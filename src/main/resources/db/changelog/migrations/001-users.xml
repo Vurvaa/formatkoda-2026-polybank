@@ -19,10 +19,10 @@
             <column name="last_name" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="password_hash" type="VARCHAR(255)">
+            <column name="password_hash" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at" type="TIMESTAMPZ" defaultValueComputed="NOW()">
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="NOW()">
                 <constraints nullable="false"/>
             </column>
             <column name="blocked_at" type="TIMESTAMPTZ"/>
