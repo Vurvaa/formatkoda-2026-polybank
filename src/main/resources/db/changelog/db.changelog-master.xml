@@ -6,4 +6,5 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <include file="db/changelog/migrations/001-users.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/001-users-roles.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
