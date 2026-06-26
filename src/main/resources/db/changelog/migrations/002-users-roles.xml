@@ -45,4 +45,16 @@
                 constraintName="fk_users_roles_role_id"/>
     </changeSet>
 
+    <changeSet id="002-insert-roles" author="egor">
+        <insert tableName="roles">
+            <column name="name" value="CLIENT"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="MANAGER"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="SENIOR_MANAGER"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
