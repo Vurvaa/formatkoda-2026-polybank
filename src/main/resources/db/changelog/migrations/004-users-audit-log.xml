@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="003-users-audit-log" author="yaroslav">
+    <changeSet id="004-users-audit-log" author="yaroslav">
         <createTable tableName="users_audit_log">
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -12,7 +12,7 @@
             <column name="user_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="field" type="VARCHAR(20)">
+            <column name="field" type="TEXT">
                 <constraints nullable="false"/>
             </column>
             <column name="old_value" type="TEXT">
