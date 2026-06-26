@@ -10,12 +10,8 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="from_account_id" type="BIGINT">
-                <constraints nullable="true"/>
-            </column>
-            <column name="to_account_id" type="BIGINT">
-                <constraints nullable="true"/>
-            </column>
+            <column name="from_account_id" type="BIGINT"/>
+            <column name="to_account_id" type="BIGINT"/>
             <column name="amount" type="DECIMAL(19,2)" defaultValueNumeric="0.00">
                 <constraints nullable="false"/>
             </column>
