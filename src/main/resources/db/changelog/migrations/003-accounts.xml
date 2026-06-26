@@ -15,7 +15,7 @@
             <column name="user_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="balance" type="DECIMAL">
+            <column name="balance" type="DECIMAL(19,2)" defaultValueNumeric="0.00">
                 <constraints nullable="false"/>
             </column>
             <column name="type" type="VARCHAR(20)">
@@ -24,7 +24,7 @@
             <column name="status" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_at=" type="TIMESTAMPTZ" defaultValueComputed="NOW()">
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="NOW()">
                 <constraints nullable="false"/>
             </column>
         </createTable>
