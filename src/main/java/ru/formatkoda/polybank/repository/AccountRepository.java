@@ -2,11 +2,13 @@ package ru.formatkoda.polybank.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.stereotype.Repository;
+import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
-import ru.formatkoda.polybank.domain.user.UserLogin;
 
-import static ru.formatkoda.polybank.jooq.generated.tables.Users.USERS;
+import java.util.Optional;
+
 import static ru.formatkoda.polybank.jooq.generated.tables.Accounts.ACCOUNTS;
 
 @Repository
@@ -14,13 +16,27 @@ import static ru.formatkoda.polybank.jooq.generated.tables.Accounts.ACCOUNTS;
 public class AccountRepository {
 	private final DSLContext dsl;
 
-	public boolean existsByNumberAndUserLogin(AccountNumber number, UserLogin login) {
-		return dsl.fetchExists(
-				dsl.selectOne()
-						.from(ACCOUNTS)
-						.join(USERS).on(ACCOUNTS.USER_ID.eq(USERS.ID))
-						.where(ACCOUNTS.NUMBER.eq(number.value()))
-						.and(USERS.LOGIN.eq(login.value()))
+	public Optional<AccountEntity> findByNumberAndUserId(AccountNumber number, Long userId) {
+		return dsl
+				.select(
+						ACCOUNTS.ID,
+						ACCOUNTS.NUMBER,
+						ACCOUNTS.USER_ID,
+						ACCOUNTS.BALANCE,
+						ACCOUNTS.TYPE,
+						ACCOUNTS.STATUS,
+						ACCOUNTS.CREATED_AT
+				)
+				.from(ACCOUNTS)
+				.where(ACCOUNTS.USER_ID.eq(userId))
+				.and(ACCOUNTS.NUMBER.eq(number.value()))
+				.fetchOptional(this::toEntity);
+	}
+
+	private AccountEntity toEntity(Record r) {
+		return new AccountEntity(
+				r.get(ACCOUNTS.ID),
+				new AccountNumber(r.get(ACCOUNTS.NUMBER))
 		);
 	}
 }

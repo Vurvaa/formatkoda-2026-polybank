@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
-import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
+import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.service.TransactionService;
@@ -26,6 +26,7 @@ public class AccountController {
 
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}/transactions")
+	// todo responseEntity
 	public PageResponse<TransactionResponseDto> getAllTransactionsByAccountNumber(
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
@@ -36,7 +37,8 @@ public class AccountController {
 		AccountNumber number = new AccountNumber(accountNumber);
 		PageRequest pageRequest = new PageRequest(page, size);
 
-		PageResult<TransactionEntity> result = transactionService.findByAccountNumber(number, login, pageRequest);
+		PageResult<TransactionWithAccountNumbersView> result = transactionService
+				.findByAccountNumber(number, login, pageRequest);
 
 		return new PageResponse<>(
 				result.items()

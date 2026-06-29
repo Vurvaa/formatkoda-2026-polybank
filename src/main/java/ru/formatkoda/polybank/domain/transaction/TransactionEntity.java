@@ -1,14 +1,12 @@
 package ru.formatkoda.polybank.domain.transaction;
 
-import ru.formatkoda.polybank.domain.account.AccountEntity;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record TransactionEntity(
-		int id,
-		AccountEntity accountFrom,
-		AccountEntity accountTo,
+		Long id,
+		Long fromAccountId,
+		Long toAccountId,
 		BigDecimal amount,
 		Type type,
 		Status status,
