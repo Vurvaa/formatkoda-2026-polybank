@@ -20,10 +20,10 @@ public class TransactionService {
 	private final TransactionRepository transactionRepository;
 	private final AccountRepository accountRepository;
 
-	public PageResult<TransactionEntity> findByAccountNumber(UserLogin userLogin,
-	                                                         AccountNumber accountNumber,
+	public PageResult<TransactionEntity> findByAccountNumber(AccountNumber accountNumber,
+															 UserLogin userLogin,
 	                                                         PageRequest pageRequest) {
-		if (!accountRepository.existsByNumberAndUserLogin(userLogin, accountNumber))
+		if (!accountRepository.existsByNumberAndUserLogin(accountNumber, userLogin))
 			throw new AccessDeniedException("account does not belong to current user");
 
 		return transactionRepository.findAllByAccountNumber(accountNumber, pageRequest);

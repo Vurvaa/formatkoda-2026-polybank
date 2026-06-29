@@ -53,18 +53,18 @@ class TransactionServiceTest {
 				0
 		);
 
-		when(accountRepository.existsByNumberAndUserLogin(userLogin, accountNumber)).thenReturn(true);
+		when(accountRepository.existsByNumberAndUserLogin(accountNumber, userLogin)).thenReturn(true);
 		when(transactionRepository.findAllByAccountNumber(accountNumber, pageRequest)).thenReturn(expectedResult);
 
 		PageResult<TransactionEntity> actualResult = transactionService.findByAccountNumber(
-				userLogin,
 				accountNumber,
+				userLogin,
 				pageRequest
 		);
 
 		assertSame(expectedResult, actualResult);
 
-		verify(accountRepository).existsByNumberAndUserLogin(userLogin, accountNumber);
+		verify(accountRepository).existsByNumberAndUserLogin(accountNumber, userLogin);
 		verify(transactionRepository).findAllByAccountNumber(accountNumber, pageRequest);
 	}
 
@@ -74,14 +74,14 @@ class TransactionServiceTest {
 		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
-		when(accountRepository.existsByNumberAndUserLogin(userLogin, accountNumber))
+		when(accountRepository.existsByNumberAndUserLogin(accountNumber, userLogin))
 				.thenReturn(false);
 
 		Throwable exception = assertThrows(AccessDeniedException.class,
-				() -> transactionService.findByAccountNumber(userLogin, accountNumber, pageRequest));
+				() -> transactionService.findByAccountNumber(accountNumber, userLogin, pageRequest));
 		assertEquals("account does not belong to current user", exception.getMessage());
 
-		verify(accountRepository).existsByNumberAndUserLogin(userLogin, accountNumber);
+		verify(accountRepository).existsByNumberAndUserLogin(accountNumber, userLogin);
 		verifyNoInteractions(transactionRepository);
 	}
 
