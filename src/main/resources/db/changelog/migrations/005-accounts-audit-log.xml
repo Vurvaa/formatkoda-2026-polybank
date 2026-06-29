@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="005-accounts-audit-log" author="yaroslav">
+        <createTable tableName="accounts_audit_log">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="old_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="new_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="changed_at" type="TIMESTAMPTZ" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="accounts_audit_log"
+                baseColumnNames="account_id"
+                constraintName="fk_account_audit_log_account_id"
+                referencedTableName="accounts"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="accounts_audit_log"
+                baseColumnNames="changed_by"
+                constraintName="fk_account_audit_log_changed_by"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
