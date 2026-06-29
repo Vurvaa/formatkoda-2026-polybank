@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.dto.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.AuthUserDto;
+import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.UserService;
 
 
@@ -16,10 +17,11 @@ import ru.formatkoda.polybank.service.UserService;
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/sign-up")
     private ResponseEntity<AuthUserDto> registrationUser(UserRegistrationDto user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(user));
     }
+
 }
