@@ -36,7 +36,7 @@ public class AccountController {
 		AccountNumber number = new AccountNumber(accountNumber);
 		PageRequest pageRequest = new PageRequest(page, size);
 
-		PageResult<TransactionEntity> result = transactionService.findByAccountNumber(login, number, pageRequest);
+		PageResult<TransactionEntity> result = transactionService.findByAccountNumber(number, login, pageRequest);
 
 		return new PageResponse<>(
 				result.items()
