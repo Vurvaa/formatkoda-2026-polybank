@@ -11,9 +11,12 @@ import org.springframework.security.access.AccessDeniedException;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
+import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
+import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.repository.TransactionRepository;
+import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -21,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -31,13 +35,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
-
 	@Mock
-	TransactionRepository transactionRepository;
+	private TransactionRepository transactionRepository;
 	@Mock
-	AccountRepository accountRepository;
+	private AccountRepository accountRepository;
+	@Mock
+	private UserRepository userRepository;
 	@InjectMocks
-	TransactionService transactionService;
+	private TransactionService transactionService;
 
 	@ParameterizedTest
 	@ValueSource(ints = {0, 5})
@@ -46,60 +51,121 @@ class TransactionServiceTest {
 		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
-		PageResult<TransactionEntity> expectedResult = new PageResult<>(
-				buildTransactionEntities(size),
+		UserEntity user = buildUser();
+		AccountEntity account = buildAccount();
+
+		PageResult<TransactionWithAccountNumbersView> expectedResult = new PageResult<>(
+				buildTransactionWithAccountNumbersViews(size),
 				0,
 				20,
-				0
+				size
 		);
 
-		when(accountRepository.existsByNumberAndUserLogin(accountNumber, userLogin)).thenReturn(true);
-		when(transactionRepository.findAllByAccountNumber(accountNumber, pageRequest)).thenReturn(expectedResult);
+		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.of(user));
 
-		PageResult<TransactionEntity> actualResult = transactionService.findByAccountNumber(
-				accountNumber,
-				userLogin,
-				pageRequest
-		);
+		when(accountRepository.findByNumberAndUserId(accountNumber, user.id())).thenReturn(Optional.of(account));
+
+		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(expectedResult);
+
+		PageResult<TransactionWithAccountNumbersView> actualResult =
+				transactionService.findByAccountNumber(
+						accountNumber,
+						userLogin,
+						pageRequest
+				);
 
 		assertSame(expectedResult, actualResult);
 
-		verify(accountRepository).existsByNumberAndUserLogin(accountNumber, userLogin);
-		verify(transactionRepository).findAllByAccountNumber(accountNumber, pageRequest);
+		verify(userRepository).findUserByLogin(userLogin.value());
+		verify(accountRepository).findByNumberAndUserId(accountNumber, user.id());
+		verify(transactionRepository).findViewsByAccountId(account.id(), pageRequest);
 	}
 
 	@Test
-	void shouldThrowExceptionWhenAccountNotBelongsToUser() {
+	void shouldThrowAccessDeniedWhenAccountDoesNotBelongToUser() {
 		UserLogin userLogin = new UserLogin("user@example.com");
 		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
-		when(accountRepository.existsByNumberAndUserLogin(accountNumber, userLogin))
-				.thenReturn(false);
+		UserEntity user = buildUser();
 
-		Throwable exception = assertThrows(AccessDeniedException.class,
-				() -> transactionService.findByAccountNumber(accountNumber, userLogin, pageRequest));
+		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.of(user));
+
+		when(accountRepository.findByNumberAndUserId(accountNumber, user.id())).thenReturn(Optional.empty());
+
+		AccessDeniedException exception = assertThrows(
+				AccessDeniedException.class,
+				() -> transactionService.findByAccountNumber(
+						accountNumber,
+						userLogin,
+						pageRequest
+				)
+		);
+
 		assertEquals("account does not belong to current user", exception.getMessage());
 
-		verify(accountRepository).existsByNumberAndUserLogin(accountNumber, userLogin);
+		verify(userRepository).findUserByLogin(userLogin.value());
+		verify(accountRepository).findByNumberAndUserId(accountNumber, user.id());
 		verifyNoInteractions(transactionRepository);
 	}
 
-	private List<TransactionEntity> buildTransactionEntities(int size) {
-		List<TransactionEntity> entities = new ArrayList<>();
-		for (int i = 0; i < size; i++)
-			entities.add(
-					new TransactionEntity(
-							i,
-							new AccountEntity(),
-							new AccountEntity(),
-							new BigDecimal("100.5"),
+	@Test
+	void shouldThrowRuntimeExceptionWhenUserNotFound() {
+		UserLogin userLogin = new UserLogin("user@example.com");
+		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
+		PageRequest pageRequest = new PageRequest(0, 20);
+
+		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.empty());
+
+		RuntimeException exception = assertThrows(
+				RuntimeException.class,
+				() -> transactionService.findByAccountNumber(
+						accountNumber,
+						userLogin,
+						pageRequest
+				)
+		);
+
+		assertEquals("user not found", exception.getMessage());
+
+		verify(userRepository).findUserByLogin(userLogin.value());
+		verifyNoInteractions(accountRepository);
+		verifyNoInteractions(transactionRepository);
+	}
+
+	private UserEntity buildUser() {
+		return new UserEntity(
+				1L,
+				"user@example.com",
+				"User",
+				"Test",
+				"password-hash",
+				OffsetDateTime.now(),
+				Optional.empty()
+		);
+	}
+
+	private AccountEntity buildAccount() {
+		return new AccountEntity(10L, new AccountNumber("12345678901234567890"));
+	}
+
+	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(int size) {
+		List<TransactionWithAccountNumbersView> transactions = new ArrayList<>();
+
+		for (int i = 0; i < size; i++) {
+			transactions.add(
+					new TransactionWithAccountNumbersView(
+							(long) i,
+							new AccountNumber("12345678901234567890"),
+							new AccountNumber("00000000000000000000"),
+							new BigDecimal("100.50"),
 							TransactionEntity.Type.DEPOSIT,
 							TransactionEntity.Status.COMPLETED,
-							OffsetDateTime.MIN
+							OffsetDateTime.now()
 					)
 			);
+		}
 
-		return entities;
+		return transactions;
 	}
 }
