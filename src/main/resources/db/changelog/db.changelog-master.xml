@@ -7,4 +7,8 @@
 
     <include file="db/changelog/migrations/001-users.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/002-users-roles.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/003-accounts.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/004-users-audit-log.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/005-account-audit-log.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/006-transactions.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
