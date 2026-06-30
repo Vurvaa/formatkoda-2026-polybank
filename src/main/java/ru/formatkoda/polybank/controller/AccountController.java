@@ -49,8 +49,7 @@ public class AccountController {
 
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}/transactions")
-	// todo responseEntity
-	public PageResponse<TransactionResponseDto> getAllTransactionsByAccountNumber(
+	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumber(
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size,
@@ -63,14 +62,16 @@ public class AccountController {
 		PageResult<TransactionWithAccountNumbersView> result = transactionService
 				.findByAccountNumber(number, login, pageRequest);
 
-		return new PageResponse<>(
-				result.items()
-						.stream()
-						.map(TransactionMapper::toResponse)
-						.toList(),
-				result.page(),
-				result.size(),
-				result.total()
+		return ResponseEntity.ok(
+				new PageResponse<>(
+						result.items()
+								.stream()
+								.map(TransactionMapper::toResponse)
+								.toList(),
+						result.page(),
+						result.size(),
+						result.total()
+				)
 		);
 	}
 }
