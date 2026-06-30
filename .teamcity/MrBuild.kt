@@ -20,12 +20,8 @@ object MrBuild : BuildType({
             #!/bin/sh
             set -e
 
-            export POSTGRES_URL="%env.POSTGRES_URL%"
-            export POSTGRES_USER="%env.POSTGRES_USER%"
-            export POSTGRES_PASSWORD="%env.POSTGRES_PASSWORD%"
-
             docker compose up -d postgres
-            until docker compose exec -T postgres pg_isready -U "${'$'}{'$'}{POSTGRES_USER}"; do
+            until docker compose exec -T postgres pg_isready -U "${'$'}{POSTGRES_USER}"; do
                 sleep 2
             done
 

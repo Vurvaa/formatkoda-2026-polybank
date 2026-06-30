@@ -14,7 +14,7 @@
 	<properties>
 		<java.version>25</java.version>
 		<postgresql.version>42.7.4</postgresql.version>
-		<POSTGRES_URL>jdbc:postgresql://localhost:5432/polybank_db</POSTGRES_URL>
+		<POSTGRES_URL>jdbc:postgresql://localhost:15432/polybank_db</POSTGRES_URL>
 		<POSTGRES_USER>polybank_user</POSTGRES_USER>
 		<POSTGRES_PASSWORD>polybank_password</POSTGRES_PASSWORD>
 	</properties>
