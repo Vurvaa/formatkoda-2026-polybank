@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -13,6 +13,10 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<java.version>25</java.version>
+		<postgresql.version>42.7.4</postgresql.version>
+		<POSTGRES_URL>jdbc:postgresql://localhost:5432/polybank_db</POSTGRES_URL>
+		<POSTGRES_USER>polybank_user</POSTGRES_USER>
+		<POSTGRES_PASSWORD>polybank_password</POSTGRES_PASSWORD>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -47,12 +51,12 @@
 			<version>1.18.46</version>
 			<optional>true</optional>
 		</dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.0.3</version>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.0.3</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -116,6 +120,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<layers>
+						<enabled>true</enabled>
+					</layers>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -139,67 +148,19 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.3.0</version>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${project.basedir}/.env</file>
-							</files>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.jooq</groupId>
-				<artifactId>jooq-codegen-maven</artifactId>
-				<version>${jooq.version}</version>
-
-				<executions>
-					<execution>
-						<id>generate-jooq</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>4.29.2</version>
 				<configuration>
-					<jdbc>
-						<driver>org.postgresql.Driver</driver>
-						<url>${POSTGRES_URL}</url>
-						<user>${POSTGRES_USER}</user>
-						<password>${POSTGRES_PASSWORD}</password>
-					</jdbc>
-
-					<generator>
-						<name>org.jooq.codegen.JavaGenerator</name>
-						<database>
-							<name>org.jooq.meta.postgres.PostgresDatabase</name>
-							<inputSchema>public</inputSchema>
-							<includes>.*</includes>
-							<excludes>(?i:databasechangelog|databasechangeloglock)</excludes>
-						</database>
-
-						<generate>
-							<javaTimeTypes>true</javaTimeTypes>
-							<fluentSetters>true</fluentSetters>
-						</generate>
-
-						<target>
-							<packageName>ru.formatkoda.polybank.jooq.generated</packageName>
-							<directory>${project.build.directory}/generated-sources/jooq</directory>
-						</target>
-					</generator>
+					<searchPath>${project.basedir}/src/main/resources</searchPath>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${postgresql.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<plugin>
@@ -219,5 +180,61 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>db-codegen</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jooq</groupId>
+						<artifactId>jooq-codegen-maven</artifactId>
+
+						<executions>
+							<execution>
+								<id>generate-jooq</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+							</execution>
+						</executions>
+
+						<configuration>
+							<jdbc>
+								<driver>org.postgresql.Driver</driver>
+								<url>${POSTGRES_URL}</url>
+								<user>${POSTGRES_USER}</user>
+								<password>${POSTGRES_PASSWORD}</password>
+							</jdbc>
+
+							<generator>
+								<name>org.jooq.codegen.JavaGenerator</name>
+								<database>
+									<name>org.jooq.meta.postgres.PostgresDatabase</name>
+									<inputSchema>public</inputSchema>
+									<includes>.*</includes>
+									<excludes>(?i:databasechangelog|databasechangeloglock)</excludes>
+								</database>
+
+								<generate>
+									<javaTimeTypes>true</javaTimeTypes>
+									<fluentSetters>true</fluentSetters>
+								</generate>
+
+								<target>
+									<packageName>ru.formatkoda.polybank.jooq.generated</packageName>
+									<directory>${project.build.directory}/generated-sources/jooq</directory>
+								</target>
+							</generator>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
