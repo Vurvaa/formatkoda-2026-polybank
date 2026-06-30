@@ -14,7 +14,7 @@ import ru.formatkoda.polybank.dto.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
 
 @RestController
-@RequestMapping(path = "/user", version = "v1")
+@RequestMapping(path = "/user")
 @RequiredArgsConstructor
 public class UserController {
     private final AuthService authService;

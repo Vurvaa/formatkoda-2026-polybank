@@ -4,13 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.time.OffsetDateTime;
 
-public record User(
+public record UserEntity(
         long id,
-        @NotBlank
         String login,
         String name,
         String lastName,
-        @NotBlank
         String pswdHash,
         OffsetDateTime createdAt,
         OffsetDateTime blockedAt
