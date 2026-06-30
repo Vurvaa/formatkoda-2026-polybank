@@ -31,7 +31,7 @@ public class AccountController {
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size,
-			Authentication authentication // todo authenticationprincipal
+			Authentication authentication // todo authenticationprincipal when security is done
 	) {
 		UserLogin login = new UserLogin(authentication.getName());
 		AccountNumber number = new AccountNumber(accountNumber);

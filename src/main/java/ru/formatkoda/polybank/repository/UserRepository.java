@@ -39,7 +39,7 @@ public class UserRepository {
 				r.get(USERS.LAST_NAME),
 				r.get(USERS.PASSWORD_HASH),
 				r.get(USERS.CREATED_AT),
-				Optional.ofNullable(r.get(USERS.BLOCKED_AT))
+				r.get(USERS.BLOCKED_AT)
 		);
 	}
 }

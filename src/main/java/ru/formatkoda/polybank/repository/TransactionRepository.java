@@ -38,8 +38,8 @@ public class TransactionRepository {
 						TRANSACTIONS.CREATED_AT
 				)
 				.from(TRANSACTIONS)
-				.join(fromAccount).on(fromAccount.ID.eq(TRANSACTIONS.FROM_ACCOUNT_ID))
-				.join(toAccount).on(toAccount.ID.eq(TRANSACTIONS.TO_ACCOUNT_ID))
+				.leftJoin(fromAccount).on(fromAccount.ID.eq(TRANSACTIONS.FROM_ACCOUNT_ID))
+				.leftJoin(toAccount).on(toAccount.ID.eq(TRANSACTIONS.TO_ACCOUNT_ID))
 				.where(condition)
 				.orderBy(TRANSACTIONS.CREATED_AT.desc(), TRANSACTIONS.ID.desc())
 				.limit(pageRequest.size())
@@ -65,10 +65,13 @@ public class TransactionRepository {
 			Accounts fromAccount,
 			Accounts toAccount
 	) {
+		String fromNumber = r.get(fromAccount.NUMBER);
+		String toNumber = r.get(toAccount.NUMBER);
+
 		return new TransactionWithAccountNumbersView(
 				r.get(TRANSACTIONS.ID),
-				new AccountNumber(r.get(fromAccount.NUMBER)),
-				new AccountNumber(r.get(toAccount.NUMBER)),
+				fromNumber == null ? null : new AccountNumber(fromNumber),
+				toNumber == null ? null : new AccountNumber(toNumber),
 				r.get(TRANSACTIONS.AMOUNT),
 				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
 				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),

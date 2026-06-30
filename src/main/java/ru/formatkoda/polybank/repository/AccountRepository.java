@@ -20,12 +20,7 @@ public class AccountRepository {
 		return dsl
 				.select(
 						ACCOUNTS.ID,
-						ACCOUNTS.NUMBER,
-						ACCOUNTS.USER_ID,
-						ACCOUNTS.BALANCE,
-						ACCOUNTS.TYPE,
-						ACCOUNTS.STATUS,
-						ACCOUNTS.CREATED_AT
+						ACCOUNTS.NUMBER
 				)
 				.from(ACCOUNTS)
 				.where(ACCOUNTS.USER_ID.eq(userId))
