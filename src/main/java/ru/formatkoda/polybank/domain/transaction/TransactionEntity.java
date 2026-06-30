@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record TransactionEntity(
-		@NonNull Long id,
+		Long id,
 		Long fromAccountId,
 		Long toAccountId,
 		@NonNull BigDecimal amount,

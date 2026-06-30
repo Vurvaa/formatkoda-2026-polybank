@@ -8,6 +8,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.jooq.generated.tables.Accounts;
+import ru.formatkoda.polybank.jooq.generated.tables.records.TransactionsRecord;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -60,6 +61,14 @@ public class TransactionRepository {
 		);
 	}
 
+	public TransactionEntity save(TransactionEntity transaction) {
+		return dsl
+				.insertInto(TRANSACTIONS)
+				.set(toRecord(transaction))
+				.returning()
+				.fetchOneInto(TransactionEntity.class);
+	}
+
 	private TransactionWithAccountNumbersView toTransactionWithAccountNumbersView(
 			Record r,
 			Accounts fromAccount,
@@ -76,6 +85,18 @@ public class TransactionRepository {
 				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
 				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
 				r.get(TRANSACTIONS.CREATED_AT)
+		);
+	}
+
+	private TransactionsRecord toRecord(TransactionEntity transaction) {
+		return new TransactionsRecord(
+				transaction.id(),
+				transaction.fromAccountId(),
+				transaction.toAccountId(),
+				transaction.amount(),
+				transaction.type().name(),
+				transaction.status().name(),
+				transaction.createdAt()
 		);
 	}
 }
