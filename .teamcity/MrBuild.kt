@@ -17,20 +17,20 @@ object MrBuild : BuildType({
             id = "prepare database"
             name = "Prepare database"
             scriptContent = """
-            #!/bin/sh
-            set -e
+                #!/bin/sh
+                set -e
 
-            docker compose up -d postgres
-            until docker compose exec -T postgres pg_isready -U "${'$'}{POSTGRES_USER}"; do
-                sleep 2
-            done
+                docker compose up -d postgres
+                until docker compose exec -T postgres pg_isready -U ${'$'}POSTGRES_USER; do
+                    sleep 2
+                done
 
-            ./mvnw liquibase:update -B \
-              -Dliquibase.url="${'$'}{POSTGRES_URL}" \
-              -Dliquibase.username="${'$'}{POSTGRES_USER}" \
-              -Dliquibase.password="${'$'}{POSTGRES_PASSWORD}" \
-              -Dliquibase.changeLogFile=src/main/resources/db/changelog/db.changelog-master.xml
-        """.trimIndent()
+                ./mvnw liquibase:update -B \
+                  -Dliquibase.url=${'$'}POSTGRES_URL \
+                  -Dliquibase.username=${'$'}POSTGRES_USER \
+                  -Dliquibase.password=${'$'}POSTGRES_PASSWORD \
+                  -Dliquibase.changeLogFile=src/main/resources/db/changelog/db.changelog-master.xml
+            """.trimIndent()
         }
 
         maven {

@@ -12,7 +12,7 @@ project {
         param("k8s.kubeconfig", "/opt/buildagent/work/.kube/polybank-rke2.conf")
         param("helm.chart.path", "%teamcity.build.checkoutDir%/helm")
         param("gitlab.api.url", "https://gitlab.com/api/v4")
-        param("env.POSTGRES_URL", "jdbc:postgresql://localhost:5432/polybank_db")
+        param("env.POSTGRES_URL", "jdbc:postgresql://localhost:5433/polybank_db")
         param("env.POSTGRES_DB", "polybank_db")
         param("env.POSTGRES_USER", "polybank_user")
 
