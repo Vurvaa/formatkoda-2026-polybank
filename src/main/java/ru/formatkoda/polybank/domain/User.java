@@ -15,4 +15,7 @@ public record User(
         OffsetDateTime createdAt,
         OffsetDateTime blockedAt
 ) {
+        public boolean isBlocked() {
+                return blockedAt == null ? true : false;
+        }
 }
