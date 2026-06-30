@@ -1,17 +1,21 @@
 package ru.formatkoda.polybank.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.dto.transaction.TopUpRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.service.TransactionService;
 import ru.formatkoda.polybank.util.mappers.TransactionMapper;
@@ -51,5 +55,23 @@ public class AccountController {
 						result.total()
 				)
 		);
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/top-up")
+	public ResponseEntity<TransactionResponseDto> topUpAccount(
+			@Valid @RequestBody TopUpRequestDto topUpRequestDto,
+			Authentication authentication // todo authenticationprincipal when security is done
+	) {
+		AccountNumber accountNumber = new AccountNumber(topUpRequestDto.accountNumber());
+		UserLogin login = new UserLogin(authentication.getName());
+
+		TransactionWithAccountNumbersView transaction = transactionService.topUp(
+				accountNumber,
+				topUpRequestDto.amount(),
+				login
+		);
+
+		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
 	}
 }
