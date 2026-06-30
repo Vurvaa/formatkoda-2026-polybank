@@ -1,19 +1,19 @@
 package ru.formatkoda.polybank.domain;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 
 import java.time.OffsetDateTime;
 
 public record UserEntity(
-        long id,
-        String login,
-        String name,
-        String lastName,
-        String pswdHash,
+        Long id,
+        @NonNull String login,
+        @NonNull String name,
+        @NonNull String lastName,
+        @NonNull String passwordHash,
         OffsetDateTime createdAt,
         OffsetDateTime blockedAt
 ) {
-        public boolean isBlocked() {
-                return blockedAt == null ? true : false;
-        }
+    public boolean isBlocked() {
+        return blockedAt != null;
+    }
 }

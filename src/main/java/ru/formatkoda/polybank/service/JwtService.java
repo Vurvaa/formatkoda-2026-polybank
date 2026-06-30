@@ -17,6 +17,10 @@ public class JwtService {
     @Value("${app.jwt.secret}")
     private String secret;
 
+    @Value("${app.jwt.expiration-minutes}")
+    private long expirationMinutes;
+
+
     private SecretKey getSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -28,7 +32,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(userLogin)
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .expiration(Date.from(now.plus(expirationMinutes, ChronoUnit.MINUTES)))
                 .signWith(getSecretKey())
                 .compact();
     }

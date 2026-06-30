@@ -12,15 +12,21 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.dto.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
+import ru.formatkoda.polybank.util.mapper.UserMapper;
 
 @RestController
 @RequestMapping(path = "/user")
 @RequiredArgsConstructor
 public class UserController {
     private final AuthService authService;
+    private final UserMapper userMapper;
 
     @PostMapping("/sign-up")
     public ResponseEntity<AuthUserDto> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(user));
+        String token = authService
+                .registerUser(userMapper.toEntity(user)).token();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new AuthUserDto(token));
     }
 }
