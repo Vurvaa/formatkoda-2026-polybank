@@ -1,15 +1,16 @@
 package ru.formatkoda.polybank.domain.user;
 
+import lombok.NonNull;
+
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 public record UserEntity(
-		Long id,
-		String login,
-		String name,
-		String lastName,
-		String passwordHash,
-		OffsetDateTime createdAt,
-		Optional<OffsetDateTime> blockedAt
+		@NonNull Long id,
+		@NonNull String login,
+		@NonNull String name,
+		@NonNull String lastName,
+		@NonNull String passwordHash,
+		@NonNull OffsetDateTime createdAt,
+		OffsetDateTime blockedAt
 ) {
 }

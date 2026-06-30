@@ -12,8 +12,8 @@ public class TransactionMapper {
 	public static TransactionResponseDto toResponse(TransactionWithAccountNumbersView transaction) {
 		return new TransactionResponseDto(
 				transaction.id(),
-				transaction.fromAccountNumber().value(),
-				transaction.toAccountNumber().value(),
+				transaction.fromAccountNumber() == null ? null : transaction.fromAccountNumber().value(),
+				transaction.toAccountNumber() == null ? null : transaction.toAccountNumber().value(),
 				transaction.amount(),
 				TransactionType.valueOf(transaction.type().name()),
 				TransactionStatus.valueOf(transaction.status().name()),

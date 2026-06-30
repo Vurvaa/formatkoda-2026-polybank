@@ -7,13 +7,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
+import ru.formatkoda.polybank.domain.account.exception.AccountDoesNotBelongToCurrentUserException;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.exception.UserNotFoundException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
@@ -22,11 +23,11 @@ import ru.formatkoda.polybank.util.pagination.PageResult;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -48,7 +49,7 @@ class TransactionServiceTest {
 	@ValueSource(ints = {0, 5})
 	void shouldReturnTransactionsWhenAccountBelongsToUser(int size) {
 		UserLogin userLogin = new UserLogin("user@example.com");
-		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
+		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
 		UserEntity user = buildUser();
@@ -82,9 +83,9 @@ class TransactionServiceTest {
 	}
 
 	@Test
-	void shouldThrowAccessDeniedWhenAccountDoesNotBelongToUser() {
+	void shouldThrowAccountDoesNotBelongToCurrentUserExceptionWhenAccountDoesNotBelongToUser() {
 		UserLogin userLogin = new UserLogin("user@example.com");
-		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
+		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
 		UserEntity user = buildUser();
@@ -93,16 +94,14 @@ class TransactionServiceTest {
 
 		when(accountRepository.findByNumberAndUserId(accountNumber, user.id())).thenReturn(Optional.empty());
 
-		AccessDeniedException exception = assertThrows(
-				AccessDeniedException.class,
+		assertThrows(
+				AccountDoesNotBelongToCurrentUserException.class,
 				() -> transactionService.findByAccountNumber(
 						accountNumber,
 						userLogin,
 						pageRequest
 				)
 		);
-
-		assertEquals("account does not belong to current user", exception.getMessage());
 
 		verify(userRepository).findUserByLogin(userLogin.value());
 		verify(accountRepository).findByNumberAndUserId(accountNumber, user.id());
@@ -110,23 +109,21 @@ class TransactionServiceTest {
 	}
 
 	@Test
-	void shouldThrowRuntimeExceptionWhenUserNotFound() {
+	void shouldThrowUserNotFoundExceptionWhenUserNotFound() {
 		UserLogin userLogin = new UserLogin("user@example.com");
-		AccountNumber accountNumber = new AccountNumber("12345678901234567890");
+		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 		PageRequest pageRequest = new PageRequest(0, 20);
 
 		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.empty());
 
-		RuntimeException exception = assertThrows(
-				RuntimeException.class,
+		assertThrows(
+				UserNotFoundException.class,
 				() -> transactionService.findByAccountNumber(
 						accountNumber,
 						userLogin,
 						pageRequest
 				)
 		);
-
-		assertEquals("user not found", exception.getMessage());
 
 		verify(userRepository).findUserByLogin(userLogin.value());
 		verifyNoInteractions(accountRepository);
@@ -140,13 +137,13 @@ class TransactionServiceTest {
 				"User",
 				"Test",
 				"password-hash",
-				OffsetDateTime.now(),
-				Optional.empty()
+				OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, ZoneOffset.UTC),
+				null
 		);
 	}
 
 	private AccountEntity buildAccount() {
-		return new AccountEntity(10L, new AccountNumber("12345678901234567890"));
+		return new AccountEntity(10L, new AccountNumber("67675678901234567890"));
 	}
 
 	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(int size) {
@@ -156,12 +153,12 @@ class TransactionServiceTest {
 			transactions.add(
 					new TransactionWithAccountNumbersView(
 							(long) i,
-							new AccountNumber("12345678901234567890"),
-							new AccountNumber("00000000000000000000"),
+							new AccountNumber("67675678901234567890"),
+							new AccountNumber("67670000000000000000"),
 							new BigDecimal("100.50"),
 							TransactionEntity.Type.DEPOSIT,
 							TransactionEntity.Status.COMPLETED,
-							OffsetDateTime.now()
+							OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, ZoneOffset.UTC)
 					)
 			);
 		}

@@ -1,16 +1,18 @@
 package ru.formatkoda.polybank.domain.transaction;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record TransactionEntity(
-		Long id,
+		@NonNull Long id,
 		Long fromAccountId,
 		Long toAccountId,
-		BigDecimal amount,
-		Type type,
-		Status status,
-		OffsetDateTime createdAt
+		@NonNull BigDecimal amount,
+		@NonNull Type type,
+		@NonNull Status status,
+		@NonNull OffsetDateTime createdAt
 ) {
 	public enum Type {
 		TRANSFER,
