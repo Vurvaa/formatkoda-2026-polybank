@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.formatkoda.polybank.domain.UserEntity;
 import ru.formatkoda.polybank.dto.UserRegistrationDto;
-import ru.formatkoda.polybank.exceptions.UserAlreadyExistsException;
+import ru.formatkoda.polybank.domain.exceptions.UserAlreadyExistsException;
 import ru.formatkoda.polybank.jooq.generated.tables.records.RolesRecord;
 import ru.formatkoda.polybank.repository.AuthorityRepository;
 import ru.formatkoda.polybank.repository.UserRepository;

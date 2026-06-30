@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.dto.UserRegistrationDto;
 import ru.formatkoda.polybank.jooq.generated.tables.Users;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
-import ru.formatkoda.polybank.repository.UserRepository;
 
 import java.time.OffsetDateTime;
 
