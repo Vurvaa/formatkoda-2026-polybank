@@ -8,7 +8,6 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.jooq.generated.tables.Accounts;
-import ru.formatkoda.polybank.jooq.generated.tables.records.TransactionsRecord;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -64,9 +63,22 @@ public class TransactionRepository {
 	public TransactionEntity save(TransactionEntity transaction) {
 		return dsl
 				.insertInto(TRANSACTIONS)
-				.set(toRecord(transaction))
-				.returning()
-				.fetchOneInto(TransactionEntity.class);
+				.set(TRANSACTIONS.FROM_ACCOUNT_ID, transaction.fromAccountId())
+				.set(TRANSACTIONS.TO_ACCOUNT_ID, transaction.toAccountId())
+				.set(TRANSACTIONS.AMOUNT, transaction.amount())
+				.set(TRANSACTIONS.TYPE, transaction.type().name())
+				.set(TRANSACTIONS.STATUS, transaction.status().name())
+				.set(TRANSACTIONS.CREATED_AT, transaction.createdAt())
+				.returning(
+						TRANSACTIONS.ID,
+						TRANSACTIONS.FROM_ACCOUNT_ID,
+						TRANSACTIONS.TO_ACCOUNT_ID,
+						TRANSACTIONS.AMOUNT,
+						TRANSACTIONS.TYPE,
+						TRANSACTIONS.STATUS,
+						TRANSACTIONS.CREATED_AT
+				)
+				.fetchOne(this::toEntity);
 	}
 
 	private TransactionWithAccountNumbersView toTransactionWithAccountNumbersView(
@@ -88,15 +100,15 @@ public class TransactionRepository {
 		);
 	}
 
-	private TransactionsRecord toRecord(TransactionEntity transaction) {
-		return new TransactionsRecord(
-				transaction.id(),
-				transaction.fromAccountId(),
-				transaction.toAccountId(),
-				transaction.amount(),
-				transaction.type().name(),
-				transaction.status().name(),
-				transaction.createdAt()
+	private TransactionEntity toEntity(Record r) {
+		return new TransactionEntity(
+				r.get(TRANSACTIONS.ID),
+				r.get(TRANSACTIONS.FROM_ACCOUNT_ID),
+				r.get(TRANSACTIONS.TO_ACCOUNT_ID),
+				r.get(TRANSACTIONS.AMOUNT),
+				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
+				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
+				r.get(TRANSACTIONS.CREATED_AT)
 		);
 	}
 }
