@@ -17,6 +17,7 @@ import ru.formatkoda.polybank.repository.UserRepository;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -24,12 +25,14 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
     @Mock
     RoleRepository roleRepository;
+
     @Mock
     UserRepository userRepository;
+
     @InjectMocks
     UserService userService;
 
-    UserEntity userEntity = new UserEntity(
+    private UserEntity userEntity = new UserEntity(
             null,
             "login",
             "name",
@@ -40,7 +43,7 @@ class UserServiceTest {
     );
 
     @Test
-    void throwingExceptionWhenLoginIsDuplicated() {
+    void createUserShouldThrowExceptionWhenLoginIsDuplicated() {
         String expectedLogin = userEntity.login();
 
         when(userRepository.findUserByLogin(expectedLogin))
@@ -51,7 +54,7 @@ class UserServiceTest {
     }
 
     @Test
-    void throwingExceptionWhenRoleNotFound() {
+    void createUserShouldThrowExceptionWhenRoleNotFound() {
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.empty());
 
@@ -60,9 +63,9 @@ class UserServiceTest {
     }
 
     @Test
-    void createUserCallingRepositoriesMethods() {
+    void createUserShouldCallingRepositoriesMethods() {
         String expectedLogin = userEntity.login();
-        prepareMocksForCallCreateUser(expectedLogin);
+        prepareMocksForCallingCreateUser(expectedLogin);
 
         userService.createUser(userEntity);
 
@@ -73,9 +76,9 @@ class UserServiceTest {
     }
 
     @Test
-    void returningUserLoginMatchesWithUserEntityLogin() {
+    void createUserShouldReturnUserLoginMatchesWithUserEntityLogin() {
         String expectedLogin = userEntity.login();
-        prepareMocksForCallCreateUser(expectedLogin);
+        prepareMocksForCallingCreateUser(expectedLogin);
 
         UserLogin userLogin = userService.createUser(userEntity);
         String actualLogin = userLogin.login();
@@ -85,7 +88,7 @@ class UserServiceTest {
     }
 
     @Test
-    void findUserByLoginCallingUserRepositoryMethod() {
+    void findUserByLoginShouldCallingUserRepositoryMethod() {
         String expectedLogin = userEntity.login();
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.of(userEntity));
@@ -96,19 +99,30 @@ class UserServiceTest {
     }
 
     @Test
-    void throwingExceptionWhenUserNotFound() {
+    void findUserByLoginShouldThrowingExceptionWhenUserNotFound() {
         String expectedLogin = userEntity.login();
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.empty());
-
-
 
         Assertions.assertThrows(UserNotFoundException.class,
                 () -> userService.findUserByLogin(expectedLogin));
     }
 
-    void prepareMocksForCallCreateUser(String expectedLogin) {
+    @Test
+    void findUserByLoginShouldReturnUserWhenUserExists() {
+        String expectedLogin = userEntity.login();
 
+        when(userRepository.findUserByLogin(expectedLogin))
+                .thenReturn(Optional.of(userEntity));
+
+        UserEntity result = userService.findUserByLogin(expectedLogin);
+
+        assertThat(result).isSameAs(userEntity);
+
+        verify(userRepository).findUserByLogin(expectedLogin);
+    }
+
+    private void prepareMocksForCallingCreateUser(String expectedLogin) {
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.empty());
 
@@ -122,6 +136,5 @@ class UserServiceTest {
         when(userRepository.createUserAndReturnId(userEntity))
                 .thenReturn(1L);
         doNothing().when(userRepository).bindUserWithRole(anyLong(), anyLong());
-
     }
 }
