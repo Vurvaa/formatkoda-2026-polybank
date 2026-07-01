@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 
-public record TopUpRequestDto(
+public record AccountOperationRequestDto(
 		@NotBlank @Length(min = 20, max = 20) String accountNumber,
 		@NotNull @DecimalMin(value = "0.01") @Digits(integer = 18, fraction = 2) BigDecimal amount
 ) {
