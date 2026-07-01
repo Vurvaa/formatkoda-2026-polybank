@@ -14,8 +14,19 @@ resources:
     memory: "1Gi"
     cpu: "1000m"
 
+postgresAuth:
+  username: polybank_user
+  password: CHANGEME
+  postgresPassword: CHANGEME
+  database: polybank_db
+
 postgresql:
   enabled: true
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    repository: bitnamilegacy/postgresql
   auth:
     existingSecret: "polybank-backend-secret"
     secretKeys:

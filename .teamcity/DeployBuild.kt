@@ -33,6 +33,7 @@ object DeployBuild : BuildType({
                 helm upgrade polybank \
                   -n %k8s.namespace% \
                   -i \
+                  --create-namespace \
                   --kubeconfig %k8s.kubeconfig% \
                   --wait \
                   --atomic \
@@ -41,6 +42,10 @@ object DeployBuild : BuildType({
                   -f %helm.chart.path%/polybank/values.yaml \
                   --set-string image.repository=%docker.registry%/polybank \
                   --set-string image.tag=%dep.${BuildBuild.id}.build.number% \
+                  --set-string postgresAuth.username=%env.POSTGRES_USER% \
+                  --set-string postgresAuth.password=%env.POSTGRES_PASSWORD% \
+                  --set-string postgresAuth.postgresPassword=%env.POSTGRES_PASSWORD% \
+                  --set-string postgresAuth.database=%env.POSTGRES_DB% \
                   --debug
 
                 kubectl get pods -n %k8s.namespace%
