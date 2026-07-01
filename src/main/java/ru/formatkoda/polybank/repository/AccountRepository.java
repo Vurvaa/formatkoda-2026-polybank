@@ -17,6 +17,7 @@ import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.domain.account.AccountEntity.ACCOUNT_NUMBER_PREFIX;
 import static ru.formatkoda.polybank.jooq.generated.tables.Accounts.ACCOUNTS;
 
+// todo: fix account logic when it merged
 @Repository
 @RequiredArgsConstructor
 public class AccountRepository {
@@ -49,15 +50,7 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	public int increaseBalance(Long id, BigDecimal amount) {
-		return dsl
-				.update(ACCOUNTS)
-				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(amount))
-				.where(ACCOUNTS.ID.eq(id))
-				.execute();
-	}
-
-	public Optional<AccountEntity> increaseBalanceByNumberAndUserLogin(
+	public Optional<AccountEntity> increaseBalanceByNumberAndUserLoginIfAccountIsActive(
 			AccountNumber accountNumber,
 			UserLogin userLogin,
 			BigDecimal amount
@@ -66,6 +59,7 @@ public class AccountRepository {
 				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(amount))
 				.from(USERS)
 				.where(ACCOUNTS.USER_ID.eq(USERS.ID))
+				.and(ACCOUNTS.STATUS.eq(AccountEntity.Status.ACTIVE.name()))
 				.and(USERS.LOGIN.eq(userLogin.value()))
 				.and(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.returning(
