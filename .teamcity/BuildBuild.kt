@@ -14,23 +14,28 @@ object BuildBuild : BuildType({
 
     steps {
         script {
-            id = "prepare database"
+            id = "prepare_database"
             name = "Prepare database"
             scriptContent = """
-            #!/bin/sh
-            set -e
+                #!/bin/sh
+                set -e
 
-            docker compose up -d postgres
-            until docker compose exec -T postgres pg_isready -U "${'$'}{POSTGRES_USER}"; do
-                sleep 2
-            done
+                UNIQUE_DB="build_%build.number%"
 
-            ./mvnw liquibase:update -B \
-              -Dliquibase.url="${'$'}{POSTGRES_URL}" \
-              -Dliquibase.username="${'$'}{POSTGRES_USER}" \
-              -Dliquibase.password="${'$'}{POSTGRES_PASSWORD}" \
-              -Dliquibase.changeLogFile=src/main/resources/db/changelog/db.changelog-master.xml
-        """.trimIndent()
+                docker run --rm --network host postgres:16-alpine \
+                  sh -c "PGPASSWORD=${'$'}{POSTGRES_PASSWORD} psql -h ${'$'}{POSTGRES_HOST} -p ${'$'}{POSTGRES_PORT} -U ${'$'}{POSTGRES_USER} -d postgres -c 'CREATE DATABASE ${'$'}{UNIQUE_DB};'"
+
+                LIQUIBASE_URL="jdbc:postgresql://${'$'}{POSTGRES_HOST}:${'$'}{POSTGRES_PORT}/${'$'}{UNIQUE_DB}"
+
+                ./mvnw liquibase:update -B \
+                  -Dliquibase.url=${'$'}{LIQUIBASE_URL} \
+                  -Dliquibase.username=${'$'}POSTGRES_USER \
+                  -Dliquibase.password=${'$'}POSTGRES_PASSWORD \
+                  -Dliquibase.changeLogFile=src/main/resources/db/changelog/db.changelog-master.xml
+
+                echo "##teamcity[setParameter name='env.UNIQUE_DB' value='${'$'}{UNIQUE_DB}']"
+                echo "##teamcity[setParameter name='env.POSTGRES_URL' value='${'$'}{LIQUIBASE_URL}']"
+            """.trimIndent()
         }
 
         script {
@@ -41,7 +46,10 @@ object BuildBuild : BuildType({
                 #!/bin/sh
                 set -e
 
-                ./mvnw clean package -DskipTests -B
+                ./mvnw clean package -DskipTests -B -Pdb-codegen \
+                  -DPOSTGRES_URL=${'$'}{POSTGRES_URL} \
+                  -DPOSTGRES_USER=${'$'}{POSTGRES_USER} \
+                  -DPOSTGRES_PASSWORD=${'$'}{POSTGRES_PASSWORD}
             """.trimIndent()
         }
 
@@ -65,9 +73,16 @@ object BuildBuild : BuildType({
         }
 
         script {
-            name = "Shutdown DB"
+            name = "Cleanup database"
             executionMode = BuildStep.ExecutionMode.ALWAYS
-            scriptContent = "docker compose down --volumes"
+            scriptContent = """
+                #!/bin/sh
+                docker run --rm --network host postgres:16-alpine \
+                  sh -c "PGPASSWORD=${'$'}{POSTGRES_PASSWORD} psql -h ${'$'}{POSTGRES_HOST} -p ${'$'}{POSTGRES_PORT} -U ${'$'}{POSTGRES_USER} -d postgres -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='${'$'}{UNIQUE_DB}' AND pid <> pg_backend_pid();\"" || true
+
+                docker run --rm --network host postgres:16-alpine \
+                  sh -c "PGPASSWORD=${'$'}{POSTGRES_PASSWORD} psql -h ${'$'}{POSTGRES_HOST} -p ${'$'}{POSTGRES_PORT} -U ${'$'}{POSTGRES_USER} -d postgres -c 'DROP DATABASE IF EXISTS ${'$'}{UNIQUE_DB};'"
+            """.trimIndent()
         }
 
     }
