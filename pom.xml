@@ -14,10 +14,7 @@
 	<properties>
 		<java.version>25</java.version>
 		<postgresql.version>42.7.4</postgresql.version>
-		<liquibase.version>4.31.1</liquibase.version>
-		<POSTGRES_URL>jdbc:postgresql://localhost:5432/polybank_db</POSTGRES_URL>
-		<POSTGRES_USER>polybank_user</POSTGRES_USER>
-		<POSTGRES_PASSWORD>polybank_password</POSTGRES_PASSWORD>
+		<liquibase.version>5.0.0</liquibase.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -149,7 +146,7 @@
 			</plugin>
 
 			<plugin>
-				<groupId>com.liquibase</groupId>
+				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<version>${liquibase.version}</version>
 				<configuration>
@@ -207,9 +204,9 @@
 						<configuration>
 							<jdbc>
 								<driver>org.postgresql.Driver</driver>
-								<url>${POSTGRES_URL}</url>
-								<user>${POSTGRES_USER}</user>
-								<password>${POSTGRES_PASSWORD}</password>
+								<url>${env.POSTGRES_URL}</url>
+								<user>${env.POSTGRES_USER}</user>
+								<password>${env.POSTGRES_PASSWORD}</password>
 							</jdbc>
 
 							<generator>

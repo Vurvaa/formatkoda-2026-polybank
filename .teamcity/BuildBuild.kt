@@ -30,8 +30,8 @@ object BuildBuild : BuildType({
                     -Dliquibase.changeLogFile=db/changelog/db.changelog-master.xml \
                     -Dliquibase.searchPath=src/main/resources
 
+                echo "##teamcity[setParameter name='env.POSTGRES_URL' value='jdbc:postgresql://${'$'}{POSTGRES_HOST}:${'$'}{POSTGRES_PORT}/${'$'}{UNIQUE_DB}']"
                 echo "##teamcity[setParameter name='env.UNIQUE_DB' value='${'$'}{UNIQUE_DB}']"
-                echo "##teamcity[setParameter name='env.POSTGRES_URL' value='${'$'}{LIQUIBASE_URL}']"
             """.trimIndent()
         }
 
@@ -43,10 +43,7 @@ object BuildBuild : BuildType({
                 #!/bin/sh
                 set -e
 
-                ./mvnw clean package -DskipTests -B -Pdb-codegen \
-                  -DPOSTGRES_URL=${'$'}{POSTGRES_URL} \
-                  -DPOSTGRES_USER=${'$'}{POSTGRES_USER} \
-                  -DPOSTGRES_PASSWORD=${'$'}{POSTGRES_PASSWORD}
+                ./mvnw clean package -DskipTests -B -Pdb-codegen
             """.trimIndent()
         }
 
@@ -85,9 +82,7 @@ object BuildBuild : BuildType({
     }
 
     triggers {
-        vcs {
-            branchFilter = "+:main"
-        }
+
     }
 
     features {
@@ -100,10 +95,6 @@ object BuildBuild : BuildType({
                 }
             }
         }
-    }
-
-    params {
-        param("docker.registry", "192.168.130.81:5000")
     }
 
     failureConditions {

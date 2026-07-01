@@ -30,8 +30,8 @@ object MrBuild : BuildType({
                     -Dliquibase.changeLogFile=db/changelog/db.changelog-master.xml \
                     -Dliquibase.searchPath=src/main/resources
 
+                echo "##teamcity[setParameter name='env.POSTGRES_URL' value='jdbc:postgresql://${'$'}{POSTGRES_HOST}:${'$'}{POSTGRES_PORT}/${'$'}{UNIQUE_DB}']"
                 echo "##teamcity[setParameter name='env.UNIQUE_DB' value='${'$'}{UNIQUE_DB}']"
-                echo "##teamcity[setParameter name='env.POSTGRES_URL' value='${'$'}{LIQUIBASE_URL}']"
             """.trimIndent()
         }
 
@@ -39,7 +39,7 @@ object MrBuild : BuildType({
             id = "COMPILE"
             name = "Compile"
             goals = "clean compile"
-            runnerArgs = "-B -Pdb-codegen -DPOSTGRES_URL=%env.POSTGRES_URL% -DPOSTGRES_USER=%env.POSTGRES_USER% -DPOSTGRES_PASSWORD=%env.POSTGRES_PASSWORD%"
+            runnerArgs = "-B -Pdb-codegen"
             jdkHome = "%java.home%"
         }
 
@@ -81,10 +81,6 @@ object MrBuild : BuildType({
                 }
             }
         }
-    }
-
-    params {
-        param("java.home", "/opt/java/openjdk")
     }
 
     failureConditions {

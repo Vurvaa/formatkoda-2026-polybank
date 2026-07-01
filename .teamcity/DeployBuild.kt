@@ -37,7 +37,7 @@ object DeployBuild : BuildType({
                   --kubeconfig %k8s.kubeconfig% \
                   --wait \
                   --atomic \
-                  --timeout 5m0s \
+                  --timeout 20m0s \
                   %helm.chart.path%/polybank/ \
                   -f %helm.chart.path%/polybank/values.yaml \
                   --set-string image.repository=%docker.registry%/polybank \
@@ -46,6 +46,8 @@ object DeployBuild : BuildType({
                   --set-string postgresAuth.password=%env.POSTGRES_PASSWORD% \
                   --set-string postgresAuth.postgresPassword=%env.POSTGRES_PASSWORD% \
                   --set-string postgresAuth.database=%env.POSTGRES_DB% \
+                  --set-string postgresql.auth.username=%env.POSTGRES_USER% \
+                  --set-string postgresql.auth.database=%env.POSTGRES_DB% \
                   --debug
 
                 kubectl get pods -n %k8s.namespace%
@@ -58,10 +60,6 @@ object DeployBuild : BuildType({
             buildType = "${BuildBuild.id}"
             successfulOnly = true
         }
-    }
-
-    params {
-        param("docker.registry", "192.168.130.81:5000")
     }
 
     failureConditions {

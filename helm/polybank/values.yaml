@@ -28,6 +28,8 @@ postgresql:
   image:
     repository: bitnamilegacy/postgresql
   auth:
+    username: polybank_user
+    database: polybank_db
     existingSecret: "polybank-backend-secret"
     secretKeys:
       adminPasswordKey: postgres-password
