@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.domain.user.UserLogin;
-import ru.formatkoda.polybank.dto.transaction.TopUpRequestDto;
+import ru.formatkoda.polybank.dto.transaction.AccountOperationRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.service.TransactionService;
 import ru.formatkoda.polybank.util.mappers.TransactionMapper;
@@ -81,15 +81,33 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/top-up")
 	public ResponseEntity<TransactionResponseDto> topUpAccount(
-			@Valid @RequestBody TopUpRequestDto topUpRequestDto,
+			@Valid @RequestBody AccountOperationRequestDto request,
 			Authentication authentication // todo authenticationprincipal when security is done
 	) {
-		AccountNumber accountNumber = new AccountNumber(topUpRequestDto.accountNumber());
+		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
 		UserLogin login = new UserLogin(authentication.getName());
 
 		TransactionWithAccountNumbersView transaction = transactionService.topUp(
 				accountNumber,
-				topUpRequestDto.amount(),
+				request.amount(),
+				login
+		);
+
+		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/withdraw")
+	public ResponseEntity<TransactionResponseDto> withdrawAccount(
+			@Valid @RequestBody AccountOperationRequestDto request,
+			Authentication authentication // todo authenticationprincipal when security is done
+	) {
+		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
+		UserLogin login = new UserLogin(authentication.getName());
+
+		TransactionWithAccountNumbersView transaction = transactionService.withdraw(
+				accountNumber,
+				request.amount(),
 				login
 		);
 

@@ -23,13 +23,14 @@ public class TransactionMapper {
 		);
 	}
 
-	public static TransactionWithAccountNumbersView toTopUpView(
+	public static TransactionWithAccountNumbersView toView(
 			TransactionEntity transaction,
+			AccountNumber fromAccountNumber,
 			AccountNumber toAccountNumber
 	) {
 		return new TransactionWithAccountNumbersView(
 				transaction.id(),
-				null,
+				fromAccountNumber,
 				toAccountNumber,
 				transaction.amount(),
 				transaction.type(),

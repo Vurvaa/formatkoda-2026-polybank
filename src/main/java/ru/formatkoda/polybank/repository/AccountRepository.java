@@ -50,18 +50,19 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	public Optional<AccountEntity> increaseBalanceByNumberAndUserLoginIfAccountIsActive(
+	public Optional<AccountEntity> changeOwnedActiveAccountBalance(
 			AccountNumber accountNumber,
 			UserLogin userLogin,
-			BigDecimal amount
+			BigDecimal delta
 	) {
 		return dsl.update(ACCOUNTS)
-				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(amount))
+				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(delta))
 				.from(USERS)
 				.where(ACCOUNTS.USER_ID.eq(USERS.ID))
 				.and(ACCOUNTS.STATUS.eq(AccountEntity.Status.ACTIVE.name()))
 				.and(USERS.LOGIN.eq(userLogin.value()))
 				.and(ACCOUNTS.NUMBER.eq(accountNumber.value()))
+				.and(ACCOUNTS.BALANCE.add(delta).ge(BigDecimal.ZERO))
 				.returning(
 						ACCOUNTS.ID,
 						ACCOUNTS.USER_ID,

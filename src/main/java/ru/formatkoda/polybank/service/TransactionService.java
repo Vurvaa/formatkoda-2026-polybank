@@ -44,25 +44,65 @@ public class TransactionService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
-		if (amount.signum() <= 0)
-			throw new InvalidTransactionException("amount must be greater than 0");
+		validateAmount(amount);
 
 		AccountEntity account = accountRepository
-				.increaseBalanceByNumberAndUserLoginIfAccountIsActive(accountNumber, userLogin, amount)
+				.changeOwnedActiveAccountBalance(accountNumber, userLogin, amount)
 				.orElseThrow(() -> new InvalidTransactionException("account is not available for top up"));
 
-		TransactionEntity transaction = transactionRepository.save(
+		TransactionEntity transaction = saveCompletedTransaction(
+				null,
+				account.id(),
+				amount,
+				TransactionEntity.Type.DEPOSIT
+		);
+
+		return TransactionMapper.toView(transaction, null, accountNumber);
+	}
+
+	@Transactional
+	public TransactionWithAccountNumbersView withdraw(
+			@NonNull AccountNumber accountNumber,
+			@NonNull BigDecimal amount,
+			@NonNull UserLogin userLogin
+	) {
+		validateAmount(amount);
+
+		AccountEntity account = accountRepository
+				.changeOwnedActiveAccountBalance(accountNumber, userLogin, amount.negate())
+				.orElseThrow(() -> new InvalidTransactionException("account is not available for withdrawal"));
+
+		TransactionEntity transaction = saveCompletedTransaction(
+				account.id(),
+				null,
+				amount,
+				TransactionEntity.Type.WITHDRAWAL
+		);
+
+		return TransactionMapper.toView(transaction, accountNumber, null);
+	}
+
+	private void validateAmount(@NonNull BigDecimal amount) {
+		if (amount.signum() <= 0)
+			throw new InvalidTransactionException("amount must be greater than 0");
+	}
+
+	private TransactionEntity saveCompletedTransaction(
+			Long fromAccountId,
+			Long toAccountId,
+			BigDecimal amount,
+			TransactionEntity.Type type
+	) {
+		return transactionRepository.save(
 				new TransactionEntity(
 						null,
-						null,
-						account.id(),
+						fromAccountId,
+						toAccountId,
 						amount,
-						TransactionEntity.Type.DEPOSIT,
+						type,
 						TransactionEntity.Status.COMPLETED,
 						OffsetDateTime.now(ZoneOffset.UTC)
 				)
 		);
-
-		return TransactionMapper.toTopUpView(transaction, accountNumber);
 	}
 }
