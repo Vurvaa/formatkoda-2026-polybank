@@ -20,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static ru.formatkoda.polybank.testutil.TestData.user;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -32,75 +33,69 @@ class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    private final UserEntity userEntity = new UserEntity(
-            null,
-            new UserLogin("value"),
-            "name",
-            "lastName",
-            "password",
-            null,
-            null
-    );
-
     @Test
     void createUserShouldThrowExceptionWhenLoginIsDuplicated() {
-        when(userRepository.findUserByLogin(userEntity.login()))
-                .thenReturn(Optional.of(userEntity));
+        UserEntity user = user();
+
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
 
         BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
-                () -> userService.createUser(userEntity));
+                () -> userService.createUser(user));
 
         Assertions.assertEquals("user already exists", actualException.getMessage());
     }
 
     @Test
     void createUserShouldThrowExceptionWhenRoleNotFound() {
+        UserEntity user = user();
+
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.empty());
 
         BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
-                () -> userService.createUser(userEntity));
+                () -> userService.createUser(user));
         Assertions.assertEquals("not found CLIENT role", actualException.getMessage());
     }
 
     @Test
     void createUserShouldCallingRepositoriesMethods() {
-        prepareMocksForCallingCreateUser(userEntity.login());
+        prepareMocksForCallingCreateUser(user().login());
 
-        userService.createUser(userEntity);
+        userService.createUser(user());
 
-        verify(userRepository).findUserByLogin(userEntity.login());
+        verify(userRepository).findUserByLogin(user().login());
         verify(roleRepository).findRoleEntityByName("CLIENT");
-        verify(userRepository).createUserAndReturnId(userEntity);
+        verify(userRepository).createUserAndReturnId(user());
         verify(userRepository).bindUserWithRole(anyLong(), anyLong());
     }
 
     @Test
     void createUserShouldReturnUserLoginMatchesWithUserEntityLogin() {
-        prepareMocksForCallingCreateUser(userEntity.login());
+        prepareMocksForCallingCreateUser(user().login());
 
-        UserLogin userLogin = userService.createUser(userEntity);
+        UserLogin userLogin = userService.createUser(user());
 
         Assertions.assertNotNull(userLogin);
-        Assertions.assertEquals(userLogin, userEntity.login());
+        Assertions.assertEquals(userLogin, user().login());
     }
 
     @Test
     void findUserByLoginShouldCallingUserRepositoryMethod() {
-        when(userRepository.findUserByLogin(userEntity.login()))
-                .thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByLogin(user().login()))
+                .thenReturn(Optional.of(user()));
 
-        userService.findUserByLogin(userEntity.login());
+        userService.findUserByLogin(user().login());
 
-        verify(userRepository).findUserByLogin(userEntity.login());
+        verify(userRepository).findUserByLogin(user().login());
     }
 
     @Test
     void findUserByLoginShouldThrowingExceptionWhenUserNotFound() {
-        when(userRepository.findUserByLogin(userEntity.login()))
+        when(userRepository.findUserByLogin(user().login()))
                 .thenReturn(Optional.empty());
 
-        UserLogin login = userEntity.login();
+        UserLogin login = user().login();
 
         BusinessLogicException actualException = Assertions
                 .assertThrows(BusinessLogicException.class,
@@ -111,14 +106,16 @@ class UserServiceTest {
 
     @Test
     void findUserByLoginShouldReturnUserWhenUserExists() {
-        when(userRepository.findUserByLogin(userEntity.login()))
-                .thenReturn(Optional.of(userEntity));
+        UserEntity user = user();
 
-        UserEntity result = userService.findUserByLogin(userEntity.login());
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
 
-        assertThat(result).isSameAs(userEntity);
+        UserEntity result = userService.findUserByLogin(user.login());
 
-        verify(userRepository).findUserByLogin(userEntity.login());
+        assertThat(result).isSameAs(user);
+
+        verify(userRepository).findUserByLogin(user.login());
     }
 
     private void prepareMocksForCallingCreateUser(UserLogin expectedLogin) {
@@ -132,7 +129,7 @@ class UserServiceTest {
 
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.of(expectedRole));
-        when(userRepository.createUserAndReturnId(userEntity))
+        when(userRepository.createUserAndReturnId(user()))
                 .thenReturn(1L);
         doNothing().when(userRepository).bindUserWithRole(anyLong(), anyLong());
     }
