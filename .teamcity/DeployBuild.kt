@@ -28,6 +28,9 @@ object DeployBuild : BuildType({
 
                 kubectl get nodes
 
+                kubectl get secret polybank-backend-secret -n %k8s.namespace% -o jsonpath='{.metadata.labels.app\.kubernetes\.io/managed-by}' | grep -q "Helm" || \
+                kubectl delete secret polybank-backend-secret -n %k8s.namespace% --ignore-not-found=true
+
                 helm dependency build %helm.chart.path%/polybank/
 
                 helm upgrade polybank \
@@ -47,7 +50,13 @@ object DeployBuild : BuildType({
                   --set-string postgresAuth.postgresPassword=%env.POSTGRES_PASSWORD% \
                   --set-string postgresAuth.database=%env.POSTGRES_DB% \
                   --set-string postgresql.auth.username=%env.POSTGRES_USER% \
+                  --set-string postgresql.auth.password=%env.POSTGRES_PASSWORD% \
+                  --set-string postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD% \
                   --set-string postgresql.auth.database=%env.POSTGRES_DB% \
+                  --set-string global.postgresql.auth.username=%env.POSTGRES_USER% \
+                  --set-string global.postgresql.auth.password=%env.POSTGRES_PASSWORD% \
+                  --set-string global.postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD% \
+                  --set-string global.postgresql.auth.database=%env.POSTGRES_DB% \
                   --set-string jwt.secret=%env.JWT_SECRET% \
                   --set-string jwt.expirationMinutes=%env.JWT_EXPIRATION_MINUTES% \
                   --debug

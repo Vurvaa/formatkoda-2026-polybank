@@ -21,12 +21,12 @@ resources:
 
 postgresAuth:
   username: polybank_user
-  password: CHANGEME
-  postgresPassword: CHANGEME
+  password: ""
+  postgresPassword: ""
   database: polybank_db
 
 jwt:
-  secret: CHANGEME
+  secret: ""
   expirationMinutes: 60
 
 postgresql:
