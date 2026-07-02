@@ -53,9 +53,7 @@ public class AccountService {
 				.findUserByLogin(userLogin)
 				.orElseThrow(() -> new BusinessLogicException("user not found"));
 
-		AccountEntity account = accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!account.userId().equals(user.id()))
 			throw new BusinessLogicException("account does not belong to user");
@@ -64,14 +62,23 @@ public class AccountService {
 	}
 
 	@Transactional
+	public AccountEntity topUpAccount(
+			@NonNull AccountNumber accountNumber,
+			@NonNull BigDecimal amount
+	) {
+		validateAmount(amount);
+		findAccountOrThrow(accountNumber);
+
+		return changeBalanceOrThrow(accountNumber, amount);
+	}
+
+	@Transactional
 	public AccountEntity topUpOwnedAccount(
 			@NonNull AccountNumber accountNumber,
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
-		if (amount.signum() <= 0)
-			throw new BusinessLogicException("amount must be greater than 0");
-
+		validateAmount(amount);
 		findOwnedAccount(accountNumber, userLogin);
 
 		return changeBalanceOrThrow(accountNumber, amount);
@@ -83,12 +90,16 @@ public class AccountService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
-		if (amount.signum() <= 0)
-			throw new BusinessLogicException("amount must be greater than 0");
-
+		validateAmount(amount);
 		findOwnedAccount(accountNumber, userLogin);
 
 		return changeBalanceOrThrow(accountNumber, amount.negate());
+	}
+
+	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
+		return accountRepository
+				.findByNumber(accountNumber)
+				.orElseThrow(() -> new BusinessLogicException("account not found"));
 	}
 
 	private AccountEntity changeBalanceOrThrow(@NonNull AccountNumber accountNumber, @NonNull BigDecimal delta) {
@@ -98,8 +109,7 @@ public class AccountService {
 	}
 
 	private RuntimeException diagnoseBalanceChangeFailure(AccountNumber accountNumber, BigDecimal delta) {
-		AccountEntity account = accountRepository.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!AccountEntity.Status.ACTIVE.equals(account.status()))
 			throw new BusinessLogicException("account is inactive");
@@ -108,5 +118,10 @@ public class AccountService {
 			throw new BusinessLogicException("insufficient funds");
 
 		throw new BusinessLogicException("unknown exception");
+	}
+
+	private void validateAmount(BigDecimal amount) {
+		if (amount.signum() <= 0)
+			throw new BusinessLogicException("amount must be greater than 0");
 	}
 }

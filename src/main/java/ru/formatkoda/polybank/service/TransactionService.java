@@ -92,7 +92,7 @@ public class TransactionService {
 			throw new BusinessLogicException("accounts must be different");
 
 		AccountEntity fromAccount = accountService.withdrawFromOwnedAccount(fromAccountNumber, amount, userLogin);
-		AccountEntity toAccount = accountService.topUpOwnedAccount(toAccountNumber, amount, userLogin);
+		AccountEntity toAccount = accountService.topUpAccount(toAccountNumber, amount);
 
 		TransactionEntity transaction = saveCompletedTransaction(
 				fromAccount.id(),

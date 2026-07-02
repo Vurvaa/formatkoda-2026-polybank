@@ -48,7 +48,7 @@ class TransactionServiceTransferTest {
 
 		when(accountService.withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
 				.thenReturn(fromAccount);
-		when(accountService.topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
+		when(accountService.topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT))
 				.thenReturn(toAccount);
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenReturn(savedTransferTransaction());
@@ -83,7 +83,7 @@ class TransactionServiceTransferTest {
 		assertThat(transactionToSave.createdAt()).isNotNull();
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
-		verify(accountService).topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
+		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
 	}
 
 	@Test
@@ -124,7 +124,7 @@ class TransactionServiceTransferTest {
 	void transferShouldPropagateTopUpExceptionAndNotCreateTransaction() {
 		when(accountService.withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
 				.thenReturn(account());
-		when(accountService.topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
+		when(accountService.topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT))
 				.thenThrow(new BusinessLogicException("account is inactive"));
 
 		assertThatThrownBy(() -> transactionService.transfer(
@@ -137,7 +137,7 @@ class TransactionServiceTransferTest {
 				.hasMessage("account is inactive");
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
-		verify(accountService).topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
+		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
 		verify(transactionRepository, never()).save(ArgumentMatchers.any());
 	}
 
@@ -145,7 +145,7 @@ class TransactionServiceTransferTest {
 	void transferShouldPropagateExceptionWhenTransactionCreationFails() {
 		when(accountService.withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
 				.thenReturn(account());
-		when(accountService.topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
+		when(accountService.topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT))
 				.thenReturn(toAccount());
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenThrow(new RuntimeException("transaction insert failed"));
@@ -160,7 +160,7 @@ class TransactionServiceTransferTest {
 				.hasMessage("transaction insert failed");
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
-		verify(accountService).topUpOwnedAccount(TO_ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
+		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
 		verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
 	}
 
