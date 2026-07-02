@@ -14,10 +14,18 @@ project {
         param("gitlab.api.url", "https://gitlab.com/api/v4")
         param("java.home", "/opt/java/openjdk")
 
-        param("env.POSTGRES_HOST", "192.168.130.82")
-        param("env.POSTGRES_PORT", "5432")
-        param("env.POSTGRES_DB", "polybank_db")
-        param("env.POSTGRES_USER", "polybank_user")
+        param("postgres.host", "192.168.130.82")
+        param("postgres.port", "5432")
+        param("postgres.db", "polybank_db")
+        param("postgres.user", "polybank_user")
+
+        param("env.POSTGRES_HOST", "%postgres.host%")
+        param("env.POSTGRES_PORT", "%postgres.port%")
+        param("env.POSTGRES_DB", "%postgres.db%")
+        param("env.POSTGRES_USER", "%postgres.user%")
+        param("env.SPRING_DATASOURCE_URL", "jdbc:postgresql://%postgres.host%:%postgres.port%/%postgres.db%")
+        param("env.SPRING_DATASOURCE_USERNAME", "%postgres.user%")
+        password("env.SPRING_DATASOURCE_PASSWORD", "credentialsJSON:20e6cb45-b464-447c-9363-aef8c4ccf22f")
 
         param("env.JWT_EXPIRATION_MINUTES", "60")
 
