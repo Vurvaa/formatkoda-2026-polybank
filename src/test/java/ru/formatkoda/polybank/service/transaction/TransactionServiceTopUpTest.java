@@ -24,11 +24,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static ru.formatkoda.polybank.testutil.TransactionTestData.ACCOUNT_NUMBER;
-import static ru.formatkoda.polybank.testutil.TransactionTestData.AMOUNT;
-import static ru.formatkoda.polybank.testutil.TransactionTestData.CREATED_AT;
-import static ru.formatkoda.polybank.testutil.TransactionTestData.USER_LOGIN;
-import static ru.formatkoda.polybank.testutil.TransactionTestData.account;
+import static ru.formatkoda.polybank.testutil.TestData.ACCOUNT_NUMBER;
+import static ru.formatkoda.polybank.testutil.TestData.AMOUNT;
+import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
+import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
+import static ru.formatkoda.polybank.testutil.TestData.account;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTopUpTest {

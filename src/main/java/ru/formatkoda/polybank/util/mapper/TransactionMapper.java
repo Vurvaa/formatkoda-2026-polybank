@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.util.mappers;
+package ru.formatkoda.polybank.util.mapper;
 
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;

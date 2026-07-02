@@ -28,7 +28,7 @@ import ru.formatkoda.polybank.dto.transaction.AccountOperationRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.dto.transaction.TransferRequestDto;
 import ru.formatkoda.polybank.service.TransactionService;
-import ru.formatkoda.polybank.util.mappers.TransactionMapper;
+import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;

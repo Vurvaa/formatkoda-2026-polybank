@@ -3,7 +3,7 @@ package ru.formatkoda.polybank.repository;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
-import ru.formatkoda.polybank.domain.RoleEntity;
+import ru.formatkoda.polybank.domain.user.RoleEntity;
 
 import java.util.Optional;
 

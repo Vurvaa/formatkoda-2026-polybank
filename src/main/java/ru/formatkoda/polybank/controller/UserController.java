@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.formatkoda.polybank.dto.UserRegistrationDto;
-import ru.formatkoda.polybank.dto.AuthUserDto;
+import ru.formatkoda.polybank.domain.auth.JwtToken;
+import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
+import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
 
@@ -23,10 +24,9 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<AuthUserDto> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
-        String token = authService
-                .registerUser(userMapper.toEntity(user)).token();
+        JwtToken token = authService.registerUser(userMapper.toEntity(user));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new AuthUserDto(token));
+                .body(new AuthUserDto(token.token()));
     }
 }

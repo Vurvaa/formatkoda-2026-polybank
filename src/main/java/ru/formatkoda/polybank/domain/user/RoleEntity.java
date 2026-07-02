@@ -1,9 +1,9 @@
-package ru.formatkoda.polybank.domain;
+package ru.formatkoda.polybank.domain.user;
 
 import lombok.NonNull;
 
 public record RoleEntity(
-        @NonNull Long id,
+        Long id,
         @NonNull String name
 ) {
 }

@@ -50,7 +50,7 @@ public class AccountService {
 
 	public AccountEntity findOwnedAccount(@NonNull AccountNumber accountNumber, @NonNull UserLogin userLogin) {
 		UserEntity user = userRepository
-				.findUserByLogin(userLogin.value())
+				.findUserByLogin(userLogin)
 				.orElseThrow(() -> new BusinessLogicException("user not found"));
 
 		AccountEntity account = accountRepository

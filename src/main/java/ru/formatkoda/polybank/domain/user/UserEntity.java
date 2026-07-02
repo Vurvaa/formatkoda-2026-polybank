@@ -5,12 +5,15 @@ import lombok.NonNull;
 import java.time.OffsetDateTime;
 
 public record UserEntity(
-		@NonNull Long id,
-		@NonNull String login,
-		@NonNull String name,
-		@NonNull String lastName,
-		@NonNull String passwordHash,
-		@NonNull OffsetDateTime createdAt,
-		OffsetDateTime blockedAt
+        Long id,
+        @NonNull UserLogin login,
+        @NonNull String name,
+        @NonNull String lastName,
+        @NonNull String passwordHash,
+        OffsetDateTime createdAt,
+        OffsetDateTime blockedAt
 ) {
+    public boolean isBlocked() {
+        return blockedAt != null;
+    }
 }

@@ -1,13 +1,16 @@
-package ru.formatkoda.polybank.service;
+package ru.formatkoda.polybank.service.user;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.domain.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
+import ru.formatkoda.polybank.service.AuthService;
+import ru.formatkoda.polybank.service.JwtService;
+import ru.formatkoda.polybank.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -29,17 +32,17 @@ class AuthServiceTest {
     void registerUserShouldCreateUserGenerateTokenAndReturnJwtToken() {
         UserEntity user = mock(UserEntity.class);
 
-        UserLogin userLogin = new UserLogin("login");
+        UserLogin userLogin = new UserLogin("value");
         String generatedToken = "test.jwt.token";
 
         when(userService.createUser(user)).thenReturn(userLogin);
-        when(jwtService.generateToken("login")).thenReturn(generatedToken);
+        when(jwtService.generateToken("value")).thenReturn(generatedToken);
 
         JwtToken result = authService.registerUser(user);
 
         assertThat(result.token()).isEqualTo(generatedToken);
 
         verify(userService).createUser(user);
-        verify(jwtService).generateToken("login");
+        verify(jwtService).generateToken("value");
     }
 }

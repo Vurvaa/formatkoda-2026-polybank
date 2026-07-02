@@ -1,10 +1,11 @@
-package ru.formatkoda.polybank.service;
+package ru.formatkoda.polybank.service.user;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.formatkoda.polybank.service.JwtService;
 
 import java.util.Base64;
 
@@ -25,18 +26,18 @@ class JwtServiceTest {
 
     @Test
     void generateTokenShouldGenerateNotBlankToken() {
-        String token = jwtService.generateToken("login");
+        String token = jwtService.generateToken("value");
 
         assertThat(token).isNotBlank();
     }
 
     @Test
     void extractUserLoginFromTokenShouldReturnUserLoginFromValidToken() {
-        String token = jwtService.generateToken("login");
+        String token = jwtService.generateToken("value");
 
         String result = jwtService.extractUserLoginFromToken(token);
 
-        assertThat(result).isEqualTo("login");
+        assertThat(result).isEqualTo("value");
     }
 
     @Test
@@ -47,7 +48,7 @@ class JwtServiceTest {
                 getBaseSecret("another-secret-key-another-key-32"));
         ReflectionTestUtils.setField(anotherJwtService, "expirationMinutes", 60L);
 
-        String token = anotherJwtService.generateToken("login");
+        String token = anotherJwtService.generateToken("value");
 
         assertThrows(JwtException.class,
                 () -> jwtService.extractUserLoginFromToken(token));
@@ -57,7 +58,7 @@ class JwtServiceTest {
     void generateTokenShouldThrowExpiredJwtExceptionWhenTokenExpired() {
         ReflectionTestUtils.setField(jwtService, "expirationMinutes", -1L);
 
-        String token = jwtService.generateToken("login");
+        String token = jwtService.generateToken("value");
 
         assertThrows(ExpiredJwtException.class,
                 () -> jwtService.extractUserLoginFromToken(token));

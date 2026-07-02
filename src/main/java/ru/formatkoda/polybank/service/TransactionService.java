@@ -11,7 +11,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.TransactionRepository;
-import ru.formatkoda.polybank.util.mappers.TransactionMapper;
+import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
