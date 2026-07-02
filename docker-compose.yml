@@ -23,10 +23,10 @@ services:
       - polybank-net
 
   polybank:
-    image: ${REGISTRY:-192.168.130.81:5000}/polybank:${IMAGE_TAG:-latest}
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
+    image: polybank-local:latest
     container_name: polybank-app
     restart: unless-stopped
     env_file:

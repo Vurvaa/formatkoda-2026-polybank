@@ -9,7 +9,14 @@
 .mvn
 mvnw
 mvnw.cmd
-target
+
+target/classes
+target/generated-sources
+target/generated-test-sources
+target/maven-status
+target/maven-archiver
+target/test-classes
+target/surefire-reports
 
 .env
 .env.*

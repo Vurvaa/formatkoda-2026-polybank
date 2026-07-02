@@ -20,13 +20,16 @@ metadata:
     app.kubernetes.io/name: polybank
     app.kubernetes.io/component: app
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.appName }}
   ports:
     - name: http
       port: {{ .Values.appServicePort }}
       targetPort: http
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
 
 ---
 

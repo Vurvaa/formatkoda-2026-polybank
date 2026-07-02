@@ -3,7 +3,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 
 object DeployBuild : BuildType({
-    name = "CD - Deploy"
+    name = "Deploy on server"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -37,7 +37,7 @@ object DeployBuild : BuildType({
                   --kubeconfig %k8s.kubeconfig% \
                   --wait \
                   --atomic \
-                  --timeout 20m0s \
+                  --timeout 30m0s \
                   %helm.chart.path%/polybank/ \
                   -f %helm.chart.path%/polybank/values.yaml \
                   --set-string image.repository=%docker.registry%/polybank \
