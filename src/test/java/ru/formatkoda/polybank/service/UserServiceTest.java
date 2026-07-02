@@ -9,9 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.RoleEntity;
 import ru.formatkoda.polybank.domain.UserEntity;
 import ru.formatkoda.polybank.domain.UserLogin;
-import ru.formatkoda.polybank.domain.exceptions.RoleNotFoundException;
-import ru.formatkoda.polybank.domain.exceptions.UserAlreadyExistsException;
-import ru.formatkoda.polybank.domain.exceptions.UserNotFoundException;
+
+import ru.formatkoda.polybank.exceptions.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 
@@ -32,7 +31,7 @@ class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    private UserEntity userEntity = new UserEntity(
+    private final UserEntity userEntity = new UserEntity(
             null,
             "login",
             "name",
@@ -45,21 +44,27 @@ class UserServiceTest {
     @Test
     void createUserShouldThrowExceptionWhenLoginIsDuplicated() {
         String expectedLogin = userEntity.login();
+        String expectedExceptionMassage = "login already exists";
 
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.of(userEntity));
 
-        Assertions.assertThrows(UserAlreadyExistsException.class,
+        BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
                 () -> userService.createUser(userEntity));
+
+        Assertions.assertEquals(expectedExceptionMassage, actualException.getMessage());
     }
 
     @Test
     void createUserShouldThrowExceptionWhenRoleNotFound() {
+        String expectedExceptionMassage = "not found CLIENT role";
+
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(RoleNotFoundException.class,
+        BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
                 () -> userService.createUser(userEntity));
+        Assertions.assertEquals(expectedExceptionMassage, actualException.getMessage());
     }
 
     @Test
@@ -101,11 +106,16 @@ class UserServiceTest {
     @Test
     void findUserByLoginShouldThrowingExceptionWhenUserNotFound() {
         String expectedLogin = userEntity.login();
+        String expectedExceptionMassage = "not found user with this login";
+
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserNotFoundException.class,
-                () -> userService.findUserByLogin(expectedLogin));
+        BusinessLogicException actualException = Assertions
+                .assertThrows(BusinessLogicException.class,
+                        () -> userService.findUserByLogin(expectedLogin));
+
+        Assertions.assertEquals(expectedExceptionMassage, actualException.getMessage());
     }
 
     @Test
