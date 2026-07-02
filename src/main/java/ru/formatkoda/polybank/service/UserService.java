@@ -30,6 +30,7 @@ public class UserService {
                 .orElseThrow(() -> new BusinessLogicException("not found CLIENT role"));
 
         long userId = userRepository.createUserAndReturnId(user);
+        long roleId = roleEntityOptional.get().id();
 
         userRepository.bindUserWithRole(userId, role.id());
 
@@ -38,6 +39,6 @@ public class UserService {
 
     public UserEntity findUserByLogin(UserLogin login) {
         return userRepository.findUserByLogin(login)
-                .orElseThrow(() -> new BusinessLogicException("not found user with this login"));
+                .orElseThrow(() -> new ResourceNotFoundException("not found user with this login"));
     }
 }
