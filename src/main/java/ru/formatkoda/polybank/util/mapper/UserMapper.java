@@ -9,6 +9,7 @@ import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -16,12 +17,17 @@ public class UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     public UserEntity toEntity(UserRegistrationDto user) {
-        return  new UserEntity(
+        String passwordHash = Objects.requireNonNull(
+                passwordEncoder.encode(user.password()),
+                "Encoded password must not be null"
+        );
+
+        return new UserEntity(
                 null,
                 new UserLogin(user.login()),
                 user.name(),
                 user.lastName(),
-                passwordEncoder.encode(user.password()),
+                passwordHash,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );

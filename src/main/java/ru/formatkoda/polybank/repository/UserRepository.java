@@ -12,8 +12,6 @@ import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Repository

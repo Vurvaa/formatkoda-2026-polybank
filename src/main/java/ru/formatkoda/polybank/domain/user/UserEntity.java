@@ -10,7 +10,7 @@ public record UserEntity(
         @NonNull String name,
         @NonNull String lastName,
         @NonNull String passwordHash,
-        OffsetDateTime createdAt,
+        @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
 ) {
     public boolean isBlocked() {
