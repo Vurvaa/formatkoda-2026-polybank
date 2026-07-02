@@ -8,7 +8,7 @@ appServicePort: 8080
 metricsContainerPort: 5300
 service:
   type: NodePort
-  nodePort: 30080
+  nodePort: 30090
 ingress:
   enabled: false
 resources:
