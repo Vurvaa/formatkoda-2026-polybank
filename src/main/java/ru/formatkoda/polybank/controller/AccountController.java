@@ -26,6 +26,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.transaction.AccountOperationRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
+import ru.formatkoda.polybank.dto.transaction.TransferRequestDto;
 import ru.formatkoda.polybank.service.TransactionService;
 import ru.formatkoda.polybank.util.mappers.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
@@ -107,6 +108,26 @@ public class AccountController {
 
 		TransactionWithAccountNumbersView transaction = transactionService.withdraw(
 				accountNumber,
+				request.amount(),
+				login
+		);
+
+		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/transfer")
+	public ResponseEntity<TransactionResponseDto> transferBetweenAccounts(
+			@Valid @RequestBody TransferRequestDto request,
+			Authentication authentication // todo authenticationprincipal when security is done
+	) {
+		AccountNumber fromAccountNumber = new AccountNumber(request.fromAccountNumber());
+		AccountNumber toAccountNumber = new AccountNumber(request.toAccountNumber());
+		UserLogin login = new UserLogin(authentication.getName());
+
+		TransactionWithAccountNumbersView transaction = transactionService.transfer(
+				fromAccountNumber,
+				toAccountNumber,
 				request.amount(),
 				login
 		);

@@ -8,9 +8,8 @@ import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
-import ru.formatkoda.polybank.domain.transaction.exception.InvalidTransactionException;
 import ru.formatkoda.polybank.domain.user.UserLogin;
-import ru.formatkoda.polybank.repository.AccountRepository;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mappers.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
@@ -19,6 +18,7 @@ import ru.formatkoda.polybank.util.pagination.PageResult;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,7 +26,6 @@ import java.time.ZoneOffset;
 public class TransactionService {
 	private final TransactionRepository transactionRepository;
 	private final AccountService accountService;
-	private final AccountRepository accountRepository;
 
 	public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
 			@NonNull AccountNumber accountNumber,
@@ -35,7 +34,15 @@ public class TransactionService {
 	) {
 		AccountEntity account = accountService.findOwnedAccount(accountNumber, userLogin);
 
-		return transactionRepository.findViewsByAccountId(account.id(), pageRequest);
+		List<TransactionWithAccountNumbersView> transactions = transactionRepository
+				.findViewsByAccountId(account.id(), pageRequest);
+
+		return new PageResult<>(
+				transactions,
+				pageRequest.page(),
+				pageRequest.size(),
+				transactions.size()
+		);
 	}
 
 	@Transactional
@@ -44,11 +51,7 @@ public class TransactionService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
-		validateAmount(amount);
-
-		AccountEntity account = accountRepository
-				.changeOwnedActiveAccountBalance(accountNumber, userLogin, amount)
-				.orElseThrow(() -> new InvalidTransactionException("account is not available for top up"));
+		AccountEntity account = accountService.topUpOwnedAccount(accountNumber, amount, userLogin);
 
 		TransactionEntity transaction = saveCompletedTransaction(
 				null,
@@ -66,11 +69,7 @@ public class TransactionService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
-		validateAmount(amount);
-
-		AccountEntity account = accountRepository
-				.changeOwnedActiveAccountBalance(accountNumber, userLogin, amount.negate())
-				.orElseThrow(() -> new InvalidTransactionException("account is not available for withdrawal"));
+		AccountEntity account = accountService.withdrawFromOwnedAccount(accountNumber, amount, userLogin);
 
 		TransactionEntity transaction = saveCompletedTransaction(
 				account.id(),
@@ -82,9 +81,27 @@ public class TransactionService {
 		return TransactionMapper.toView(transaction, accountNumber, null);
 	}
 
-	private void validateAmount(@NonNull BigDecimal amount) {
-		if (amount.signum() <= 0)
-			throw new InvalidTransactionException("amount must be greater than 0");
+	@Transactional
+	public TransactionWithAccountNumbersView transfer(
+			@NonNull AccountNumber fromAccountNumber,
+			@NonNull AccountNumber toAccountNumber,
+			@NonNull BigDecimal amount,
+			@NonNull UserLogin userLogin
+	) {
+		if (fromAccountNumber.equals(toAccountNumber))
+			throw new BusinessLogicException("accounts must be different");
+
+		AccountEntity fromAccount = accountService.withdrawFromOwnedAccount(fromAccountNumber, amount, userLogin);
+		AccountEntity toAccount = accountService.topUpOwnedAccount(toAccountNumber, amount, userLogin);
+
+		TransactionEntity transaction = saveCompletedTransaction(
+				fromAccount.id(),
+				toAccount.id(),
+				amount,
+				TransactionEntity.Type.TRANSFER
+		);
+
+		return TransactionMapper.toView(transaction, fromAccountNumber, toAccountNumber);
 	}
 
 	private TransactionEntity saveCompletedTransaction(

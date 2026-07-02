@@ -11,13 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
-import ru.formatkoda.polybank.domain.transaction.exception.InvalidTransactionException;
-import ru.formatkoda.polybank.repository.AccountRepository;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.TransactionRepository;
+import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,17 +35,17 @@ class TransactionServiceWithdrawTest {
 	@Mock
 	private TransactionRepository transactionRepository;
 	@Mock
-	private AccountRepository accountRepository;
+	private AccountService accountService;
 	@InjectMocks
 	private TransactionService transactionService;
 
 	@Test
 	void withdrawShouldDecreaseBalanceCreateWithdrawTransactionAndReturnView() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
+		when(accountService.withdrawFromOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT.negate()
-		)).thenReturn(Optional.of(account()));
+				AMOUNT,
+				USER_LOGIN
+		)).thenReturn(account());
 
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenReturn(savedWithdrawalTransaction());
@@ -79,48 +78,49 @@ class TransactionServiceWithdrawTest {
 		assertThat(transactionToSave.status()).isEqualTo(TransactionEntity.Status.COMPLETED);
 		assertThat(transactionToSave.createdAt()).isNotNull();
 
-		verify(accountRepository).changeOwnedActiveAccountBalance(
+		verify(accountService).withdrawFromOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT.negate()
+				AMOUNT,
+				USER_LOGIN
 		);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"0.0", "-1.0"})
-	void withdrawShouldRejectInvalidAmount(String amountValue) {
+	void withdrawShouldPropagateAccountServiceExceptionAndNotCreateTransaction(String amountValue) {
 		BigDecimal amount = new BigDecimal(amountValue);
 
+		when(accountService.withdrawFromOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN))
+				.thenThrow(new BusinessLogicException("amount must be greater than 0"));
+
 		assertThatThrownBy(() -> transactionService.withdraw(ACCOUNT_NUMBER, amount, USER_LOGIN))
-				.isInstanceOf(InvalidTransactionException.class)
+				.isInstanceOf(BusinessLogicException.class)
 				.hasMessage("amount must be greater than 0");
 
-		verifyNoInteractions(accountRepository);
+		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN);
 		verifyNoInteractions(transactionRepository);
 	}
 
 	@Test
-	void withdrawShouldRejectUnavailableAccountAndNotCreateTransaction() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
-				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT.negate()
-		)).thenReturn(Optional.empty());
+	void withdrawShouldPropagateAccountServiceExceptionWhenAccountCannotBeChanged() {
+		when(accountService.withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
+				.thenThrow(new BusinessLogicException("insufficient funds"));
 
 		assertThatThrownBy(() -> transactionService.withdraw(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
-				.isInstanceOf(InvalidTransactionException.class)
-				.hasMessage("account is not available for withdrawal");
+				.isInstanceOf(BusinessLogicException.class)
+				.hasMessage("insufficient funds");
 
+		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(transactionRepository, never()).save(ArgumentMatchers.any());
 	}
 
 	@Test
 	void withdrawShouldPropagateExceptionWhenTransactionCreationFails() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
+		when(accountService.withdrawFromOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT.negate()
-		)).thenReturn(Optional.of(account()));
+				AMOUNT,
+				USER_LOGIN
+		)).thenReturn(account());
 
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenThrow(new RuntimeException("transaction insert failed"));
@@ -129,10 +129,10 @@ class TransactionServiceWithdrawTest {
 				.isInstanceOf(RuntimeException.class)
 				.hasMessage("transaction insert failed");
 
-		verify(accountRepository).changeOwnedActiveAccountBalance(
+		verify(accountService).withdrawFromOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT.negate()
+				AMOUNT,
+				USER_LOGIN
 		);
 		verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
 	}

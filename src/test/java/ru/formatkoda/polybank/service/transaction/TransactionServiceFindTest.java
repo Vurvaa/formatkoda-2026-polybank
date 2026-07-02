@@ -22,7 +22,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.formatkoda.polybank.testutil.TransactionTestData.ACCOUNT_NUMBER;
@@ -44,26 +44,25 @@ class TransactionServiceFindTest {
 		PageRequest pageRequest = new PageRequest(0, 20);
 
 		AccountEntity account = account();
+		List<TransactionWithAccountNumbersView> transactions = buildTransactionWithAccountNumbersViews(size);
 
 		PageResult<TransactionWithAccountNumbersView> expectedResult = new PageResult<>(
-				buildTransactionWithAccountNumbersViews(size),
-				0,
-				20,
-				size
+				transactions,
+				pageRequest.page(),
+				pageRequest.size(),
+				transactions.size()
 		);
 
-		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(expectedResult);
-
 		when(accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN)).thenReturn(account);
+		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(transactions);
 
-		PageResult<TransactionWithAccountNumbersView> actualResult =
-				transactionService.findByAccountNumber(
-						ACCOUNT_NUMBER,
-						USER_LOGIN,
-						pageRequest
-				);
+		PageResult<TransactionWithAccountNumbersView> actualResult = transactionService.findByAccountNumber(
+				ACCOUNT_NUMBER,
+				USER_LOGIN,
+				pageRequest
+		);
 
-		assertSame(expectedResult, actualResult);
+		assertThat(actualResult).isEqualTo(expectedResult);
 
 		verify(accountService).findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN);
 		verify(transactionRepository).findViewsByAccountId(account.id(), pageRequest);

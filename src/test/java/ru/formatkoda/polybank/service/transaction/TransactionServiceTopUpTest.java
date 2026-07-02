@@ -11,13 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
-import ru.formatkoda.polybank.domain.transaction.exception.InvalidTransactionException;
-import ru.formatkoda.polybank.repository.AccountRepository;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.TransactionRepository;
+import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,17 +35,17 @@ class TransactionServiceTopUpTest {
 	@Mock
 	private TransactionRepository transactionRepository;
 	@Mock
-	private AccountRepository accountRepository;
+	private AccountService accountService;
 	@InjectMocks
 	private TransactionService transactionService;
 
 	@Test
 	void topUpShouldIncreaseBalanceCreateDepositTransactionAndReturnView() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
+		when(accountService.topUpOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT
-		)).thenReturn(Optional.of(account()));
+				AMOUNT,
+				USER_LOGIN
+		)).thenReturn(account());
 
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenReturn(savedTopUpTransaction());
@@ -79,48 +78,49 @@ class TransactionServiceTopUpTest {
 		assertThat(transactionToSave.status()).isEqualTo(TransactionEntity.Status.COMPLETED);
 		assertThat(transactionToSave.createdAt()).isNotNull();
 
-		verify(accountRepository).changeOwnedActiveAccountBalance(
+		verify(accountService).topUpOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT
+				AMOUNT,
+				USER_LOGIN
 		);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"0.0", "-1.0"})
-	void topUpShouldRejectInvalidAmount(String amountValue) {
+	void topUpShouldPropagateAccountServiceExceptionAndNotCreateTransaction(String amountValue) {
 		BigDecimal amount = new BigDecimal(amountValue);
 
+		when(accountService.topUpOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN))
+				.thenThrow(new BusinessLogicException("amount must be greater than 0"));
+
 		assertThatThrownBy(() -> transactionService.topUp(ACCOUNT_NUMBER, amount, USER_LOGIN))
-				.isInstanceOf(InvalidTransactionException.class)
+				.isInstanceOf(BusinessLogicException.class)
 				.hasMessage("amount must be greater than 0");
 
-		verifyNoInteractions(accountRepository);
+		verify(accountService).topUpOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN);
 		verifyNoInteractions(transactionRepository);
 	}
 
 	@Test
-	void topUpShouldRejectUnavailableAccountAndNotCreateTransaction() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
-				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT
-		)).thenReturn(Optional.empty());
+	void topUpShouldPropagateAccountServiceExceptionWhenAccountCannotBeChanged() {
+		when(accountService.topUpOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
+				.thenThrow(new BusinessLogicException("account is inactive"));
 
 		assertThatThrownBy(() -> transactionService.topUp(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
-				.isInstanceOf(InvalidTransactionException.class)
-				.hasMessage("account is not available for top up");
+				.isInstanceOf(BusinessLogicException.class)
+				.hasMessage("account is inactive");
 
+		verify(accountService).topUpOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(transactionRepository, never()).save(ArgumentMatchers.any());
 	}
 
 	@Test
 	void topUpShouldPropagateExceptionWhenTransactionCreationFails() {
-		when(accountRepository.changeOwnedActiveAccountBalance(
+		when(accountService.topUpOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT
-		)).thenReturn(Optional.of(account()));
+				AMOUNT,
+				USER_LOGIN
+		)).thenReturn(account());
 
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenThrow(new RuntimeException("transaction insert failed"));
@@ -129,10 +129,10 @@ class TransactionServiceTopUpTest {
 				.isInstanceOf(RuntimeException.class)
 				.hasMessage("transaction insert failed");
 
-		verify(accountRepository).changeOwnedActiveAccountBalance(
+		verify(accountService).topUpOwnedAccount(
 				ACCOUNT_NUMBER,
-				USER_LOGIN,
-				AMOUNT
+				AMOUNT,
+				USER_LOGIN
 		);
 		verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
 	}

@@ -6,7 +6,6 @@ import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
-import ru.formatkoda.polybank.domain.user.UserLogin;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,30 +37,26 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	public Optional<AccountEntity> findByNumberAndUserId(AccountNumber number, Long userId) {
+	public Optional<AccountEntity> findByNumber(AccountNumber number) {
 		return dsl
 				.select(
 						ACCOUNTS.ID,
-						ACCOUNTS.NUMBER
+						ACCOUNTS.USER_ID,
+						ACCOUNTS.NUMBER,
+						ACCOUNTS.BALANCE,
+						ACCOUNTS.STATUS
 				)
 				.from(ACCOUNTS)
-				.where(ACCOUNTS.USER_ID.eq(userId))
-				.and(ACCOUNTS.NUMBER.eq(number.value()))
+				.where(ACCOUNTS.NUMBER.eq(number.value()))
 				.fetchOptional(this::toEntity);
 	}
 
-	public Optional<AccountEntity> changeOwnedActiveAccountBalance(
-			AccountNumber accountNumber,
-			UserLogin userLogin,
-			BigDecimal delta
-	) {
-		return dsl.update(ACCOUNTS)
+	public Optional<AccountEntity> changeAccountBalance(AccountNumber accountNumber, BigDecimal delta) {
+		return dsl
+				.update(ACCOUNTS)
 				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(delta))
-				.from(USERS)
-				.where(ACCOUNTS.USER_ID.eq(USERS.ID))
+				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.and(ACCOUNTS.STATUS.eq(AccountEntity.Status.ACTIVE.name()))
-				.and(USERS.LOGIN.eq(userLogin.value()))
-				.and(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.and(ACCOUNTS.BALANCE.add(delta).ge(BigDecimal.ZERO))
 				.returning(
 						ACCOUNTS.ID,

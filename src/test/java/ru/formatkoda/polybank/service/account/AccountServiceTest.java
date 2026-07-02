@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.service;
+package ru.formatkoda.polybank.service.account;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -8,16 +8,16 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.formatkoda.polybank.domain.UserEntity;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountEntity.AccountType;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
-import ru.formatkoda.polybank.repository.AccountRepository;
-import ru.formatkoda.polybank.repository.UserRepository;
-import ru.formatkoda.polybank.security.UserSession;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.repository.AccountRepository;
+import ru.formatkoda.polybank.repository.UserRepository;
+import ru.formatkoda.polybank.service.AccountService;
+import ru.formatkoda.polybank.security.UserSession;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -110,59 +111,78 @@ class AccountServiceTest {
 		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 
 		UserEntity user = buildUser();
-		AccountEntity account = new AccountEntity(10L, accountNumber);
+		AccountEntity account = buildAccount(accountNumber, user.id());
 
 		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.of(user));
-		when(accountRepository.findByNumberAndUserId(accountNumber, user.id())).thenReturn(Optional.of(account));
+		when(accountRepository.findByNumber(accountNumber)).thenReturn(Optional.of(account));
 
 		AccountEntity actualAccount = accountService.findOwnedAccount(accountNumber, userLogin);
 
 		assertThat(actualAccount).isSameAs(account);
 
 		verify(userRepository).findUserByLogin(userLogin.value());
-		verify(accountRepository).findByNumberAndUserId(accountNumber, user.id());
+		verify(accountRepository).findByNumber(accountNumber);
 	}
 
 	@Test
-	void shouldThrowAccountDoesNotBelongToCurrentUserExceptionWhenAccountDoesNotBelongToUser() {
+	void shouldThrowBusinessLogicExceptionWhenAccountDoesNotBelongToUser() {
+		UserLogin userLogin = new UserLogin("user@example.com");
+		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
+
+		UserEntity user = buildUser();
+		AccountEntity account = buildAccount(accountNumber, 999L);
+
+		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.of(user));
+		when(accountRepository.findByNumber(accountNumber)).thenReturn(Optional.of(account));
+
+		assertThatThrownBy(() -> accountService.findOwnedAccount(accountNumber, userLogin))
+				.isInstanceOf(BusinessLogicException.class)
+				.hasMessage("account does not belong to user");
+
+		verify(userRepository).findUserByLogin(userLogin.value());
+		verify(accountRepository).findByNumber(accountNumber);
+	}
+
+	@Test
+	void shouldThrowBusinessLogicExceptionWhenAccountNotFound() {
 		UserLogin userLogin = new UserLogin("user@example.com");
 		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 
 		UserEntity user = buildUser();
 
 		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.of(user));
+		when(accountRepository.findByNumber(accountNumber)).thenReturn(Optional.empty());
 
-		when(accountRepository.findByNumberAndUserId(accountNumber, user.id())).thenReturn(Optional.empty());
-
-		assertThrows(
-				AccountDoesNotBelongToCurrentUserException.class,
-				() -> accountService.findOwnedAccount(
-						accountNumber,
-						userLogin
-				)
-		);
+		assertThatThrownBy(() -> accountService.findOwnedAccount(accountNumber, userLogin))
+				.isInstanceOf(BusinessLogicException.class)
+				.hasMessage("account not found");
 
 		verify(userRepository).findUserByLogin(userLogin.value());
-		verify(accountRepository).findByNumberAndUserId(accountNumber, user.id());
+		verify(accountRepository).findByNumber(accountNumber);
 	}
 
 	@Test
-	void shouldThrowUserNotFoundExceptionWhenUserNotFound() {
+	void shouldThrowBusinessLogicExceptionWhenUserNotFound() {
 		UserLogin userLogin = new UserLogin("user@example.com");
 		AccountNumber accountNumber = new AccountNumber("67675678901234567890");
 
 		when(userRepository.findUserByLogin(userLogin.value())).thenReturn(Optional.empty());
 
-		assertThrows(
-				UserNotFoundException.class,
-				() -> accountService.findOwnedAccount(
-						accountNumber,
-						userLogin
-				)
-		);
+		assertThatThrownBy(() -> accountService.findOwnedAccount(accountNumber, userLogin))
+				.isInstanceOf(BusinessLogicException.class)
+				.hasMessage("user not found");
 
 		verify(userRepository).findUserByLogin(userLogin.value());
 		verifyNoInteractions(accountRepository);
+	}
+
+	private AccountEntity buildAccount(AccountNumber accountNumber, Long userId) {
+		return new AccountEntity(
+				10L,
+				accountNumber,
+				userId,
+				new BigDecimal("300.00")
+		);
 	}
 
 	private UserEntity buildUser() {
