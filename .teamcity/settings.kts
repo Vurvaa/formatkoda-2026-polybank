@@ -19,6 +19,9 @@ project {
         param("env.POSTGRES_DB", "polybank_db")
         param("env.POSTGRES_USER", "polybank_user")
 
+        param("env.JWT_EXPIRATION_MINUTES", "60")
+
+        password("env.JWT_SECRET", "credentialsJSON:12db1afd-9baf-4d3e-873b-07ae63f3bd22")
         password("env.POSTGRES_PASSWORD", "credentialsJSON:20e6cb45-b464-447c-9363-aef8c4ccf22f")
         password("env.GITLAB_TOKEN", "credentialsJSON:18b94050-b187-44a5-a494-e37022a420b5")
     }

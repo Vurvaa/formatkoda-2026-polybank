@@ -25,6 +25,10 @@ postgresAuth:
   postgresPassword: CHANGEME
   database: polybank_db
 
+jwt:
+  secret: CHANGEME
+  expirationMinutes: 60
+
 postgresql:
   enabled: true
   global:
