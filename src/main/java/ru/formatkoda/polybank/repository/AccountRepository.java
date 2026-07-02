@@ -6,16 +6,18 @@ import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.account.*;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.formatkoda.polybank.domain.account.AccountEntity.ACCOUNT_NUMBER_PREFIX;
 import static ru.formatkoda.polybank.jooq.generated.tables.Accounts.ACCOUNTS;
 
 @Repository
 @RequiredArgsConstructor
 public class AccountRepository {
 	private final DSLContext dsl;
-	private final AccountNumberGenerator accountNumberGenerator;
+	private static final String SEQUENCE_NAME = "account_number_seq";
 
 	public Optional<AccountEntity> createAccountForUser(Long userId, AccountEntity.AccountType accountType) {
 		Objects.requireNonNull(userId, "userId must not be null");
@@ -23,12 +25,18 @@ public class AccountRepository {
 
 		return dsl
 				.insertInto(ACCOUNTS)
-				.set(ACCOUNTS.NUMBER, accountNumberGenerator.generate())
+				.set(ACCOUNTS.NUMBER, generateNextAccountNumber())
 				.set(ACCOUNTS.USER_ID, userId)
 				.set(ACCOUNTS.TYPE, accountType.name())
 				.set(ACCOUNTS.STATUS, AccountEntity.AccountStatus.ACTIVE.name())
 				.returning()
 				.fetchOptional(this::toEntity);
+	}
+
+	public String generateNextAccountNumber() {
+		BigInteger value = dsl.nextval(SEQUENCE_NAME);
+
+		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
 	}
 
 	private AccountEntity toEntity(Record r) {
