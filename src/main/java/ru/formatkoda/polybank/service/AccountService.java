@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +30,12 @@ public class AccountService {
 		return accountRepository
 				.createAccountForUser(user.id(),accountType)
 				.orElseThrow(() -> new BusinessLogicException("account not created"));
+	}
+
+	public List<AccountEntity> findAllForUser(@NonNull UserLogin userLogin) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
+		return accountRepository.findAllByUserId(user.id());
 	}
 
 	public AccountEntity findOwnedAccount(@NonNull AccountNumber accountNumber, @NonNull UserLogin userLogin) {

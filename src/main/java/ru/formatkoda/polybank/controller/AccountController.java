@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
-import ru.formatkoda.polybank.dto.account.CreateAccountResponseDto;
+import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.security.UserSession;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
@@ -32,6 +32,8 @@ import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/account")
 @RequiredArgsConstructor
@@ -42,14 +44,29 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
-	public ResponseEntity<CreateAccountResponseDto> createAccount(
+	public ResponseEntity<AccountResponseDto> createAccount(
 			@AuthenticationPrincipal UserSession userSession,
 			@Valid @RequestBody CreateAccountRequestDto createAccountDto
 	) {
 		UserLogin login = new UserLogin(userSession.login());
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toCreateAccountResponseDto(accountEntity));
+		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping
+	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserSession userSession) {
+		UserLogin login = new UserLogin(userSession.login());
+
+		List<AccountResponseDto> accounts = accountService
+				.findAllForUser(login)
+				.stream()
+				.map(AccountMapper::toResponse)
+				.toList();
+
+		return ResponseEntity.ok(accounts);
 	}
 
 	@SecurityRequirement(name = "bearerAuth")

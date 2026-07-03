@@ -9,6 +9,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 import static ru.formatkoda.polybank.domain.account.AccountEntity.ACCOUNT_NUMBER_PREFIX;
@@ -31,35 +32,30 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
+	public List<AccountEntity> findAllByUserId(Long id) {
+		return dsl
+				.selectFrom(ACCOUNTS)
+				.where(ACCOUNTS.USER_ID.eq(id))
+				.fetch(this::toEntity);
+	}
+
 	public Optional<AccountEntity> findByNumber(AccountNumber number) {
 		return dsl
-				.select(
-						ACCOUNTS.ID,
-						ACCOUNTS.USER_ID,
-						ACCOUNTS.NUMBER,
-						ACCOUNTS.BALANCE,
-						ACCOUNTS.STATUS
-				)
-				.from(ACCOUNTS)
+				.selectFrom(ACCOUNTS)
 				.where(ACCOUNTS.NUMBER.eq(number.value()))
 				.fetchOptional(this::toEntity);
 	}
 
 	public Optional<AccountEntity> changeAccountBalance(AccountNumber accountNumber, BigDecimal delta) {
+		var newBalanceExpression = ACCOUNTS.BALANCE.add(delta);
+
 		return dsl
 				.update(ACCOUNTS)
-				.set(ACCOUNTS.BALANCE, ACCOUNTS.BALANCE.add(delta))
+				.set(ACCOUNTS.BALANCE, newBalanceExpression)
 				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.and(ACCOUNTS.STATUS.eq(AccountEntity.Status.ACTIVE.name()))
-				.and(ACCOUNTS.BALANCE.add(delta).ge(BigDecimal.ZERO))
-				.returning(
-						ACCOUNTS.ID,
-						ACCOUNTS.NUMBER,
-						ACCOUNTS.USER_ID,
-						ACCOUNTS.BALANCE,
-						ACCOUNTS.TYPE,
-						ACCOUNTS.STATUS
-				)
+				.and(newBalanceExpression.ge(BigDecimal.ZERO))
+				.returning()
 				.fetchOptional(this::toEntity);
 	}
 
