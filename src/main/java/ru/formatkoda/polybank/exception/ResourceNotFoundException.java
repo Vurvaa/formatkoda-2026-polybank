@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.exceptions;
+package ru.formatkoda.polybank.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

@@ -9,7 +9,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
-import ru.formatkoda.polybank.exceptions.ResourceNotFoundException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 
 import java.math.BigDecimal;

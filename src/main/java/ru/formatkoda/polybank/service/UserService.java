@@ -9,7 +9,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
-import ru.formatkoda.polybank.exceptions.ResourceNotFoundException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 
 import java.util.Optional;
 

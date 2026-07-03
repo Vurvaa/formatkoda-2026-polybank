@@ -14,6 +14,7 @@ import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 
 import java.util.Optional;
 
@@ -53,7 +54,8 @@ class UserServiceTest {
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.empty());
 
-        BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
+        ResourceNotFoundException actualException = Assertions.assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.createUser(user));
         Assertions.assertEquals("not found CLIENT role", actualException.getMessage());
     }
@@ -97,8 +99,8 @@ class UserServiceTest {
 
         UserLogin login = user().login();
 
-        BusinessLogicException actualException = Assertions
-                .assertThrows(BusinessLogicException.class,
+        ResourceNotFoundException actualException = Assertions
+                .assertThrows(ResourceNotFoundException.class,
                         () -> userService.findUserByLogin(login));
 
         Assertions.assertEquals("not found user with this login", actualException.getMessage());
