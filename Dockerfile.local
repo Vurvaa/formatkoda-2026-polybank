@@ -1,9 +1,32 @@
 FROM maven:3.9-eclipse-temurin-25-alpine AS builder
 WORKDIR /build
 
+RUN apk add --no-cache postgresql16 postgresql16-contrib su-exec \
+    && mkdir -p /run/postgresql /var/lib/postgresql/data \
+    && chown -R postgres:postgres /run/postgresql /var/lib/postgresql
+
 COPY pom.xml .
 COPY src ./src
-RUN mvn package -DskipTests -B -P'!db-codegen'
+
+ARG POSTGRES_DB
+ARG POSTGRES_USER
+ARG POSTGRES_PASSWORD
+ARG POSTGRES_PORT
+ARG POSTGRES_HOST
+
+RUN su-exec postgres initdb -D /var/lib/postgresql/data -U "$POSTGRES_USER" --auth=trust \
+    && su-exec postgres pg_ctl -D /var/lib/postgresql/data -o "-c listen_addresses=${POSTGRES_HOST}" -w start \
+    && su-exec postgres createdb -U "$POSTGRES_USER" "$POSTGRES_DB" \
+    && mvn liquibase:update -B \
+         -Dliquibase.changeLogFile=db/changelog/db.changelog-master.xml \
+         -Dliquibase.url="jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}" \
+         -Dliquibase.username="$POSTGRES_USER" \
+         -Dliquibase.password="$POSTGRES_PASSWORD" \
+    && mvn package -DskipTests -B -P db-codegen \
+         -Denv.POSTGRES_URL="jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}" \
+         -Denv.POSTGRES_USER="$POSTGRES_USER" \
+         -Denv.POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+    && su-exec postgres pg_ctl -D /var/lib/postgresql/data -w stop
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
