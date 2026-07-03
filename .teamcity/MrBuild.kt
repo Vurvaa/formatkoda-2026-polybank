@@ -35,10 +35,7 @@ object MrBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = """
-            +:*
-            -:refs/heads/*
-        """.trimIndent()
+            branchFilter = "+:mr-*"
         }
     }
 
