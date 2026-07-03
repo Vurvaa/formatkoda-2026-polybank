@@ -9,6 +9,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 
 import java.math.BigDecimal;
@@ -83,7 +84,7 @@ public class AccountService {
 	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
 		return accountRepository
 				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 	}
 
 	private AccountEntity changeBalanceOrThrow(@NonNull AccountNumber accountNumber, @NonNull BigDecimal delta) {

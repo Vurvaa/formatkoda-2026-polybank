@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.UserService;
@@ -133,7 +134,7 @@ class AccountServiceBalanceOperationTest {
 		when(accountRepository.changeAccountBalance(ACCOUNT_NUMBER, AMOUNT)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> accountService.topUpOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
-				.isInstanceOf(BusinessLogicException.class)
+				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("account not found");
 
 		verify(accountRepository, times(2)).findByNumber(ACCOUNT_NUMBER);
