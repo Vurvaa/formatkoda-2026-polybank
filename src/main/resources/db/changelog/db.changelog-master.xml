@@ -11,4 +11,5 @@
     <include file="db/changelog/migrations/004-users-audit-log.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/005-account-audit-log.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/006-transactions.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/007-account-number-seq.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

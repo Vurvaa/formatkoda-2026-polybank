@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-	@Bean
-	public OpenAPI openAPI() {
-		SecurityScheme securityScheme = new SecurityScheme()
-				.type(SecurityScheme.Type.HTTP)
-				.scheme("bearer")
-				.bearerFormat("JWT");
+    @Bean
+    public OpenAPI openAPI() {
+        SecurityScheme securityScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT");
 
-		return new OpenAPI().components(new Components().addSecuritySchemes("bearerAuth", securityScheme));
-	}
+        return new OpenAPI().components(new Components().addSecuritySchemes("bearerAuth", securityScheme));
+    }
 }
