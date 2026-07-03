@@ -36,9 +36,4 @@ public class UserController {
          return ResponseEntity.status(HttpStatus.OK)
                 .body(new AuthUserDto(token));
     }
-
-    @GetMapping("/example")
-    public String example() {
-        return "Hello, world!";
-    }
 }

@@ -16,23 +16,8 @@ public class AuthUserDetails implements UserDetails {
     private final boolean isBlocked;
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isBlocked;
     }
 
     @Override
