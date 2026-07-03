@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.formatkoda.polybank.exceptions.ResourceNotFoundException;
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

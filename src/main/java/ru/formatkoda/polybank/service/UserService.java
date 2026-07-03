@@ -9,6 +9,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
+import ru.formatkoda.polybank.exceptions.ResourceNotFoundException;
 
 import java.util.Optional;
 
@@ -27,10 +28,9 @@ public class UserService {
 
         RoleEntity role = roleRepository
                 .findRoleEntityByName("CLIENT")
-                .orElseThrow(() -> new BusinessLogicException("not found CLIENT role"));
+                .orElseThrow(() -> new ResourceNotFoundException("not found CLIENT role"));
 
         long userId = userRepository.createUserAndReturnId(user);
-        long roleId = roleEntityOptional.get().id();
 
         userRepository.bindUserWithRole(userId, role.id());
 
