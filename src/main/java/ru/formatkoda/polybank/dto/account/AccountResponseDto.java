@@ -1,7 +1,6 @@
 package ru.formatkoda.polybank.dto.account;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.domain.account.AccountNumber;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

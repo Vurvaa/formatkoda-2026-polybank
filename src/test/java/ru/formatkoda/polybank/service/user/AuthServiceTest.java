@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
-import ru.formatkoda.polybank.security.JwtHelper;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.JwtService;
 import ru.formatkoda.polybank.service.UserService;
@@ -20,8 +19,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-    @Mock
-    private JwtHelper jwtHelper;
 
     @Mock
     private UserService userService;
