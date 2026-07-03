@@ -58,7 +58,6 @@ object DeployBuild : BuildType({
                   --set-string global.postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD% \
                   --set-string global.postgresql.auth.database=%env.POSTGRES_DB% \
                   --set-string jwt.secret=%env.JWT_SECRET% \
-                  --set-string jwt.expirationMinutes=%env.JWT_EXPIRATION_MINUTES% \
                   --debug
 
                 kubectl get pods -n %k8s.namespace%
