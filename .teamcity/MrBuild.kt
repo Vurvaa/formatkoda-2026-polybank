@@ -51,6 +51,7 @@ object MrBuild : BuildType({
                 }
             }
         }
+
         pullRequestsFeature {
             vcsRootExtId = "${DslContext.settingsRoot.id}"
             provider = gitlab {
