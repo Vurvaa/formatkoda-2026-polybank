@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.domain;
+package ru.formatkoda.polybank.domain.user;
 
 import lombok.NonNull;
 
@@ -6,11 +6,11 @@ import java.time.OffsetDateTime;
 
 public record UserEntity(
         Long id,
-        @NonNull String login,
+        @NonNull UserLogin login,
         @NonNull String name,
         @NonNull String lastName,
         @NonNull String passwordHash,
-        OffsetDateTime createdAt,
+        @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
 ) {
     public boolean isBlocked() {

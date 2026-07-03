@@ -1,10 +1,11 @@
-package ru.formatkoda.polybank.service;
+package ru.formatkoda.polybank.service.user;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.formatkoda.polybank.service.JwtService;
 
 import java.util.Base64;
 

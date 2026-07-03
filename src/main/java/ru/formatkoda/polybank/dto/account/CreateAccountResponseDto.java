@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.dto;
+package ru.formatkoda.polybank.dto.account;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
@@ -10,7 +10,7 @@ public record CreateAccountResponseDto(
         Long id,
         AccountNumber number,
         BigDecimal balance,
-        AccountEntity.AccountType type,
-        AccountEntity.AccountStatus status,
+        AccountEntity.Type type,
+        AccountEntity.Status status,
         OffsetDateTime createdAt
 ) {}

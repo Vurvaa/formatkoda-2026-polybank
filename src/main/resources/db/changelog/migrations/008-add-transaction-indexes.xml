@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="008-add-transaction-indexes" author="edwin">
+        <createIndex
+                tableName="transactions"
+                indexName="idx_transactions_from_account_created_id">
+            <column name="from_account_id"/>
+            <column name="created_at" descending="true"/>
+            <column name="id" descending="true"/>
+        </createIndex>
+
+        <createIndex
+                tableName="transactions"
+                indexName="idx_transactions_to_account_created_id">
+            <column name="to_account_id"/>
+            <column name="created_at" descending="true"/>
+            <column name="id" descending="true"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

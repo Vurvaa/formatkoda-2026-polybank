@@ -1,39 +1,29 @@
 package ru.formatkoda.polybank.domain.account;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 
 public record AccountEntity (
     Long id,
-    AccountNumber number,
-    Long userId,
-    BigDecimal balance,
-    AccountType type,
-    AccountStatus status,
-    OffsetDateTime createdAt
+    @NonNull AccountNumber number,
+    @NonNull Long userId,
+    @NonNull BigDecimal balance,
+    @NonNull Type type,
+    @NonNull Status status,
+    @NonNull OffsetDateTime createdAt
 ) {
-
     public static final String ACCOUNT_NUMBER_PREFIX = "6767";
 
-    public AccountEntity {
-        Objects.requireNonNull(userId);
-        Objects.requireNonNull(number);
-        Objects.requireNonNull(userId);
-        Objects.requireNonNull(balance);
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(status);
-        Objects.requireNonNull(createdAt);
-    }
-
-    public enum AccountStatus {
+    public enum Status {
         ACTIVE,
         FROZEN,
         BLOCKED,
         CLOSED
     }
 
-    public enum AccountType {
+    public enum Type {
         CURRENT,
         FIXED_DEPOSIT,
         SAVINGS,

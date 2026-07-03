@@ -1,7 +1,7 @@
-package ru.formatkoda.polybank.util.mappers;
+package ru.formatkoda.polybank.util.mapper;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.dto.CreateAccountResponseDto;
+import ru.formatkoda.polybank.dto.account.CreateAccountResponseDto;
 
 public class AccountMapper {
 	private AccountMapper() {

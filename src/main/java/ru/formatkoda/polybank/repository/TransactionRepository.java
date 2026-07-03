@@ -1,0 +1,100 @@
+package ru.formatkoda.polybank.repository;
+
+import lombok.RequiredArgsConstructor;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.springframework.stereotype.Repository;
+import ru.formatkoda.polybank.domain.account.AccountNumber;
+import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
+import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
+import ru.formatkoda.polybank.jooq.generated.tables.Accounts;
+import ru.formatkoda.polybank.util.pagination.PageRequest;
+
+import java.util.List;
+
+import static ru.formatkoda.polybank.jooq.generated.Tables.ACCOUNTS;
+import static ru.formatkoda.polybank.jooq.generated.Tables.TRANSACTIONS;
+
+@Repository
+@RequiredArgsConstructor
+public class TransactionRepository {
+	private final DSLContext dsl;
+
+	public List<TransactionWithAccountNumbersView> findViewsByAccountId(Long accountId, PageRequest pageRequest) {
+		var fromAccount = ACCOUNTS.as("from_account");
+		var toAccount = ACCOUNTS.as("to_account");
+
+		var condition = TRANSACTIONS.FROM_ACCOUNT_ID.eq(accountId).or(TRANSACTIONS.TO_ACCOUNT_ID.eq(accountId));
+
+		return dsl
+				.select(
+						TRANSACTIONS.ID,
+						fromAccount.NUMBER,
+						toAccount.NUMBER,
+						TRANSACTIONS.AMOUNT,
+						TRANSACTIONS.TYPE,
+						TRANSACTIONS.STATUS,
+						TRANSACTIONS.CREATED_AT
+				)
+				.from(TRANSACTIONS)
+				.leftJoin(fromAccount).on(fromAccount.ID.eq(TRANSACTIONS.FROM_ACCOUNT_ID))
+				.leftJoin(toAccount).on(toAccount.ID.eq(TRANSACTIONS.TO_ACCOUNT_ID))
+				.where(condition)
+				.orderBy(TRANSACTIONS.CREATED_AT.desc(), TRANSACTIONS.ID.desc())
+				.limit(pageRequest.size())
+				.offset(pageRequest.offset())
+				.fetch(r -> toTransactionWithAccountNumbersView(r, fromAccount, toAccount));
+	}
+
+	public TransactionEntity save(TransactionEntity transaction) {
+		return dsl
+				.insertInto(TRANSACTIONS)
+				.set(TRANSACTIONS.FROM_ACCOUNT_ID, transaction.fromAccountId())
+				.set(TRANSACTIONS.TO_ACCOUNT_ID, transaction.toAccountId())
+				.set(TRANSACTIONS.AMOUNT, transaction.amount())
+				.set(TRANSACTIONS.TYPE, transaction.type().name())
+				.set(TRANSACTIONS.STATUS, transaction.status().name())
+				.set(TRANSACTIONS.CREATED_AT, transaction.createdAt())
+				.returning(
+						TRANSACTIONS.ID,
+						TRANSACTIONS.FROM_ACCOUNT_ID,
+						TRANSACTIONS.TO_ACCOUNT_ID,
+						TRANSACTIONS.AMOUNT,
+						TRANSACTIONS.TYPE,
+						TRANSACTIONS.STATUS,
+						TRANSACTIONS.CREATED_AT
+				)
+				.fetchOne(this::toEntity);
+	}
+
+	private TransactionWithAccountNumbersView toTransactionWithAccountNumbersView(
+			Record r,
+			Accounts fromAccount,
+			Accounts toAccount
+	) {
+		String fromNumber = r.get(fromAccount.NUMBER);
+		String toNumber = r.get(toAccount.NUMBER);
+
+		return new TransactionWithAccountNumbersView(
+				r.get(TRANSACTIONS.ID),
+				fromNumber == null ? null : new AccountNumber(fromNumber),
+				toNumber == null ? null : new AccountNumber(toNumber),
+				r.get(TRANSACTIONS.AMOUNT),
+				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
+				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
+				r.get(TRANSACTIONS.CREATED_AT)
+		);
+	}
+
+	private TransactionEntity toEntity(Record r) {
+		return new TransactionEntity(
+				r.get(TRANSACTIONS.ID),
+				r.get(TRANSACTIONS.FROM_ACCOUNT_ID),
+				r.get(TRANSACTIONS.TO_ACCOUNT_ID),
+				r.get(TRANSACTIONS.AMOUNT),
+				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
+				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
+				r.get(TRANSACTIONS.CREATED_AT)
+		);
+	}
+}
