@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.formatkoda.polybank.dto.UserLoginDto;
-import ru.formatkoda.polybank.dto.UserRegistrationDto;
-import ru.formatkoda.polybank.dto.AuthUserDto;
+import ru.formatkoda.polybank.domain.auth.JwtToken;
+import ru.formatkoda.polybank.dto.user.UserLoginDto;
+import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
+import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
 

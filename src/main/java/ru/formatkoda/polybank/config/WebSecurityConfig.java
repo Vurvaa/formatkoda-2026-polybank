@@ -1,12 +1,12 @@
 package ru.formatkoda.polybank.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,15 +16,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.formatkoda.polybank.security.AuthUserDetailsService;
 import ru.formatkoda.polybank.security.JwtAuthenticationEntryPoint;
 import ru.formatkoda.polybank.security.JwtFilter;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
+
     private final JwtFilter jwtFilter;
 
     private final AuthUserDetailsService authUserDetailsService;
@@ -57,7 +65,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         httpSecurity
-                .cors(cors -> {})
+                .cors(cors -> corsConfigurationSource())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/sign-up", "/user/sign-in").permitAll()
