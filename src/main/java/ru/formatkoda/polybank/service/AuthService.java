@@ -2,8 +2,8 @@ package ru.formatkoda.polybank.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.domain.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 
 @Service

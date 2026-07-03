@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.formatkoda.polybank.domain.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.service.UserService;
 
 @Service

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.UserEntity;
+import ru.formatkoda.polybank.dto.UserLoginDto;
 import ru.formatkoda.polybank.dto.UserRegistrationDto;
 
 @Component
