@@ -5,7 +5,7 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 object BuildBuild : BuildType({
-    name = "Build and push to registry"
+    name = "Build and push to registry."
 
     vcs {
         root(DslContext.settingsRoot)

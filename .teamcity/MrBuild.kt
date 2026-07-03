@@ -5,7 +5,7 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 object MrBuild : BuildType({
-    name = "Checks on MR"
+    name = "Checks on MR."
 
     vcs {
         root(DslContext.settingsRoot)

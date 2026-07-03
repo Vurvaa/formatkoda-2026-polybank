@@ -3,7 +3,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 
 object DeployBuild : BuildType({
-    name = "Deploy on server"
+    name = "Deploy on server."
 
     vcs {
         root(DslContext.settingsRoot)
