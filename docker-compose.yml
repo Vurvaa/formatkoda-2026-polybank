@@ -1,16 +1,58 @@
 services:
+
   postgres:
     image: postgres:16-alpine
     container_name: polybank-postgres
-    environment:
-      POSTGRES_DB: polybank_db
-      POSTGRES_USER: polybank_user
-      POSTGRES_PASSWORD: polybank_password
+    restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER:     ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U polybank_user -d polybank_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - polybank-net
+
+  polybank:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    image: polybank-local:latest
+    container_name: polybank-app
     restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      JAVA_OPTS:                  ${JAVA_OPTS:-}
+      SPRING_DATASOURCE_URL:      jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - polybank-net
+
+volumes:
+  postgres-data:
+
+networks:
+  polybank-net:
+    driver: bridge
