@@ -14,7 +14,7 @@ public class AuthService {
 
     public JwtToken registerUser(UserEntity user) {
         UserLogin userLogin = userService.createUser(user);
-        String token = jwtService.generateToken(userLogin.value());
+        String token = jwtService.generateToken(userLogin.login());
 
         return new JwtToken(token);
     }

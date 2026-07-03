@@ -19,12 +19,16 @@ public class JwtService {
     private final JwtHelper jwtHelper;
 
     public String generateToken(String login,  String password) {
-        this.authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(login, password));
 
-        final UserDetails userDetails =
+        UserDetails userDetails =
                 userDetailsService.loadUserByUsername(login);
 
         return jwtHelper.createToken(userDetails.getUsername());
+    }
+
+    public String generateToken(String login) {
+        return jwtHelper.createToken(login);
     }
 }

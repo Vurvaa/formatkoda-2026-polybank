@@ -6,17 +6,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.repository.UserRepository;
+import ru.formatkoda.polybank.service.UserService;
 
 @Service
 @RequiredArgsConstructor
 public class AuthUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findUserByLogin(username)
-                .orElseThrow(() -> new UsernameNotFoundException("not found user with this login"));
+        UserEntity userEntity = userService.findUserByLogin(username);
 
         return new AuthUserDetails(
                 userEntity.login(),

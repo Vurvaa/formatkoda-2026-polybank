@@ -28,7 +28,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         Map<String, Object> data = new HashMap<>();
         data.put("message", exception != null ?
-                exception.getMessage() : "this not wait, but it not work");
+                exception.getMessage() : authException.getCause().toString());
 
         OutputStream out = response.getOutputStream();
         ObjectMapper mapper = new ObjectMapper();

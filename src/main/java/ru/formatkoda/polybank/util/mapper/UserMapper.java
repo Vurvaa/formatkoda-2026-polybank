@@ -34,7 +34,7 @@ public class UserMapper {
                 source.login(),
                 "",
                 "",
-                passwordEncoder.encode(source.password()),
+                source.password(),
                 null,
                 null
         );
