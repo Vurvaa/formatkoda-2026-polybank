@@ -43,7 +43,6 @@ object DeployBuild : BuildType({
                   jwt.secret=%env.JWT_SECRET%
                 "
 
-
                 SET_STRING_FLAGS=""
                 for kv in ${'$'}SET_ARGS; do
                   SET_STRING_FLAGS="${'$'}SET_STRING_FLAGS --set-string ${'$'}kv"
