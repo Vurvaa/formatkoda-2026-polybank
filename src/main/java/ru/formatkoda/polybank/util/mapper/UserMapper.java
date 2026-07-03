@@ -41,7 +41,7 @@ public class UserMapper {
                 "",
                 "",
                 user.password(),
-                null,
+                OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
     }
