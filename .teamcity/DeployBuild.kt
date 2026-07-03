@@ -33,6 +33,21 @@ object DeployBuild : BuildType({
 
                 helm dependency build %helm.chart.path%/polybank/
 
+                SET_ARGS="
+                  image.repository=%docker.registry%/polybank
+                  image.tag=%dep.${BuildBuild.id}.build.number%
+                  global.postgresql.auth.username=%env.POSTGRES_USER%
+                  global.postgresql.auth.password=%env.POSTGRES_PASSWORD%
+                  global.postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD%
+                  global.postgresql.auth.database=%env.POSTGRES_DB%
+                  jwt.secret=%env.JWT_SECRET%
+                "
+
+                SET_STRING_FLAGS=""
+                for kv in ${'$'}SET_ARGS; do
+                  SET_STRING_FLAGS="${'$'}SET_STRING_FLAGS --set-string ${'$'}kv"
+                done
+
                 helm upgrade polybank \
                   -n %k8s.namespace% \
                   -i \
@@ -43,21 +58,7 @@ object DeployBuild : BuildType({
                   --timeout 30m0s \
                   %helm.chart.path%/polybank/ \
                   -f %helm.chart.path%/polybank/values.yaml \
-                  --set-string image.repository=%docker.registry%/polybank \
-                  --set-string image.tag=%dep.${BuildBuild.id}.build.number% \
-                  --set-string postgresAuth.username=%env.POSTGRES_USER% \
-                  --set-string postgresAuth.password=%env.POSTGRES_PASSWORD% \
-                  --set-string postgresAuth.postgresPassword=%env.POSTGRES_PASSWORD% \
-                  --set-string postgresAuth.database=%env.POSTGRES_DB% \
-                  --set-string postgresql.auth.username=%env.POSTGRES_USER% \
-                  --set-string postgresql.auth.password=%env.POSTGRES_PASSWORD% \
-                  --set-string postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD% \
-                  --set-string postgresql.auth.database=%env.POSTGRES_DB% \
-                  --set-string global.postgresql.auth.username=%env.POSTGRES_USER% \
-                  --set-string global.postgresql.auth.password=%env.POSTGRES_PASSWORD% \
-                  --set-string global.postgresql.auth.postgresPassword=%env.POSTGRES_PASSWORD% \
-                  --set-string global.postgresql.auth.database=%env.POSTGRES_DB% \
-                  --set-string jwt.secret=%env.JWT_SECRET% \
+                  ${'$'}SET_STRING_FLAGS \
                   --debug
 
                 kubectl get pods -n %k8s.namespace%
