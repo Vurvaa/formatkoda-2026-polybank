@@ -56,9 +56,7 @@ object MrBuild : BuildType({
                 authType = token {
                     token = "%env.GITLAB_TOKEN%"
                 }
-                filterAuthorRole = PullRequests.GitLabRoleFilter.MEMBER_OR_HIGHER
             }
-            branchFilter = "+:refs/merge-requests/*"
         }
     }
 
