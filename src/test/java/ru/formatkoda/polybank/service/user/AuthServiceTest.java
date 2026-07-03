@@ -32,17 +32,17 @@ class AuthServiceTest {
     void registerUserShouldCreateUserGenerateTokenAndReturnJwtToken() {
         UserEntity user = mock(UserEntity.class);
 
-        UserLogin userLogin = new UserLogin("value");
+        UserLogin userLogin = new UserLogin("login");
         String generatedToken = "test.jwt.token";
 
         when(userService.createUser(user)).thenReturn(userLogin);
-        when(jwtService.generateToken("value")).thenReturn(generatedToken);
+        when(jwtService.generateToken("login")).thenReturn(generatedToken);
 
         JwtToken result = authService.registerUser(user);
 
         assertThat(result.token()).isEqualTo(generatedToken);
 
         verify(userService).createUser(user);
-        verify(jwtService).generateToken("value");
+        verify(jwtService).generateToken("login");
     }
 }

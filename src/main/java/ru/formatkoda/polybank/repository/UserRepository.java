@@ -33,7 +33,7 @@ public class UserRepository {
                 .fetchOne(USERS.ID);
 
         if (id == null)
-            throw new DataAccessException("error inserting entity with value: " + user.login());
+            throw new DataAccessException("error inserting entity with login: " + user.login());
 
         return id;
     }

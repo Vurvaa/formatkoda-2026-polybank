@@ -101,7 +101,7 @@ class UserServiceTest {
                 .assertThrows(BusinessLogicException.class,
                         () -> userService.findUserByLogin(login));
 
-        Assertions.assertEquals("not found user with this value", actualException.getMessage());
+        Assertions.assertEquals("not found user with this login", actualException.getMessage());
     }
 
     @Test

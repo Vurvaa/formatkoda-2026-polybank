@@ -38,6 +38,6 @@ public class UserService {
 
     public UserEntity findUserByLogin(UserLogin login) {
         return userRepository.findUserByLogin(login)
-                .orElseThrow(() -> new BusinessLogicException("not found user with this value"));
+                .orElseThrow(() -> new BusinessLogicException("not found user with this login"));
     }
 }

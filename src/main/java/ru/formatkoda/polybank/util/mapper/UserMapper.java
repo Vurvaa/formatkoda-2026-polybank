@@ -19,7 +19,7 @@ public class UserMapper {
     public UserEntity toEntity(UserRegistrationDto user) {
         String passwordHash = Objects.requireNonNull(
                 passwordEncoder.encode(user.password()),
-                "Encoded password must not be null"
+                "encoded password must not be null"
         );
 
         return new UserEntity(

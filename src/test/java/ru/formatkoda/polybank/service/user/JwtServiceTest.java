@@ -26,18 +26,18 @@ class JwtServiceTest {
 
     @Test
     void generateTokenShouldGenerateNotBlankToken() {
-        String token = jwtService.generateToken("value");
+        String token = jwtService.generateToken("login");
 
         assertThat(token).isNotBlank();
     }
 
     @Test
     void extractUserLoginFromTokenShouldReturnUserLoginFromValidToken() {
-        String token = jwtService.generateToken("value");
+        String token = jwtService.generateToken("login");
 
         String result = jwtService.extractUserLoginFromToken(token);
 
-        assertThat(result).isEqualTo("value");
+        assertThat(result).isEqualTo("login");
     }
 
     @Test
@@ -48,7 +48,7 @@ class JwtServiceTest {
                 getBaseSecret("another-secret-key-another-key-32"));
         ReflectionTestUtils.setField(anotherJwtService, "expirationMinutes", 60L);
 
-        String token = anotherJwtService.generateToken("value");
+        String token = anotherJwtService.generateToken("login");
 
         assertThrows(JwtException.class,
                 () -> jwtService.extractUserLoginFromToken(token));
@@ -58,7 +58,7 @@ class JwtServiceTest {
     void generateTokenShouldThrowExpiredJwtExceptionWhenTokenExpired() {
         ReflectionTestUtils.setField(jwtService, "expirationMinutes", -1L);
 
-        String token = jwtService.generateToken("value");
+        String token = jwtService.generateToken("login");
 
         assertThrows(ExpiredJwtException.class,
                 () -> jwtService.extractUserLoginFromToken(token));
