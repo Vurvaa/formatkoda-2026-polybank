@@ -3,7 +3,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.triggers.pullRequests as pullRequestsTrigger
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests as pullRequestsFeature
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 object MrBuild : BuildType({
     name = "Checks on MR."
@@ -36,8 +36,20 @@ object MrBuild : BuildType({
     }
 
     triggers {
-        pullRequestsTrigger {
+        vcs {
+            branchFilter = "+:*"
+        }
+    }
+
+    features {
+        pullRequests {
             vcsRootExtId = "${DslContext.settingsRoot.id}"
+            provider = gitlab {
+                authType = token {
+                    token = "%env.GITLAB_TOKEN%"
+                }
+                ignoreDrafts = true
+            }
         }
     }
 
@@ -48,15 +60,6 @@ object MrBuild : BuildType({
                 gitlabApiUrl = "%gitlab.api.url%"
                 authType = personalToken {
                     accessToken = "%env.GITLAB_TOKEN%"
-                }
-            }
-        }
-
-        pullRequestsFeature {
-            vcsRootExtId = "${DslContext.settingsRoot.id}"
-            provider = gitlab {
-                authType = token {
-                    token = "%env.GITLAB_TOKEN%"
                 }
             }
         }
