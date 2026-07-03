@@ -15,6 +15,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class UserRepository {
+
     private final DSLContext dsl;
     private final UserEntityUnmapper recordUnmapper;
 
