@@ -169,7 +169,10 @@ class TransactionServiceTransferTest {
 				2L,
 				TO_ACCOUNT_NUMBER,
 				10L,
-				new BigDecimal("50.00")
+				new BigDecimal("50.00"),
+				AccountEntity.Type.CURRENT,
+				AccountEntity.Status.ACTIVE,
+				CREATED_AT
 		);
 	}
 

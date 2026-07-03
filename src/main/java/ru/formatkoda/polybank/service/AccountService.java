@@ -4,18 +4,12 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.formatkoda.polybank.domain.UserEntity;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
-import ru.formatkoda.polybank.domain.user.exception.UserNotFoundException;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.AccountRepository;
-import ru.formatkoda.polybank.repository.UserRepository;
-import ru.formatkoda.polybank.security.UserSession;
-
-import java.util.Objects;
 
 import java.math.BigDecimal;
 
@@ -23,36 +17,22 @@ import java.math.BigDecimal;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountService {
-	private final UserRepository userRepository;
 	private final AccountRepository accountRepository;
 	private final UserService userService;
-	private final AccountRepository accountRepository;
 
 	@Transactional
-	public AccountEntity createAccountForUser(
-			UserSession userSession,
-			AccountEntity.AccountType accountType) {
-		Objects.requireNonNull(userSession);
-		Objects.requireNonNull(accountType);
-
-		UserEntity user = userService.findUserByLogin(userSession.login());
-		if (user.isBlocked()) {
+	public AccountEntity createAccountForUser(@NonNull AccountEntity.Type accountType, @NonNull UserLogin userLogin) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+		if (user.isBlocked())
 			throw new BusinessLogicException("user is blocked");
-		}
 
 		return accountRepository
-				.createAccountForUser(
-						user.id(),
-						accountType
-				)
+				.createAccountForUser(user.id(),accountType)
 				.orElseThrow(() -> new BusinessLogicException("account not created"));
 	}
 
 	public AccountEntity findOwnedAccount(@NonNull AccountNumber accountNumber, @NonNull UserLogin userLogin) {
-		UserEntity user = userRepository
-				.findUserByLogin(userLogin)
-				.orElseThrow(() -> new BusinessLogicException("user not found"));
-
+		UserEntity user = userService.findUserByLogin(userLogin);
 		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!account.userId().equals(user.id()))
@@ -62,10 +42,7 @@ public class AccountService {
 	}
 
 	@Transactional
-	public AccountEntity topUpAccount(
-			@NonNull AccountNumber accountNumber,
-			@NonNull BigDecimal amount
-	) {
+	public AccountEntity topUpAccount(@NonNull AccountNumber accountNumber, @NonNull BigDecimal amount) {
 		validateAmount(amount);
 		findAccountOrThrow(accountNumber);
 

@@ -1,9 +1,9 @@
 package ru.formatkoda.polybank.domain.account;
 
 import lombok.NonNull;
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 
-public record AccountNumber(String value) {
+public record AccountNumber(@NonNull String value) {
 	public AccountNumber {
 		if (value.length() != 20)
 			throw new BusinessLogicException("account number length must be 20 digits");

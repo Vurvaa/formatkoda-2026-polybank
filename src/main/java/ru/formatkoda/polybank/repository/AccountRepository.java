@@ -9,30 +9,24 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 import java.util.Optional;
 
-import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.domain.account.AccountEntity.ACCOUNT_NUMBER_PREFIX;
 import static ru.formatkoda.polybank.jooq.generated.tables.Accounts.ACCOUNTS;
 
-// todo: fix account logic when it merged
 @Repository
 @RequiredArgsConstructor
 public class AccountRepository {
 	private final DSLContext dsl;
 	private static final String SEQUENCE_NAME = "account_number_seq";
 
-	public Optional<AccountEntity> createAccountForUser(Long userId, AccountEntity.AccountType accountType) {
-		Objects.requireNonNull(userId, "userId must not be null");
-		Objects.requireNonNull(accountType, "accountType must not be null");
-
+	public Optional<AccountEntity> createAccountForUser(Long userId, AccountEntity.Type accountType) {
 		return dsl
 				.insertInto(ACCOUNTS)
 				.set(ACCOUNTS.NUMBER, generateNextAccountNumber())
 				.set(ACCOUNTS.USER_ID, userId)
 				.set(ACCOUNTS.TYPE, accountType.name())
-				.set(ACCOUNTS.STATUS, AccountEntity.AccountStatus.ACTIVE.name())
+				.set(ACCOUNTS.STATUS, AccountEntity.Status.ACTIVE.name())
 				.returning()
 				.fetchOptional(this::toEntity);
 	}
@@ -60,19 +54,16 @@ public class AccountRepository {
 				.and(ACCOUNTS.BALANCE.add(delta).ge(BigDecimal.ZERO))
 				.returning(
 						ACCOUNTS.ID,
-						ACCOUNTS.USER_ID,
 						ACCOUNTS.NUMBER,
-						ACCOUNTS.BALANCE
+						ACCOUNTS.USER_ID,
+						ACCOUNTS.BALANCE,
+						ACCOUNTS.TYPE,
+						ACCOUNTS.STATUS
 				)
-				.fetchOptional(r -> new AccountEntity(
-						r.get(ACCOUNTS.ID),
-						new AccountNumber(r.get(ACCOUNTS.NUMBER)),
-						r.get(ACCOUNTS.USER_ID),
-						r.get(ACCOUNTS.BALANCE)
-				));
+				.fetchOptional(this::toEntity);
 	}
 
-	public String generateNextAccountNumber() {
+	private String generateNextAccountNumber() {
 		BigInteger value = dsl.nextval(SEQUENCE_NAME);
 
 		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
@@ -84,8 +75,8 @@ public class AccountRepository {
 				new AccountNumber(r.get(ACCOUNTS.NUMBER)),
 				r.get(ACCOUNTS.USER_ID),
 				r.get(ACCOUNTS.BALANCE),
-				AccountEntity.AccountType.valueOf(r.get(ACCOUNTS.TYPE)),
-				AccountEntity.AccountStatus.valueOf(r.get(ACCOUNTS.STATUS)),
+				AccountEntity.Type.valueOf(r.get(ACCOUNTS.TYPE)),
+				AccountEntity.Status.valueOf(r.get(ACCOUNTS.STATUS)),
 				r.get(ACCOUNTS.CREATED_AT)
 		);
 	}

@@ -23,7 +23,10 @@ public final class TestData {
 				1L,
 				ACCOUNT_NUMBER,
 				userId,
-				AMOUNT
+				AMOUNT,
+				AccountEntity.Type.CURRENT,
+				AccountEntity.Status.ACTIVE,
+				CREATED_AT
 		);
 	}
 
