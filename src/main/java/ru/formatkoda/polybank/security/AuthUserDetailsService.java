@@ -19,7 +19,8 @@ public class AuthUserDetailsService implements UserDetailsService {
 
         return new AuthUserDetails(
                 userEntity.login(),
-                userEntity.passwordHash()
+                userEntity.passwordHash(),
+                userEntity.isBlocked()
         );
     }
 }

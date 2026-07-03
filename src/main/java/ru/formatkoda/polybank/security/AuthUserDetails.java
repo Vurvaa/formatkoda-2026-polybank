@@ -8,29 +8,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+
 @RequiredArgsConstructor
 public class AuthUserDetails implements UserDetails {
     private final String login;
     private final String password;
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    private final boolean isBlocked;
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
+        return isBlocked;
     }
 
     @Override

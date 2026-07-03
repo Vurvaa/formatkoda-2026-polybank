@@ -71,7 +71,8 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+
 
         return httpSecurity.build();
     }
