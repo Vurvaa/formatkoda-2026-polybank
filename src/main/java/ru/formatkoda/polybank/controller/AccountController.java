@@ -56,7 +56,6 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
 	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
-
 		List<AccountResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()

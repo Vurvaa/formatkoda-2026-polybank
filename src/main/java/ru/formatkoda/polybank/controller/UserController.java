@@ -30,10 +30,8 @@ public class UserController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<AuthUserDto> loginUser(@RequestBody @Valid UserLoginDto user) {
-         String token = authService
-                 .loginUser(userMapper.toEntity(user)).token();
+         JwtToken token = authService.loginUser(userMapper.toEntity(user));
 
-         return ResponseEntity.status(HttpStatus.OK)
-                .body(new AuthUserDto(token));
+         return ResponseEntity.ok(new AuthUserDto(token.token()));
     }
 }

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 public record AccountResponseDto(
-        AccountNumber number,
+        String number,
         BigDecimal balance,
         AccountEntity.Type type,
         AccountEntity.Status status,
