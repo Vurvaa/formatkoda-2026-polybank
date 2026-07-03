@@ -3,10 +3,10 @@ package ru.formatkoda.polybank.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.formatkoda.polybank.domain.RoleEntity;
-import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.domain.UserLogin;
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
+import ru.formatkoda.polybank.domain.user.RoleEntity;
+import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
@@ -31,7 +31,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("not found CLIENT role"));
 
         long userId = userRepository.createUserAndReturnId(user);
-        long roleId = roleEntityOptional.get().id();
 
         userRepository.bindUserWithRole(userId, role.id());
 

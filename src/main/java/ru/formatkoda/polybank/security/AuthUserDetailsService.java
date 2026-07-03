@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.service.UserService;
 
 @Service
@@ -15,10 +16,11 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userService.findUserByLogin(username);
+
+        UserEntity userEntity = userService.findUserByLogin(new UserLogin(username));
 
         return new AuthUserDetails(
-                userEntity.login(),
+                userEntity.login().value(),
                 userEntity.passwordHash(),
                 userEntity.isBlocked()
         );

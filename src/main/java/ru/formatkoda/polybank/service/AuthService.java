@@ -14,13 +14,14 @@ public class AuthService {
 
     public JwtToken registerUser(UserEntity user) {
         UserLogin userLogin = userService.createUser(user);
-        String token = jwtService.generateToken(userLogin.login());
+        String token = jwtService.generateToken(userLogin.value());
 
         return new JwtToken(token);
     }
 
     public JwtToken loginUser(UserEntity user) {
-        String token = jwtService.generateToken(user.login(), user.passwordHash());
+        String userLogin = user.login().value();
+        String token = jwtService.generateToken(userLogin, user.passwordHash());
         return new JwtToken(token);
     }
 }

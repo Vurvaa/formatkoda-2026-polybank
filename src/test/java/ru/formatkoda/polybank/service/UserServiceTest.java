@@ -10,7 +10,7 @@ import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 
@@ -33,7 +33,7 @@ class UserServiceTest {
 
     private final UserEntity userEntity = new UserEntity(
             null,
-            "login",
+            new UserLogin("login"),
             "name",
             "lastName",
             "password",
@@ -43,10 +43,9 @@ class UserServiceTest {
 
     @Test
     void createUserShouldThrowExceptionWhenLoginIsDuplicated() {
-        String expectedLogin = userEntity.login();
         String expectedExceptionMassage = "login already exists";
 
-        when(userRepository.findUserByLogin(expectedLogin))
+        when(userRepository.findUserByLogin(userEntity.login()))
                 .thenReturn(Optional.of(userEntity));
 
         BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
@@ -69,12 +68,12 @@ class UserServiceTest {
 
     @Test
     void createUserShouldCallingRepositoriesMethods() {
-        String expectedLogin = userEntity.login();
+        String expectedLogin = userEntity.login().value();
         prepareMocksForCallingCreateUser(expectedLogin);
 
         userService.createUser(userEntity);
 
-        verify(userRepository).findUserByLogin(expectedLogin);
+        verify(userRepository).findUserByLogin(userEntity.login());
         verify(roleRepository).findRoleEntityByName("CLIENT");
         verify(userRepository).createUserAndReturnId(userEntity);
         verify(userRepository).bindUserWithRole(anyLong(), anyLong());
@@ -82,11 +81,11 @@ class UserServiceTest {
 
     @Test
     void createUserShouldReturnUserLoginMatchesWithUserEntityLogin() {
-        String expectedLogin = userEntity.login();
+        String expectedLogin = userEntity.login().value();
         prepareMocksForCallingCreateUser(expectedLogin);
 
         UserLogin userLogin = userService.createUser(userEntity);
-        String actualLogin = userLogin.login();
+        String actualLogin = userLogin.value();
 
         Assertions.assertNotNull(userLogin);
         Assertions.assertEquals(expectedLogin, actualLogin);
@@ -94,46 +93,46 @@ class UserServiceTest {
 
     @Test
     void findUserByLoginShouldCallingUserRepositoryMethod() {
-        String expectedLogin = userEntity.login();
-        when(userRepository.findUserByLogin(expectedLogin))
+        String expectedLogin = userEntity.login().value();
+        when(userRepository.findUserByLogin(userEntity.login()))
                 .thenReturn(Optional.of(userEntity));
 
-        userService.findUserByLogin(expectedLogin);
+        userService.findUserByLogin(userEntity.login());
 
-        verify(userRepository).findUserByLogin(expectedLogin);
+        verify(userRepository).findUserByLogin(userEntity.login());
     }
 
     @Test
     void findUserByLoginShouldThrowingExceptionWhenUserNotFound() {
-        String expectedLogin = userEntity.login();
+        String expectedLogin = userEntity.login().value();
         String expectedExceptionMassage = "not found user with this login";
 
-        when(userRepository.findUserByLogin(expectedLogin))
+        when(userRepository.findUserByLogin(userEntity.login()))
                 .thenReturn(Optional.empty());
 
         BusinessLogicException actualException = Assertions
                 .assertThrows(BusinessLogicException.class,
-                        () -> userService.findUserByLogin(expectedLogin));
+                        () -> userService.findUserByLogin(userEntity.login()));
 
         Assertions.assertEquals(expectedExceptionMassage, actualException.getMessage());
     }
 
     @Test
     void findUserByLoginShouldReturnUserWhenUserExists() {
-        String expectedLogin = userEntity.login();
+        String expectedLogin = userEntity.login().value();
 
-        when(userRepository.findUserByLogin(expectedLogin))
+        when(userRepository.findUserByLogin(userEntity.login()))
                 .thenReturn(Optional.of(userEntity));
 
-        UserEntity result = userService.findUserByLogin(expectedLogin);
+        UserEntity result = userService.findUserByLogin(userEntity.login());
 
         assertThat(result).isSameAs(userEntity);
 
-        verify(userRepository).findUserByLogin(expectedLogin);
+        verify(userRepository).findUserByLogin(userEntity.login());
     }
 
     private void prepareMocksForCallingCreateUser(String expectedLogin) {
-        when(userRepository.findUserByLogin(expectedLogin))
+        when(userRepository.findUserByLogin(userEntity.login()))
                 .thenReturn(Optional.empty());
 
         RoleEntity expectedRole = new RoleEntity(

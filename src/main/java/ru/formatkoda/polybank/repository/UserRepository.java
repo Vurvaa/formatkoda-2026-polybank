@@ -3,9 +3,11 @@ package ru.formatkoda.polybank.repository;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
+import org.jooq.Record;
 import org.springframework.stereotype.Repository;
-import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.util.mapper.UserEntityUnmapper;
+import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
@@ -17,7 +19,6 @@ import java.util.Optional;
 public class UserRepository {
 
     private final DSLContext dsl;
-    private final UserEntityUnmapper recordUnmapper;
 
     public Optional<UserEntity> findUserByLogin(UserLogin login) {
         return dsl.selectFrom(USERS)
