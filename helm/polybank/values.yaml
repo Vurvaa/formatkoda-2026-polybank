@@ -19,15 +19,17 @@ resources:
     memory: "1Gi"
     cpu: "1000m"
 
-postgresAuth:
-  username: polybank_user
-  password: ""
-  postgresPassword: ""
-  database: polybank_db
-
 jwt:
   secret: ""
   expirationMinutes: 60
+
+global:
+  postgresql:
+    auth:
+      username: polybank_user
+      password: ""
+      postgresPassword: ""
+      database: polybank_db
 
 postgresql:
   enabled: true
@@ -37,8 +39,6 @@ postgresql:
   image:
     repository: bitnamilegacy/postgresql
   auth:
-    username: polybank_user
-    database: polybank_db
     existingSecret: "polybank-backend-secret"
     secretKeys:
       adminPasswordKey: postgres-password
