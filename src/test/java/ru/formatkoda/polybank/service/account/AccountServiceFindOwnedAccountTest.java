@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.UserService;
@@ -69,7 +70,7 @@ class AccountServiceFindOwnedAccountTest {
 		when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN))
-				.isInstanceOf(BusinessLogicException.class)
+				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("account not found");
 
 		verify(userService).findUserByLogin(USER_LOGIN);
@@ -79,10 +80,10 @@ class AccountServiceFindOwnedAccountTest {
 	@Test
 	void shouldThrowBusinessLogicExceptionWhenUserNotFound() {
 		when(userService.findUserByLogin(USER_LOGIN))
-				.thenThrow(new BusinessLogicException("not found user with this login"));
+				.thenThrow(new ResourceNotFoundException("not found user with this login"));
 
 		assertThatThrownBy(() -> accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN))
-				.isInstanceOf(BusinessLogicException.class)
+				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("not found user with this login");
 
 		verify(userService).findUserByLogin(USER_LOGIN);
