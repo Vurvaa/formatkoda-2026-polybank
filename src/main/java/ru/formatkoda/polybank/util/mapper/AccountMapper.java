@@ -1,15 +1,14 @@
 package ru.formatkoda.polybank.util.mapper;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.dto.account.CreateAccountResponseDto;
+import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 
 public class AccountMapper {
 	private AccountMapper() {
 	}
 
-	public static CreateAccountResponseDto toCreateAccountResponseDto(AccountEntity accountEntity) {
-		return new CreateAccountResponseDto(
-				accountEntity.id(),
+	public static AccountResponseDto toResponse(AccountEntity accountEntity) {
+		return new AccountResponseDto(
 				accountEntity.number(),
 				accountEntity.balance(),
 				accountEntity.type(),

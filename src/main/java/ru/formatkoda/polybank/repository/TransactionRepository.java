@@ -55,15 +55,7 @@ public class TransactionRepository {
 				.set(TRANSACTIONS.TYPE, transaction.type().name())
 				.set(TRANSACTIONS.STATUS, transaction.status().name())
 				.set(TRANSACTIONS.CREATED_AT, transaction.createdAt())
-				.returning(
-						TRANSACTIONS.ID,
-						TRANSACTIONS.FROM_ACCOUNT_ID,
-						TRANSACTIONS.TO_ACCOUNT_ID,
-						TRANSACTIONS.AMOUNT,
-						TRANSACTIONS.TYPE,
-						TRANSACTIONS.STATUS,
-						TRANSACTIONS.CREATED_AT
-				)
+				.returning()
 				.fetchOne(this::toEntity);
 	}
 
