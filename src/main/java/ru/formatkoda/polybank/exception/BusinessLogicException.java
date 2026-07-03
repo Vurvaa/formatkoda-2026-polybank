@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.exceptions;
+package ru.formatkoda.polybank.exception;
 
 public class BusinessLogicException extends RuntimeException {
     public BusinessLogicException(String message) {

@@ -3,10 +3,10 @@ package ru.formatkoda.polybank.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.formatkoda.polybank.domain.RoleEntity;
-import ru.formatkoda.polybank.domain.UserEntity;
-import ru.formatkoda.polybank.domain.UserLogin;
-import ru.formatkoda.polybank.exceptions.BusinessLogicException;
+import ru.formatkoda.polybank.domain.user.RoleEntity;
+import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 
@@ -23,21 +23,20 @@ public class UserService {
     public UserLogin createUser(UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findUserByLogin(user.login());
         if (userOptional.isPresent())
-            throw new BusinessLogicException("login already exists");
+            throw new BusinessLogicException("user already exists");
 
-        Optional<RoleEntity> roleEntityOptional = roleRepository.findRoleEntityByName("CLIENT");
-        if (roleEntityOptional.isEmpty())
-            throw new BusinessLogicException("not found CLIENT role");
+        RoleEntity role = roleRepository
+                .findRoleEntityByName("CLIENT")
+                .orElseThrow(() -> new BusinessLogicException("not found CLIENT role"));
 
         long userId = userRepository.createUserAndReturnId(user);
-        long roleId = roleEntityOptional.get().id();
 
-        userRepository.bindUserWithRole(userId, roleId);
+        userRepository.bindUserWithRole(userId, role.id());
 
-        return new UserLogin(user.login());
+        return user.login();
     }
 
-    public UserEntity findUserByLogin(String login) {
+    public UserEntity findUserByLogin(UserLogin login) {
         return userRepository.findUserByLogin(login)
                 .orElseThrow(() -> new BusinessLogicException("not found user with this login"));
     }

@@ -20,12 +20,6 @@ public class JwtService {
     @Value("${app.jwt.expiration-minutes}")
     private long expirationMinutes;
 
-
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
     public String generateToken(String userLogin) {
         Instant now = Instant.now();
 
@@ -45,6 +39,11 @@ public class JwtService {
                 .getPayload();
 
         return claims.getSubject();
+    }
+
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
 

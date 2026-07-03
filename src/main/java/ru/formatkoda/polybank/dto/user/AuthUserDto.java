@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank.dto;
+package ru.formatkoda.polybank.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 
