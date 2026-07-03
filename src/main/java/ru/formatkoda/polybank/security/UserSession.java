@@ -1,11 +1,8 @@
 package ru.formatkoda.polybank.security;
 
-import java.util.Objects;
+import lombok.NonNull;
 
 public record UserSession(
-        String login
+        @NonNull String login
 ) {
-    public UserSession {
-        Objects.requireNonNull(login);
-    }
 }
