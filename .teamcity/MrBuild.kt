@@ -13,6 +13,7 @@ object MrBuild : BuildType({
         cleanCheckout = true
     }
 
+
     steps {
         prepareDatabaseStep()
 
