@@ -2,7 +2,6 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 object MrBuild : BuildType({
     name = "Checks on MR."
@@ -28,6 +27,23 @@ object MrBuild : BuildType({
             name = "Unit Tests"
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
+            jdkHome = "%java.home%"
+        }
+
+        maven {
+            id = "SONARQUBE"
+            name = "SonarQube Analysis"
+            goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
+            runnerArgs = """
+                -Dsonar.host.url=%sonar.host.url%
+                -Dsonar.token=%env.SONAR_TOKEN%
+                -Dsonar.projectKey=polybank
+                -Dsonar.projectName=Polybank
+                -Dsonar.projectVersion=%teamcity.build.branch%-%build.number%
+                -Dsonar.java.binaries=target/classes
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                -Dsonar.qualitygate.wait=true
+            """.trimIndent().replace("\n", " ")
             jdkHome = "%java.home%"
         }
 
