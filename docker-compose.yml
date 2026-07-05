@@ -26,6 +26,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local
+      args:
+        POSTGRES_DB: ${POSTGRES_DB}_codegen
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     image: polybank-local:latest
     container_name: polybank-app
     restart: unless-stopped
