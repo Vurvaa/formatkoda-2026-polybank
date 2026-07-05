@@ -8,7 +8,10 @@ data:
   SERVER_PORT: {{ .Values.appServicePort | quote }}
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
-  JWT_EXPIRATION_MINUTES: {{ .Values.jwt.expirationMinutes | quote }}
+
+  {{- range $key, $val := .Values.configEnv }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
 
 ---
 

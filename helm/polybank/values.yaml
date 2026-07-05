@@ -25,9 +25,11 @@ postgresAuth:
   postgresPassword: ""
   database: polybank_db
 
-jwt:
-  secret: ""
-  expirationMinutes: 60
+configEnv:
+  APP_JWT_EXPIRATION_MINUTES: "60"
+
+secretEnv:
+  APP_JWT_SECRET: ""
 
 postgresql:
   enabled: true
