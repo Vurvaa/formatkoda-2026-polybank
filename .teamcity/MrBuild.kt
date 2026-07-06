@@ -24,6 +24,19 @@ object MrBuild : BuildType({
             jdkHome = "%java.home%"
         }
 
+        script {
+            id = "WEBAPP_CHECK"
+            name = "Webapp Build"
+            workingDir = "webapp"
+            scriptContent = """
+                #!/bin/sh
+                set -e
+
+                npm ci
+                npm run build
+            """.trimIndent()
+        }
+
         maven {
             id = "UNIT_TESTS"
             name = "Unit Tests"
@@ -47,19 +60,6 @@ object MrBuild : BuildType({
                 -Dsonar.qualitygate.wait=true
             """.trimIndent().replace("\n", " ")
             jdkHome = "%java.home%"
-        }
-
-        script {
-            id = "WEBAPP_CHECK"
-            name = "Webapp Build"
-            workingDir = "webapp"
-            scriptContent = """
-                #!/bin/sh
-                set -e
-
-                npm ci
-                npm run build
-            """.trimIndent()
         }
 
         cleanupDatabaseStep()

@@ -26,10 +26,11 @@ postgresAuth:
   database: polybank_db
 
 configEnv:
-  APP_JWT_EXPIRATION_MINUTES: "60"
+  APP_JWT_EXPIRATION_MINUTES: "59"
+  APP_CORS_ALLOWED_ORIGIN: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
 
 secretEnv:
-  APP_JWT_SECRET: ""
+  APP_JWT_SECRET: "CHANGE_ME_generate_a_long_random_secret"
 
 webapp:
   appName: polybank-webapp
