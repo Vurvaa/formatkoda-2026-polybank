@@ -26,6 +26,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local
+      args:
+        POSTGRES_DB: ${POSTGRES_DB}_codegen
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     image: polybank-local:latest
     container_name: polybank-app
     restart: unless-stopped
@@ -47,6 +51,23 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    networks:
+      - polybank-net
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    image: polybank-webapp-local:latest
+    container_name: polybank-webapp
+    restart: unless-stopped
+    depends_on:
+      polybank:
+        condition: service_healthy
+    ports:
+      - "${WEBAPP_PORT:-3000}:80"
     networks:
       - polybank-net
 

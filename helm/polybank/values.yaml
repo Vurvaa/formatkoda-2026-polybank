@@ -25,9 +25,30 @@ postgresAuth:
   postgresPassword: ""
   database: polybank_db
 
-jwt:
-  secret: ""
-  expirationMinutes: 60
+configEnv:
+  APP_JWT_EXPIRATION_MINUTES: "59"
+  APP_CORS_ALLOWED_ORIGIN: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
+
+secretEnv:
+  APP_JWT_SECRET: "CHANGE_ME_generate_a_long_random_secret"
+
+webapp:
+  appName: polybank-webapp
+  image:
+    repository: 192.168.130.81:5000/polybank-webapp
+    tag: latest
+  replicas: 2
+  containerPort: 80
+  service:
+    type: NodePort
+    nodePort: 30091
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "200m"
 
 postgresql:
   enabled: true
