@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.dto.account.AccountDetailsResponseDto;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
-import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,23 +44,23 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
-	public ResponseEntity<AccountResponseDto> createAccount(
+	public ResponseEntity<AccountDetailsResponseDto> createAccount(
 			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody CreateAccountRequestDto createAccountDto
 	) {
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(accountEntity));
+		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toAccountDetailsResponseDto(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
-	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
-		List<AccountResponseDto> accounts = accountService
+	public ResponseEntity<List<AccountDetailsResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
+		List<AccountDetailsResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()
-				.map(AccountMapper::toResponse)
+				.map(AccountMapper::toAccountDetailsResponseDto)
 				.toList();
 
 		return ResponseEntity.ok(accounts);
@@ -70,13 +69,13 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}")
-	public ResponseEntity<AccountResponseDto> getAccount(
+	public ResponseEntity<AccountDetailsResponseDto> getAccount(
 			@AuthenticationPrincipal UserLogin login,
 			@PathVariable String accountNumber
 	) {
 		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
 
-		return ResponseEntity.ok(AccountMapper.toResponse(account));
+		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(account));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
