@@ -2,8 +2,8 @@ package ru.formatkoda.polybank.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.jooq.exception.DataAccessException;
+import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;

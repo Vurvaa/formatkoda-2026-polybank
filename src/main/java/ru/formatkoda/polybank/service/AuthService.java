@@ -18,4 +18,10 @@ public class AuthService {
 
         return new JwtToken(token);
     }
+
+    public JwtToken loginUser(UserEntity user) {
+        String userLogin = user.login().value();
+        String token = jwtService.generateToken(userLogin, user.passwordHash());
+        return new JwtToken(token);
+    }
 }

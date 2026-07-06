@@ -19,11 +19,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-    @Mock
-    private JwtService jwtService;
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private AuthService authService;

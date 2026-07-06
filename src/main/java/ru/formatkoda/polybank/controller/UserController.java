@@ -5,11 +5,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
+import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
@@ -28,5 +26,12 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new AuthUserDto(token.token()));
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<AuthUserDto> loginUser(@RequestBody @Valid UserLoginDto user) {
+         JwtToken token = authService.loginUser(userMapper.toEntity(user));
+
+         return ResponseEntity.ok(new AuthUserDto(token.token()));
     }
 }

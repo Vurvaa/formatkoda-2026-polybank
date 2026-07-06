@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 
 import java.time.OffsetDateTime;
@@ -28,6 +29,18 @@ public class UserMapper {
                 user.name(),
                 user.lastName(),
                 passwordHash,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null
+        );
+    }
+
+    public UserEntity toEntity(UserLoginDto user) {
+        return  new UserEntity(
+                null,
+                new UserLogin(user.login()),
+                "",
+                "",
+                user.password(),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
