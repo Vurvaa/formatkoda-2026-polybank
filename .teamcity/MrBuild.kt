@@ -1,5 +1,6 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.maven
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
@@ -46,6 +47,19 @@ object MrBuild : BuildType({
                 -Dsonar.qualitygate.wait=true
             """.trimIndent().replace("\n", " ")
             jdkHome = "%java.home%"
+        }
+
+        script {
+            id = "WEBAPP_CHECK"
+            name = "Webapp Build"
+            workingDir = "webapp"
+            scriptContent = """
+                #!/bin/sh
+                set -e
+
+                npm ci
+                npm run build
+            """.trimIndent()
         }
 
         cleanupDatabaseStep()

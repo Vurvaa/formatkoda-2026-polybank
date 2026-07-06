@@ -73,6 +73,8 @@ object DeployBuild : BuildType({
                     -f %helm.chart.path%/polybank/values.yaml \
                     --set-string image.repository=%docker.registry%/polybank \
                     --set-string image.tag=%dep.${BuildBuild.id}.build.number% \
+                    --set-string webapp.image.repository=%docker.registry%/polybank-webapp \
+                    --set-string webapp.image.tag=%dep.${BuildBuild.id}.build.number% \
                     ${'$'}PG_SET_ARGS \
                     ${'$'}APP_SET_ARGS \
                     --debug
