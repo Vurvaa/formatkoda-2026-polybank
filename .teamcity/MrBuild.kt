@@ -52,7 +52,7 @@ object MrBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/merge-requests/*"
+            branchFilter = "+:refs/merge-requests/*/head"
         }
     }
 
