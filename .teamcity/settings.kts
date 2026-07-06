@@ -36,8 +36,8 @@ project {
         param("env.POSTGRES_USER", "polybank_user")
         password("env.POSTGRES_PASSWORD", "credentialsJSON:20e6cb45-b464-447c-9363-aef8c4ccf22f")
 
-        param("sonar.host.url", "http://192.168.130.82:9000")
-        password("env.SONAR_TOKEN", "credentialsJSON:2172e929-59f3-4d2c-8142-9c45447289c5")
+        param("sonar.host.url", "http://192.168.130.84:9000")
+        password("env.SONAR_TOKEN", "credentialsJSON:17fe68f4-ab0c-4290-b334-0b78b080d20b")
 
         appEnvVars.forEach { v ->
             if (v.secret) password("env.${v.name}", v.value) else param("env.${v.name}", v.value)
