@@ -67,6 +67,18 @@ public class AccountController {
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{accountNumber}")
+	public ResponseEntity<AccountResponseDto> getAccount(
+			@AuthenticationPrincipal UserLogin login,
+			@PathVariable String accountNumber
+	) {
+		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(account));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}/transactions")
 	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumber(
 			@AuthenticationPrincipal UserLogin login,

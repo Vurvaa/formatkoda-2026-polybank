@@ -112,12 +112,4 @@ class AccountServiceFindAllForUserTest {
 		verify(accountRepository, never()).findByNumber(any());
 		verifyNoMoreInteractions(userService, accountRepository);
 	}
-
-	private AccountEntity inactiveAccount() {
-		AccountEntity account = mock(AccountEntity.class);
-
-		when(account.status()).thenReturn(AccountEntity.Status.BLOCKED);
-
-		return account;
-	}
 }
