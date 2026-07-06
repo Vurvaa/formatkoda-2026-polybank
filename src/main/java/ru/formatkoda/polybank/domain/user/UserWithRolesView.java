@@ -14,5 +14,5 @@ public record UserWithRolesView(
         @NonNull List<String> roles,
         @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
-)
-{}
+) {
+}

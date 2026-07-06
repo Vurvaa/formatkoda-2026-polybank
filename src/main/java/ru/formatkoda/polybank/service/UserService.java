@@ -1,5 +1,6 @@
 package ru.formatkoda.polybank.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,8 @@ import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
+import ru.formatkoda.polybank.util.pagination.PageRequest;
+import ru.formatkoda.polybank.util.pagination.PageResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -92,5 +95,30 @@ public class UserService {
 
     public List<String> findAllUserRoles(UserEntity user) {
         return userRepository.findAllUserRoles(user);
+    }
+
+    public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
+        List<UserWithRolesView> users = userRepository
+                .findAllUsers(pageRequest).stream()
+                .map(this::toUserWithRolesView)
+                .toList();
+
+        return new PageResult<>(
+                users,
+                pageRequest.page(),
+                pageRequest.size(),
+                users.size()
+        );
+    }
+
+    private UserWithRolesView toUserWithRolesView(UserEntity user) {
+        return new UserWithRolesView(
+                user.login(),
+                user.name(),
+                user.lastName(),
+                userRepository.findAllUserRoles(user),
+                user.createdAt(),
+                user.blockedAt()
+        );
     }
 }

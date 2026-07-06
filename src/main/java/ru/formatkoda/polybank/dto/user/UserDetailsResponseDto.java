@@ -1,13 +1,17 @@
 package ru.formatkoda.polybank.dto.user;
 
+import lombok.NonNull;
+import ru.formatkoda.polybank.domain.user.UserLogin;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public record UserDetailsResponseDto(
-        String login,
-        String name,
-        String lastName,
-        List<String> userRoles,
-        OffsetDateTime createdAt,
-        OffsetDateTime blockedAt
-) {}
+        @NonNull UserLogin login,
+        @NonNull String name,
+        @NonNull String lastName,
+        @NonNull List<String> userRoles,
+        @NonNull OffsetDateTime createdAt,
+        @NonNull OffsetDateTime blockedAt
+) {
+}

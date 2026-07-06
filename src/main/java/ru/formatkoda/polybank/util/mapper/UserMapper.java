@@ -49,6 +49,17 @@ public class UserMapper {
         );
     }
 
+    public UserDetailsResponseDto toResponse(UserWithRolesView user) {
+        return new UserDetailsResponseDto(
+                user.login(),
+                user.name(),
+                user.lastName(),
+                user.userRoles(),
+                user.createdAt(),
+                user.blockedAt()
+        );
+    }
+
     public UserWithRolesView toUserWithRolesView(UserEntity user, List<String> roles) {
         return new UserWithRolesView(
                 user.id(),
