@@ -116,7 +116,7 @@ public class AccountService {
 		UserEntity user = userService.findUserByLogin(userLogin);
 
 		AccountEntity account = accountRepository
-				.getAccountByNumber(accountNumber.value())
+				.findByNumber(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
@@ -138,7 +138,7 @@ public class AccountService {
 		}
 
 		AccountEntity account = accountRepository
-				.getAccountByNumber(accountNumber.value())
+				.findByNumber(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
@@ -172,7 +172,7 @@ public class AccountService {
 		}
 
 		AccountEntity account = accountRepository
-				.getAccountByNumber(accountNumber.value())
+				.findByNumber(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
@@ -204,7 +204,7 @@ public class AccountService {
 		}
 
 		AccountEntity account = accountRepository
-				.getAccountByNumber(accountNumber.value())
+				.findByNumber(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
