@@ -18,6 +18,7 @@ import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
+import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto
 
 @RestController
 @RequestMapping(path = "/user")
