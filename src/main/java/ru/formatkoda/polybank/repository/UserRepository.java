@@ -9,10 +9,12 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 
+import static ru.formatkoda.polybank.jooq.generated.Tables.ROLES;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -67,6 +69,15 @@ public class UserRepository {
                 .where(USERS.ID.eq(userId))
                 .returning()
                 .fetchOptionalInto(UserEntity.class);
+    }
+
+    public List<String> findAllUserRoles(UserEntity user) {
+        return dsl.select(ROLES.NAME)
+                .from(USERS_ROLES)
+                .join(ROLES)
+                .on(USERS_ROLES.ROLE_ID.eq(ROLES.ID))
+                .where(USERS_ROLES.USER_ID.eq(user.id()))
+                .fetch(ROLES.NAME);
     }
 
     private UsersRecord toRecord(UserEntity user) {

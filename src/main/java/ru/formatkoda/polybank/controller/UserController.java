@@ -1,8 +1,8 @@
 package ru.formatkoda.polybank.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
-import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
@@ -44,24 +44,26 @@ public class UserController {
          return ResponseEntity.ok(new AuthUserDto(token.token()));
     }
 
-    @PreAuthorize("hasAuthority('SENIOR_MANAGER')")
-    @PostMapping("/{userId}/block")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('SENIOR_MANAGER')")
+    @PostMapping("/{userLogin}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
-            @AuthenticationPrincipal UserLogin userLogin,
-            @PathVariable @Min(1) Long userId
+            @AuthenticationPrincipal UserLogin managerLogin,
+            @Valid @PathVariable UserLogin userLogin
     ) {
-        UserEntity user = userService.blockUserById(userLogin, userId);
+        UserWithRolesView user = userService.blockUserById(managerLogin, userLogin);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }
 
-    @PreAuthorize("hasAuthority('SENIOR_MANAGER')")
-    @PostMapping("/{userId}/block")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('SENIOR_MANAGER')")
+    @PostMapping("/{userLogin}/unblock")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
-            @AuthenticationPrincipal UserLogin userLogin,
-            @PathVariable @Min(1) Long userId
+            @AuthenticationPrincipal UserLogin managerLogin,
+            @Valid @PathVariable UserLogin userLogin
     ) {
-        UserEntity user = userService.unBlockUserById(userLogin, userId);
+        UserWithRolesView user = userService.unBlockUserById(managerLogin, userLogin);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }

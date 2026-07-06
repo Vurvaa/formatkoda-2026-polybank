@@ -5,12 +5,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -47,12 +49,25 @@ public class UserMapper {
         );
     }
 
-    public UserDetailsResponseDto toUserDetailsResponseDto(UserEntity user) {
-        return new UserDetailsResponseDto(
+    public UserWithRolesView toUserWithRolesView(UserEntity user, List<String> roles) {
+        return new UserWithRolesView(
                 user.id(),
+                user.login(),
+                user.name(),
+                user.lastName(),
+                user.passwordHash(),
+                roles,
+                user.createdAt(),
+                user.blockedAt()
+        );
+    }
+
+    public UserDetailsResponseDto toUserDetailsResponseDto(UserWithRolesView user) {
+        return new UserDetailsResponseDto(
                 user.login().value(),
                 user.name(),
                 user.lastName(),
+                user.roles(),
                 user.createdAt(),
                 user.blockedAt()
         );

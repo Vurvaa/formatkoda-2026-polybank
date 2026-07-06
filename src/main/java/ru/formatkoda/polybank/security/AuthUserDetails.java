@@ -14,6 +14,7 @@ public class AuthUserDetails implements UserDetails {
     private final String login;
     private final String password;
     private final boolean isBlocked;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public boolean isAccountNonLocked() {
@@ -22,7 +23,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return authorities;
     }
 
     @Override

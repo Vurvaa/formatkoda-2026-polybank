@@ -6,11 +6,14 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.util.mapper.UserMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public UserLogin createUser(UserEntity user) {
@@ -43,44 +47,58 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity blockUserById(UserLogin userLogin, Long userId) {
-        UserEntity blockingUser = userRepository
+    public UserWithRolesView blockUserById(UserLogin managerLogin, UserLogin userLogin) {
+        UserEntity manager = userRepository
+                .findUserByLogin(managerLogin)
+                .orElseThrow(() -> new BusinessLogicException("manager not found"));
+        UserEntity user = userRepository
                 .findUserByLogin(userLogin)
                 .orElseThrow(() -> new BusinessLogicException("user not found"));
-        if (blockingUser.id().equals(userId)) {
-            throw new BusinessLogicException("user can not block himself");
+        if (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("manager can not block himself");
         }
 
-        UserEntity potentiallyBlockedUser = userRepository
-                .findUserById(userId)
-                .orElseThrow(() -> new BusinessLogicException("user not found"));
-        if (potentiallyBlockedUser.isBlocked()) {
-            return potentiallyBlockedUser;
+        List<String> roles = findAllUserRoles(user);
+
+        if (user.isBlocked()) {
+            return userMapper.toUserWithRolesView(user, roles);
         }
 
-        return userRepository
-                .blockUserById(userId)
-                .orElseThrow(() -> new BusinessLogicException("user not blocked"));
+        return userMapper.toUserWithRolesView(
+                userRepository
+                .blockUserById(user.id())
+                .orElseThrow(() -> new BusinessLogicException("user not blocked")),
+                roles
+        );
     }
 
     @Transactional
-    public UserEntity unBlockUserById(UserLogin userLogin, Long userId) {
-        UserEntity unBlockingUser = userRepository
+    public UserWithRolesView unBlockUserById(UserLogin managerLogin, UserLogin userLogin) {
+        UserEntity manager = userRepository
+                .findUserByLogin(managerLogin)
+                .orElseThrow(() -> new BusinessLogicException("manager not found"));
+        UserEntity user = userRepository
                 .findUserByLogin(userLogin)
                 .orElseThrow(() -> new BusinessLogicException("user not found"));
-        if (unBlockingUser.id().equals(userId)) {
-            throw new BusinessLogicException("user can not unblock himself");
+        if (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("manager can not unblock himself");
         }
 
-        UserEntity potentiallyUnBlockedUser = userRepository
-                .findUserById(userId)
-                .orElseThrow(() -> new BusinessLogicException("user not found"));
-        if (!potentiallyUnBlockedUser.isBlocked()) {
-            return potentiallyUnBlockedUser;
+        List<String> roles = findAllUserRoles(user);
+
+        if (!user.isBlocked()) {
+            return userMapper.toUserWithRolesView(user, roles);
         }
 
-        return userRepository
-                .unBlockUserById(userId)
-                .orElseThrow(() -> new BusinessLogicException("user not unblocked"));
+        return userMapper.toUserWithRolesView(
+                userRepository
+                        .unBlockUserById(user.id())
+                        .orElseThrow(() -> new BusinessLogicException("user not unblocked")),
+                roles
+        );
+    }
+
+    public List<String> findAllUserRoles(UserEntity user) {
+        return userRepository.findAllUserRoles(user);
     }
 }
