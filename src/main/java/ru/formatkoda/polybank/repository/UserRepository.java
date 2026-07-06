@@ -49,12 +49,6 @@ public class UserRepository {
                 .execute();
     }
 
-    public Optional<UserEntity> findUserById(Long userId) {
-        return dsl.selectFrom(USERS)
-                .where(USERS.ID.eq(userId))
-                .fetchOptionalInto(UserEntity.class);
-    }
-
     public Optional<UserEntity> blockUserById(Long userId) {
         return dsl.update(USERS)
                 .set(USERS.BLOCKED_AT, OffsetDateTime.now())
