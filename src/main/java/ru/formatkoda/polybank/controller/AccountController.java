@@ -10,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
 import ru.formatkoda.polybank.dto.account.AccountResponseDto;
-import ru.formatkoda.polybank.security.UserSession;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,10 +44,9 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<AccountResponseDto> createAccount(
-			@AuthenticationPrincipal UserSession userSession,
+			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody CreateAccountRequestDto createAccountDto
 	) {
-		UserLogin login = new UserLogin(userSession.login());
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(accountEntity));
@@ -57,9 +55,7 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
-	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserSession userSession) {
-		UserLogin login = new UserLogin(userSession.login());
-
+	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
 		List<AccountResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()
@@ -71,14 +67,25 @@ public class AccountController {
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{accountNumber}")
+	public ResponseEntity<AccountResponseDto> getAccount(
+			@AuthenticationPrincipal UserLogin login,
+			@PathVariable String accountNumber
+	) {
+		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(account));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}/transactions")
 	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumber(
-			@AuthenticationPrincipal UserSession userSession,
+			@AuthenticationPrincipal UserLogin login,
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size
 	) {
-		UserLogin login = new UserLogin(userSession.login());
 		AccountNumber number = new AccountNumber(accountNumber);
 		PageRequest pageRequest = new PageRequest(page, size);
 
@@ -102,10 +109,9 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/top-up")
 	public ResponseEntity<TransactionResponseDto> topUpAccount(
-			@AuthenticationPrincipal UserSession userSession,
+			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody AccountOperationRequestDto request
 	) {
-		UserLogin login = new UserLogin(userSession.login());
 		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
 
 		TransactionWithAccountNumbersView transaction = transactionService.topUp(
@@ -121,10 +127,9 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/withdraw")
 	public ResponseEntity<TransactionResponseDto> withdrawAccount(
-			@AuthenticationPrincipal UserSession userSession,
+			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody AccountOperationRequestDto request
 	) {
-		UserLogin login = new UserLogin(userSession.login());
 		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
 
 		TransactionWithAccountNumbersView transaction = transactionService.withdraw(
@@ -140,10 +145,9 @@ public class AccountController {
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/transfer")
 	public ResponseEntity<TransactionResponseDto> transferBetweenAccounts(
-			@AuthenticationPrincipal UserSession userSession,
+			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody TransferRequestDto request
 	) {
-		UserLogin login = new UserLogin(userSession.login());
 		AccountNumber fromAccountNumber = new AccountNumber(request.fromAccountNumber());
 		AccountNumber toAccountNumber = new AccountNumber(request.toAccountNumber());
 

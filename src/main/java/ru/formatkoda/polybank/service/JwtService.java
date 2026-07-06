@@ -1,49 +1,34 @@
 package ru.formatkoda.polybank.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.formatkoda.polybank.security.AuthUserDetailsService;
+import ru.formatkoda.polybank.security.JwtHelper;
 
-import javax.crypto.SecretKey;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
-    @Value("${app.jwt.secret}")
-    private String secret;
+    private final AuthenticationManager authenticationManager;
 
-    @Value("${app.jwt.expiration-minutes}")
-    private long expirationMinutes;
+    private final AuthUserDetailsService userDetailsService;
 
-    public String generateToken(String userLogin) {
-        Instant now = Instant.now();
+    private final JwtHelper jwtHelper;
 
-        return Jwts.builder()
-                .subject(userLogin)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(expirationMinutes, ChronoUnit.MINUTES)))
-                .signWith(getSecretKey())
-                .compact();
+    public String generateToken(String login,  String password) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(login, password));
+
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(login);
+
+        return jwtHelper.createToken(userDetails.getUsername());
     }
 
-    public String extractUserLoginFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        return claims.getSubject();
-    }
-
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
+    public String generateToken(String login) {
+        return jwtHelper.createToken(login);
     }
 }
-
