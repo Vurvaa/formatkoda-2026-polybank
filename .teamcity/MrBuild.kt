@@ -2,6 +2,7 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 
 object MrBuild : BuildType({
     name = "Checks on MR."
@@ -52,11 +53,23 @@ object MrBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/merge-requests/*/head"
+            branchFilter = """
+                +:refs/merge-requests/*/head
+                +:<default>
+            """.trimIndent()
         }
     }
 
     features {
+        pullRequests {
+            vcsRootExtId = "${DslContext.settingsRoot.id}"
+            provider = gitlab {
+                authType = token {
+                    token = "%env.GITLAB_TOKEN%"
+                }
+            }
+        }
+
         commitStatusPublisher {
             vcsRootExtId = "${DslContext.settingsRoot.id}"
             publisher = gitlab {
