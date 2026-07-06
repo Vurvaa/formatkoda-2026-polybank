@@ -68,8 +68,7 @@ object MrBuild : BuildType({
     triggers {
         vcs {
             branchFilter = """
-                +:refs/merge-requests/*/head
-                +:<default>
+                -:refs/heads/main
             """.trimIndent()
         }
     }
