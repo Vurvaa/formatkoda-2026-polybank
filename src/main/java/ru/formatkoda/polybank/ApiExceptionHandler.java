@@ -3,9 +3,11 @@ package ru.formatkoda.polybank;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 
@@ -14,8 +16,13 @@ import java.util.Map;
 
 @RestControllerAdvice
 class ApiExceptionHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ProblemDetail handleBeanValidationException(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(
+            value = {
+                    MethodArgumentNotValidException.class,
+                    HandlerMethodValidationException.class
+            }
+    )
+    ProblemDetail handleBeanValidationException(BindException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Validation failed");
         problem.setProperty("code", "VALIDATION_ERROR");

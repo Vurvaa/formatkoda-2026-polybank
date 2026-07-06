@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
@@ -45,10 +46,10 @@ public class UserController {
     @PreAuthorize("hasAuthority('SENIOR_MANAGER')")
     @PostMapping("/{userId}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
-            @AuthenticationPrincipal UserSession userSession,
+            @AuthenticationPrincipal UserLogin userLogin,
             @PathVariable @Min(1) Long userId
     ) {
-        UserEntity user = userService.blockUserById(userSession, userId);
+        UserEntity user = userService.blockUserById(userLogin, userId);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }
@@ -56,7 +57,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('SENIOR_MANAGER')")
     @PostMapping("/{userId}/block")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
-            @AuthenticationPrincipal UserSession userSession,
+            @AuthenticationPrincipal UserLogin userLogin,
             @PathVariable @Min(1) Long userId
     ) {
         UserEntity user = userService.unBlockUserById(userSession, userId);
