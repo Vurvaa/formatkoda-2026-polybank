@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Repository
@@ -44,6 +45,28 @@ public class UserRepository {
                         USERS_ROLES.ROLE_ID)
                 .values(userId, roleId)
                 .execute();
+    }
+
+    public Optional<UserEntity> findUserById(Long userId) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.ID.eq(userId))
+                .fetchOptionalInto(UserEntity.class);
+    }
+
+    public Optional<UserEntity> blockUserById(Long userId) {
+        return dsl.update(USERS)
+                .set(USERS.BLOCKED_AT, OffsetDateTime.now())
+                .where(USERS.ID.eq(userId))
+                .returning()
+                .fetchOptionalInto(UserEntity.class);
+    }
+
+    public Optional<UserEntity> unBlockUserById(Long userId) {
+        return dsl.update(USERS)
+                .set(USERS.BLOCKED_AT, (OffsetDateTime) null)
+                .where(USERS.ID.eq(userId))
+                .returning()
+                .fetchOptionalInto(UserEntity.class);
     }
 
     private UsersRecord toRecord(UserEntity user) {

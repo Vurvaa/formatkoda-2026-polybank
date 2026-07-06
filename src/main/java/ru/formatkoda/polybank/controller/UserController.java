@@ -60,7 +60,7 @@ public class UserController {
             @AuthenticationPrincipal UserLogin userLogin,
             @PathVariable @Min(1) Long userId
     ) {
-        UserEntity user = userService.unBlockUserById(userSession, userId);
+        UserEntity user = userService.unBlockUserById(userLogin, userId);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }
