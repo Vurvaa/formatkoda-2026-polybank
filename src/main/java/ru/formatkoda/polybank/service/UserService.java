@@ -50,10 +50,10 @@ public class UserService {
     public UserWithRolesView blockUserById(UserLogin managerLogin, UserLogin userLogin) {
         UserEntity manager = userRepository
                 .findUserByLogin(managerLogin)
-                .orElseThrow(() -> new BusinessLogicException("manager not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("manager not found"));
         UserEntity user = userRepository
                 .findUserByLogin(userLogin)
-                .orElseThrow(() -> new BusinessLogicException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
         if (user.id().equals(manager.id())) {
             throw new BusinessLogicException("manager can not block himself");
         }
@@ -76,10 +76,10 @@ public class UserService {
     public UserWithRolesView unBlockUserById(UserLogin managerLogin, UserLogin userLogin) {
         UserEntity manager = userRepository
                 .findUserByLogin(managerLogin)
-                .orElseThrow(() -> new BusinessLogicException("manager not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("manager not found"));
         UserEntity user = userRepository
                 .findUserByLogin(userLogin)
-                .orElseThrow(() -> new BusinessLogicException("user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
         if (user.id().equals(manager.id())) {
             throw new BusinessLogicException("manager can not unblock himself");
         }

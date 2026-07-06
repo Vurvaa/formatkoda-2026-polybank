@@ -50,29 +50,44 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problem.setTitle("Resource doesn't exist");
-        problem.setProperty("code", "RESOURCE_NOT_FOUND");
-        problem.setProperty("message", ex.getMessage());
-
-        return problem;
+        return buildProblem(
+                ex,
+                HttpStatus.NOT_FOUND,
+                "Resource doesn't exist",
+                Map.of(
+                        "code", "RESOURCE_NOT_FOUND"
+                )
+        );
     }
 
     @ExceptionHandler(BusinessLogicException.class)
     ProblemDetail handleBusinessLogicException(BusinessLogicException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        problem.setTitle("Business logic failed");
-        problem.setProperty("code", "BUSINESS_RULE_VIOLATION");
-        problem.setProperty("message", ex.getMessage());
-
-        return problem;
+        return buildProblem(
+                ex,
+                HttpStatus.CONFLICT,
+                "Business logic failed",
+                Map.of(
+                        "code", "BUSINESS_RULE_VIOLATION"
+                )
+        );
     }
 
     @ExceptionHandler(Exception.class)
     ProblemDetail handleGeneralException(Exception ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        problem.setTitle("Server logic failed");
-        problem.setProperty("code", "INTERNAL_SERVER_ERROR");
+        return buildProblem(
+                ex,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Server logic failed",
+                Map.of(
+                        "code", "INTERNAL_SERVER_ERROR"
+                )
+        );
+    }
+
+    private ProblemDetail buildProblem(Exception ex, HttpStatus status, String title, Map<String, String> properties) {
+        ProblemDetail problem = ProblemDetail.forStatus(status);
+        problem.setTitle(title);
+        properties.keySet().forEach(key -> problem.setProperty(key, properties.get(key)));
         problem.setProperty("message", ex.getMessage());
 
         return problem;

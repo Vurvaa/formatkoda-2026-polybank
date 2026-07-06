@@ -117,7 +117,7 @@ public class AccountService {
 
 		AccountEntity account = accountRepository
 				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -139,7 +139,7 @@ public class AccountService {
 
 		AccountEntity account = accountRepository
 				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -173,7 +173,7 @@ public class AccountService {
 
 		AccountEntity account = accountRepository
 				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -205,7 +205,7 @@ public class AccountService {
 
 		AccountEntity account = accountRepository
 				.findByNumber(accountNumber)
-				.orElseThrow(() -> new BusinessLogicException("account not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
