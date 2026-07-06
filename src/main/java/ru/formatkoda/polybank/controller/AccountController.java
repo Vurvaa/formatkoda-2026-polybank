@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PutMapping;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
+import ru.formatkoda.polybank.dto.account.AccountDetailsResponseDto;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
 import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.service.AccountService;
@@ -159,5 +161,71 @@ public class AccountController {
 		);
 
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{number}")
+	public ResponseEntity<AccountDetailsResponseDto> getAccountDetails(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") Long accountNumber
+	) {
+		AccountEntity accountEntity = accountService.getAccountForUser(
+				userLogin,
+				new AccountNumber(String.valueOf(accountNumber))
+		);
+
+		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/close")
+	public ResponseEntity<AccountDetailsResponseDto> closeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") Long accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.closeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/freeze")
+	public ResponseEntity<AccountDetailsResponseDto> freezeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") Long accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.freezeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/unfreeze")
+	public ResponseEntity<AccountDetailsResponseDto> unFreezeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") Long accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.unFreezeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
 	}
 }
