@@ -109,4 +109,116 @@ public class AccountService {
 		if (amount.signum() <= 0)
 			throw new BusinessLogicException("amount must be greater than 0");
 	}
+
+	public AccountEntity getAccountForUser(
+			UserLogin userLogin,
+			AccountNumber accountNumber) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
+		AccountEntity account = accountRepository
+				.getAccountByNumber(accountNumber.value())
+				.orElseThrow(() -> new BusinessLogicException("account not found"));
+
+		if (!account.userId().equals(user.id())) {
+			throw new BusinessLogicException("account does not belong to this user");
+		}
+
+		return account;
+	}
+
+	@Transactional
+	public AccountEntity closeAccountForUser(
+			@NonNull UserLogin userLogin,
+			@NonNull AccountNumber accountNumber
+	) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
+		if (user.isBlocked()) {
+			throw new BusinessLogicException("user is blocked");
+		}
+
+		AccountEntity account = accountRepository
+				.getAccountByNumber(accountNumber.value())
+				.orElseThrow(() -> new BusinessLogicException("account not found"));
+
+		if (!account.userId().equals(user.id())) {
+			throw new BusinessLogicException("account does not belong to this user");
+		} else if (!account.balance().equals(BigDecimal.ZERO)) {
+			throw new BusinessLogicException("account balance is not zero");
+		}
+
+		if (account.status().equals(AccountEntity.Status.CLOSED)) {
+			return account;
+		} else if (!account.status().equals(AccountEntity.Status.ACTIVE)) {
+			throw new BusinessLogicException("account is not active");
+		}
+
+		return accountRepository
+				.closeAccount(accountNumber)
+				.orElseThrow(
+						() -> new BusinessLogicException("account not closed")
+				);
+	}
+
+	@Transactional
+	public AccountEntity freezeAccountForUser(
+			@NonNull UserLogin userLogin,
+			@NonNull AccountNumber accountNumber
+	) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
+		if (user.isBlocked()) {
+			throw new BusinessLogicException("user is blocked");
+		}
+
+		AccountEntity account = accountRepository
+				.getAccountByNumber(accountNumber.value())
+				.orElseThrow(() -> new BusinessLogicException("account not found"));
+
+		if (!account.userId().equals(user.id())) {
+			throw new BusinessLogicException("account does not belong to this user");
+		} else if (account.type().equals(AccountEntity.Type.CREDIT)) {
+			throw new BusinessLogicException("account type is credit");
+		}
+
+		if (account.status().equals(AccountEntity.Status.FROZEN)) {
+			return account;
+		} else if (!account.status().equals(AccountEntity.Status.ACTIVE)) {
+			throw new BusinessLogicException("account is not active");
+		}
+
+		return accountRepository
+				.freezeAccount(accountNumber)
+				.orElseThrow(() -> new BusinessLogicException("account not frozen"));
+	}
+
+	@Transactional
+	public AccountEntity unFreezeAccountForUser(
+			@NonNull UserLogin userLogin,
+			@NonNull AccountNumber accountNumber
+	) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
+		if (user.isBlocked()) {
+			throw new BusinessLogicException("account is not active");
+		}
+
+		AccountEntity account = accountRepository
+				.getAccountByNumber(accountNumber.value())
+				.orElseThrow(() -> new BusinessLogicException("account not found"));
+
+		if (!account.userId().equals(user.id())) {
+			throw new BusinessLogicException("account does not belong to this user");
+		}
+
+		if (account.status().equals(AccountEntity.Status.ACTIVE)) {
+			return account;
+		} else if (!account.status().equals(AccountEntity.Status.FROZEN)) {
+			throw new BusinessLogicException("account is not frozen");
+		}
+
+		return accountRepository
+				.unFreezeAccount(accountNumber)
+				.orElseThrow(() -> new BusinessLogicException("account not unfrozen"));
+	}
 }
