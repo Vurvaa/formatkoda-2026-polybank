@@ -28,6 +28,18 @@ object BuildBuild : BuildType({
         }
 
         dockerCommand {
+            id = "DOCKER_BUILD_WEBAPP"
+            name = "Docker Build Webapp"
+            commandType = build {
+                source = file {
+                    path = "webapp/Dockerfile"
+                }
+                contextDir = "webapp"
+                namesAndTags = "%docker.registry%/polybank-webapp:%build.number%"
+            }
+        }
+
+        dockerCommand {
             id = "DOCKER_BUILD"
             name = "Docker Build"
             commandType = build {
@@ -43,6 +55,14 @@ object BuildBuild : BuildType({
             name = "Docker Push"
             commandType = push {
                 namesAndTags = "%docker.registry%/polybank:%build.number%"
+            }
+        }
+
+        dockerCommand {
+            id = "DOCKER_PUSH_WEBAPP"
+            name = "Docker Push Webapp"
+            commandType = push {
+                namesAndTags = "%docker.registry%/polybank-webapp:%build.number%"
             }
         }
 

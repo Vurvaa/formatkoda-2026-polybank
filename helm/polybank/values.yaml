@@ -31,6 +31,24 @@ configEnv:
 secretEnv:
   APP_JWT_SECRET: ""
 
+webapp:
+  appName: polybank-webapp
+  image:
+    repository: 192.168.130.81:5000/polybank-webapp
+    tag: latest
+  replicas: 2
+  containerPort: 80
+  service:
+    type: NodePort
+    nodePort: 30091
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "200m"
+
 postgresql:
   enabled: true
   global:
