@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 
@@ -43,6 +44,17 @@ public class UserMapper {
                 user.password(),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
+        );
+    }
+
+    public UserDetailsResponseDto toUserDetailsResponseDto(UserEntity user) {
+        return new UserDetailsResponseDto(
+                user.id(),
+                user.login().value(),
+                user.name(),
+                user.lastName(),
+                user.createdAt(),
+                user.blockedAt()
         );
     }
 }
