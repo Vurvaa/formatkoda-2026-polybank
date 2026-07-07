@@ -1,15 +1,24 @@
-import jetbrains.buildServer.configs.kotlin.*
-import jetbrains.buildServer.configs.kotlin.buildSteps.dockerCommand
-import jetbrains.buildServer.configs.kotlin.triggers.vcs
-import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.buildSteps.script
+package CD.Prod
 
-object BuildBuild : BuildType({
-    name = "Build and push to registry."
+import Helpers.cleanupDatabaseStep
+import Helpers.prepareDatabaseStep
+import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.DslContext
+import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.buildSteps.dockerCommand
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
+import jetbrains.buildServer.configs.kotlin.triggers.vcs
+
+object ProdBuild : BuildType({
+    name = "CD - (prod) build and push to registry."
 
     vcs {
         root(DslContext.settingsRoot)
         cleanCheckout = true
+    }
+
+    params {
+        param("env.RELEASE_VERSION", "%teamcity.build.branch%")
     }
 
     steps {
@@ -35,7 +44,7 @@ object BuildBuild : BuildType({
                     path = "webapp/Dockerfile"
                 }
                 contextDir = "webapp"
-                namesAndTags = "%docker.registry%/polybank-webapp:%build.number%"
+                namesAndTags = "%docker.registry%/polybank-webapp:%env.RELEASE_VERSION%"
             }
         }
 
@@ -46,7 +55,7 @@ object BuildBuild : BuildType({
                 source = file {
                     path = "Dockerfile"
                 }
-                namesAndTags = "%docker.registry%/polybank:%build.number%"
+                namesAndTags = "%docker.registry%/polybank:%env.RELEASE_VERSION%"
             }
         }
 
@@ -54,7 +63,7 @@ object BuildBuild : BuildType({
             id = "DOCKER_PUSH"
             name = "Docker Push"
             commandType = push {
-                namesAndTags = "%docker.registry%/polybank:%build.number%"
+                namesAndTags = "%docker.registry%/polybank:%env.RELEASE_VERSION%"
             }
         }
 
@@ -62,17 +71,19 @@ object BuildBuild : BuildType({
             id = "DOCKER_PUSH_WEBAPP"
             name = "Docker Push Webapp"
             commandType = push {
-                namesAndTags = "%docker.registry%/polybank-webapp:%build.number%"
+                namesAndTags = "%docker.registry%/polybank-webapp:%env.RELEASE_VERSION%"
             }
         }
 
         cleanupDatabaseStep()
-
     }
 
     triggers {
         vcs {
-            branchFilter = "+:refs/heads/main"
+            branchFilter = """
+                +:refs/tags/*
+                -:refs/heads/*
+            """.trimIndent()
         }
     }
 

@@ -19,18 +19,26 @@ resources:
     memory: "1Gi"
     cpu: "1000m"
 
+appVars:
+  APP_JWT_EXPIRATION_MINUTES:
+    secret: false
+    value: "60"
+  APP_CORS_ALLOWED_ORIGIN:
+    secret: false
+    value: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
+  APP_JWT_SECRET:
+    secret: true
+    value: ""
+
 postgresAuth:
   username: polybank_user
   password: ""
   postgresPassword: ""
   database: polybank_db
 
-configEnv:
-  APP_JWT_EXPIRATION_MINUTES: "60"
-  APP_CORS_ALLOWED_ORIGIN: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
-
-secretEnv:
-  APP_JWT_SECRET: ""
+externalPostgres:
+  host: ""
+  port: 5432
 
 webapp:
   appName: polybank-webapp
@@ -52,6 +60,7 @@ webapp:
 
 postgresql:
   enabled: true
+  architecture: replication
   global:
     security:
       allowInsecureImages: true
@@ -66,6 +75,7 @@ postgresql:
       userPasswordKey: password
       usernameKey: username
       databaseKey: database
+      replicationPasswordKey: replication-password
   primary:
     persistence:
       enabled: true
@@ -78,3 +88,18 @@ postgresql:
       limits:
         cpu: "500m"
         memory: "1Gi"
+    podAntiAffinityPreset: hard
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "local-path"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+    podAntiAffinityPreset: hard

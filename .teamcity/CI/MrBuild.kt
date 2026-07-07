@@ -1,12 +1,17 @@
-import jetbrains.buildServer.configs.kotlin.*
+package CI
+
+import Helpers.cleanupDatabaseStep
+import Helpers.prepareDatabaseStep
+import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.DslContext
+import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
-import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 
 object MrBuild : BuildType({
-    name = "Checks on MR."
+    name = "CI - all checks."
 
     vcs {
         root(DslContext.settingsRoot)

@@ -9,8 +9,10 @@ data:
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
 
-  {{- range $key, $val := .Values.configEnv }}
-  {{ $key }}: {{ $val | quote }}
+  {{- range $key, $var := .Values.appVars }}
+  {{- if not $var.secret }}
+  {{ $key }}: {{ required (printf "Set .Values.appVars.%s.value" $key) $var.value | quote }}
+  {{- end }}
   {{- end }}
 
 ---
@@ -65,7 +67,7 @@ spec:
             - sh
             - -c
             - >-
-              until pg_isready -h polybank-postgresql -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              until pg_isready -h {{ .Values.postgresql.enabled | ternary (printf "%s-postgresql" .Release.Name) .Values.externalPostgres.host }} -p {{ .Values.postgresql.enabled | ternary 5432 .Values.externalPostgres.port }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
               do echo "waiting for postgres"; sleep 2; done
           envFrom:
             - secretRef:

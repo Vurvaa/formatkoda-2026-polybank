@@ -1,0 +1,52 @@
+namespace: polybank-test
+appName: polybank-backend
+replicas: 1
+
+image:
+  repository: 192.168.130.81:5000/polybank-test
+  tag: latest
+
+service:
+  type: NodePort
+  nodePort: 30190
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+webapp:
+  appName: polybank-webapp
+  replicas: 1
+  image:
+    repository: 192.168.130.81:5000/polybank-webapp-test
+    tag: latest
+  service:
+    type: NodePort
+    nodePort: 30191
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+appVars:
+  APP_CORS_ALLOWED_ORIGIN:
+    secret: false
+    value: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
+
+postgresql:
+  enabled: false
+
+externalPostgres:
+  host: "192.168.130.82"
+  port: 5432
+
+postgresAuth:
+  username: polybank_test_user
+  database: polybank_test_db
