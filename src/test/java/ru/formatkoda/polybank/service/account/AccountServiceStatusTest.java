@@ -173,8 +173,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -212,7 +211,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntityClosed, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.CLOSED, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(1)).closeAccount(accountNumber);
@@ -237,8 +236,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -262,7 +260,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntity, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.CLOSED, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).closeAccount(accountNumber);
@@ -287,8 +285,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -312,7 +309,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).closeAccount(accountNumber);
@@ -338,8 +335,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -363,7 +359,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).closeAccount(accountNumber);
@@ -382,9 +378,8 @@ class AccountServiceStatusTest {
         String testAccountNumber = AccountEntity.ACCOUNT_NUMBER_PREFIX + "1234123412341234";
         AccountNumber accountNumber = new AccountNumber(testAccountNumber);
 
-        UserEntity userEntity = mock(UserEntity.class);
-        when(userEntity.isBlocked()).thenReturn(true);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin))
+                .thenThrow(new BusinessLogicException("user is blocked"));
 
         Assertions.assertThrows(
                 BusinessLogicException.class,
@@ -394,7 +389,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).closeAccount(accountNumber);
@@ -423,8 +418,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -448,7 +442,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).closeAccount(accountNumber);
@@ -477,8 +471,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -516,7 +509,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntityFrozen, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.FROZEN, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(1)).freezeAccount(accountNumber);
@@ -546,8 +539,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -571,7 +563,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntity, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.FROZEN, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).freezeAccount(accountNumber);
@@ -599,8 +591,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -624,7 +615,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).freezeAccount(accountNumber);
@@ -653,8 +644,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -678,7 +668,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).freezeAccount(accountNumber);
@@ -697,9 +687,8 @@ class AccountServiceStatusTest {
         String testAccountNumber = AccountEntity.ACCOUNT_NUMBER_PREFIX + "1234123412341234";
         AccountNumber accountNumber = new AccountNumber(testAccountNumber);
 
-        UserEntity userEntity = mock(UserEntity.class);
-        when(userEntity.isBlocked()).thenReturn(true);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin))
+                .thenThrow(new BusinessLogicException("user is blocked"));
 
         Assertions.assertThrows(
                 BusinessLogicException.class,
@@ -709,7 +698,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).freezeAccount(accountNumber);
@@ -737,8 +726,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -762,7 +750,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).freezeAccount(accountNumber);
@@ -790,8 +778,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntity = new AccountEntity(
                 testAccountId,
@@ -829,7 +816,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntityUnFrozen, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.ACTIVE, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(1)).makeActiveAccount(accountNumber);
@@ -848,9 +835,8 @@ class AccountServiceStatusTest {
         String testAccountNumber = AccountEntity.ACCOUNT_NUMBER_PREFIX + "1234123412341234";
         AccountNumber accountNumber = new AccountNumber(testAccountNumber);
 
-        UserEntity userEntity = mock(UserEntity.class);
-        when(userEntity.isBlocked()).thenReturn(true);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin))
+                .thenThrow(new BusinessLogicException("user is blocked"));
 
         Assertions.assertThrows(
                 BusinessLogicException.class,
@@ -860,7 +846,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
@@ -888,8 +874,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntityUnFrozen = new AccountEntity(
                 testAccountId,
@@ -913,7 +898,7 @@ class AccountServiceStatusTest {
         Assertions.assertEquals(accountEntityUnFrozen, accountEntityToCheck);
         Assertions.assertEquals(AccountEntity.Status.ACTIVE, accountEntityToCheck.status());
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
@@ -941,8 +926,7 @@ class AccountServiceStatusTest {
 
         UserEntity userEntity = mock(UserEntity.class);
         when(userEntity.id()).thenReturn(testUserId);
-        when(userEntity.isBlocked()).thenReturn(false);
-        when(userService.findUserByLogin(userLogin)).thenReturn(userEntity);
+        when(userService.findNotBlockedUserByLogin(userLogin)).thenReturn(userEntity);
 
         AccountEntity accountEntityUnFrozen = new AccountEntity(
                 testAccountId,
@@ -966,7 +950,7 @@ class AccountServiceStatusTest {
                 )
         );
 
-        verify(userService, times(1)).findUserByLogin(userLogin);
+        verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
         verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
