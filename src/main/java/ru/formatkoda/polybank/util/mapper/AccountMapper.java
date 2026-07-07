@@ -7,7 +7,7 @@ public class AccountMapper {
 	private AccountMapper() {
 	}
 
-	public static AccountResponseDto toResponseDto(AccountEntity accountEntity) {
+	public static AccountResponseDto toResponse(AccountEntity accountEntity) {
 		return new AccountResponseDto(
 				accountEntity.number().value(),
 				accountEntity.balance(),

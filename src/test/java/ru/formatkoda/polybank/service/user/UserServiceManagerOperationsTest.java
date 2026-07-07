@@ -25,7 +25,7 @@ import static ru.formatkoda.polybank.testutil.TestData.user;
 import static ru.formatkoda.polybank.testutil.TestData.userManager;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceManagerOperationsTest {
+class UserServiceManagerOperationsTest {
     @Mock
     UserRepository userRepository;
 

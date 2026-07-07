@@ -50,7 +50,7 @@ public class AccountController {
 	) {
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponseDto(accountEntity));
+		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
@@ -60,7 +60,7 @@ public class AccountController {
 		List<AccountResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()
-				.map(AccountMapper::toResponseDto)
+				.map(AccountMapper::toResponse)
 				.toList();
 
 		return ResponseEntity.ok(accounts);
@@ -75,7 +75,7 @@ public class AccountController {
 	) {
 		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
 
-		return ResponseEntity.ok(AccountMapper.toResponseDto(account));
+		return ResponseEntity.ok(AccountMapper.toResponse(account));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
@@ -176,7 +176,7 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
@@ -193,7 +193,7 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
@@ -210,6 +210,6 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 }
