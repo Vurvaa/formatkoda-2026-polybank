@@ -48,30 +48,36 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PostMapping("/{userLogin}/block")
+    @PutMapping("/{userLogin}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable UserLogin userLogin
+            @Valid @PathVariable String userLogin
     ) {
-        UserWithRolesView user = userService.blockUserByLogin(managerLogin, userLogin);
+        UserWithRolesView user = userService.blockUserByLogin(
+                managerLogin,
+                new UserLogin(userLogin)
+        );
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PostMapping("/{userLogin}/unblock")
+    @PutMapping("/{userLogin}/unblock")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable UserLogin userLogin
+            @Valid @PathVariable String userLogin
     ) {
-        UserWithRolesView user = userService.unBlockUserByLogin(managerLogin, userLogin);
+        UserWithRolesView user = userService.unBlockUserByLogin(
+                managerLogin,
+                new UserLogin(userLogin)
+        );
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER') or hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
     @GetMapping
     public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
