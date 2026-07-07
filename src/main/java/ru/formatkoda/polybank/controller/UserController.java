@@ -99,4 +99,19 @@ public class UserController {
                 )
         );
     }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('SENIOR_MANAGER')")
+    @DeleteMapping("/{userLogin}/roles/manager")
+    public ResponseEntity<UserDetailsResponseDto> removeManagerRole(
+            @AuthenticationPrincipal String managerLogin,
+            @PathVariable String userLogin
+    ) {
+        UserWithRolesView user = userService.removeManagerRoleByLogin(
+                new UserLogin(managerLogin),
+                new UserLogin(userLogin)
+        );
+
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
 }
