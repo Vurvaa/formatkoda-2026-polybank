@@ -55,7 +55,7 @@ public class UserController {
     ) {
         UserWithRolesView user = userService.blockUserByLogin(managerLogin, userLogin);
 
-        return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -67,7 +67,7 @@ public class UserController {
     ) {
         UserWithRolesView user = userService.unBlockUserByLogin(managerLogin, userLogin);
 
-        return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @SecurityRequirement(name = "bearerAuth")

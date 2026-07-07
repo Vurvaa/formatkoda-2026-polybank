@@ -71,15 +71,4 @@ public class UserMapper {
                 user.blockedAt()
         );
     }
-
-    public UserDetailsResponseDto toUserDetailsResponseDto(UserWithRolesView user) {
-        return new UserDetailsResponseDto(
-                user.login(),
-                user.name(),
-                user.lastName(),
-                user.roles(),
-                user.createdAt(),
-                user.blockedAt()
-        );
-    }
 }
