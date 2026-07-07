@@ -104,11 +104,11 @@ public class UserController {
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @DeleteMapping("/{userLogin}/roles/manager")
     public ResponseEntity<UserDetailsResponseDto> removeManagerRole(
-            @AuthenticationPrincipal String managerLogin,
+            @AuthenticationPrincipal UserLogin managerLogin,
             @PathVariable String userLogin
     ) {
         UserWithRolesView user = userService.removeManagerRoleByLogin(
-                new UserLogin(managerLogin),
+                managerLogin,
                 new UserLogin(userLogin)
         );
 

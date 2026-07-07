@@ -119,9 +119,11 @@ public class UserService {
         }
 
         long managerRoleId = findRoleIdOrThrow("MANAGER");
-        UserEntity updatedUser = userRepository
-                .removeUserRole(user.id(), managerRoleId)
-                .orElseThrow(() -> new BusinessLogicException("user manager role not removed"));
+        if (!userRepository.removeUserRole(user.id(), managerRoleId)) {
+            throw new BusinessLogicException("user manager role not removed");
+        }
+
+        UserEntity updatedUser = findUserByLogin(userLogin);
         List<String> updatedUserRoles = findAllUserRoles(updatedUser);
 
         return userMapper.toUserWithRolesView(

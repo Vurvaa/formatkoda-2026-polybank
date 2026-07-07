@@ -71,14 +71,15 @@ public class UserRepository {
                 .fetchOptionalInto(UserEntity.class);
     }
 
-    public Optional<UserEntity> removeUserRole(Long userId, Long roleId) {
-        return dsl
+    public boolean removeUserRole(Long userId, Long roleId) {
+        int deletedRoles = dsl
                 .delete(USERS_ROLES)
                 .where(USERS_ROLES.USER_ID.eq(userId)
                         .and(USERS_ROLES.ROLE_ID.eq(roleId))
                 )
-                .returning()
-                .fetchOptionalInto(UserEntity.class);
+                .execute();
+
+        return deletedRoles == 1;
     }
 
     public List<String> findAllUserRoles(UserEntity user) {
