@@ -9,9 +9,13 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 
+import static ru.formatkoda.polybank.jooq.generated.Tables.ROLES;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -44,6 +48,31 @@ public class UserRepository {
                         USERS_ROLES.ROLE_ID)
                 .values(userId, roleId)
                 .execute();
+    }
+
+    public Optional<UserEntity> blockUserById(Long userId) {
+        return dsl.update(USERS)
+                .set(USERS.BLOCKED_AT, OffsetDateTime.now(ZoneOffset.UTC))
+                .where(USERS.ID.eq(userId))
+                .returning()
+                .fetchOptionalInto(UserEntity.class);
+    }
+
+    public Optional<UserEntity> unBlockUserById(Long userId) {
+        return dsl.update(USERS)
+                .setNull(USERS.BLOCKED_AT)
+                .where(USERS.ID.eq(userId))
+                .returning()
+                .fetchOptionalInto(UserEntity.class);
+    }
+
+    public List<String> findAllUserRoles(UserEntity user) {
+        return dsl.select(ROLES.NAME)
+                .from(USERS_ROLES)
+                .join(ROLES)
+                .on(USERS_ROLES.ROLE_ID.eq(ROLES.ID))
+                .where(USERS_ROLES.USER_ID.eq(user.id()))
+                .fetch(ROLES.NAME);
     }
 
     private UsersRecord toRecord(UserEntity user) {

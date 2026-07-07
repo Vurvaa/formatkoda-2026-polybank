@@ -6,11 +6,14 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.util.mapper.UserMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public UserLogin createUser(UserEntity user) {
@@ -40,5 +44,53 @@ public class UserService {
     public UserEntity findUserByLogin(UserLogin login) {
         return userRepository.findUserByLogin(login)
                 .orElseThrow(() -> new ResourceNotFoundException("not found user with this login"));
+    }
+
+    @Transactional
+    public UserWithRolesView blockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
+        UserEntity manager = findUserByLogin(managerLogin);
+        UserEntity user = findUserByLogin(userLogin);
+        if (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("manager can not block himself");
+        }
+
+        List<String> roles = findAllUserRoles(user);
+
+        if (user.isBlocked()) {
+            return userMapper.toUserWithRolesView(user, roles);
+        }
+
+        return userMapper.toUserWithRolesView(
+                userRepository
+                .blockUserById(user.id())
+                .orElseThrow(() -> new BusinessLogicException("user not blocked")),
+                roles
+        );
+    }
+
+    @Transactional
+    public UserWithRolesView unBlockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
+        UserEntity manager = findUserByLogin(managerLogin);
+        UserEntity user = findUserByLogin(userLogin);
+        if (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("manager can not unblock himself");
+        }
+
+        List<String> roles = findAllUserRoles(user);
+
+        if (!user.isBlocked()) {
+            return userMapper.toUserWithRolesView(user, roles);
+        }
+
+        return userMapper.toUserWithRolesView(
+                userRepository
+                        .unBlockUserById(user.id())
+                        .orElseThrow(() -> new BusinessLogicException("user not unblocked")),
+                roles
+        );
+    }
+
+    public List<String> findAllUserRoles(UserEntity user) {
+        return userRepository.findAllUserRoles(user);
     }
 }

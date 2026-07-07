@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -14,6 +13,7 @@ public class AuthUserDetails implements UserDetails {
     private final String login;
     private final String password;
     private final boolean isBlocked;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public boolean isAccountNonLocked() {
@@ -22,7 +22,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return authorities;
     }
 
     @Override

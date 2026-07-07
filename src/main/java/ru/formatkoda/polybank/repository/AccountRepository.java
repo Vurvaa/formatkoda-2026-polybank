@@ -65,6 +65,33 @@ public class AccountRepository {
 		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
 	}
 
+	public Optional<AccountEntity> closeAccount(AccountNumber accountNumber) {
+		return dsl
+				.update(ACCOUNTS)
+				.set(ACCOUNTS.STATUS, AccountEntity.Status.CLOSED.name())
+				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
+				.returning()
+				.fetchOptional(this::toEntity);
+	}
+
+	public Optional<AccountEntity> freezeAccount(AccountNumber accountNumber) {
+		return dsl
+				.update(ACCOUNTS)
+				.set(ACCOUNTS.STATUS, AccountEntity.Status.FROZEN.name())
+				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
+				.returning()
+				.fetchOptional(this::toEntity);
+	}
+
+	public Optional<AccountEntity> unFreezeAccount(AccountNumber accountNumber) {
+		return dsl
+				.update(ACCOUNTS)
+				.set(ACCOUNTS.STATUS, AccountEntity.Status.ACTIVE.name())
+				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
+				.returning()
+				.fetchOptional(this::toEntity);
+	}
+
 	private AccountEntity toEntity(Record r) {
 		return new AccountEntity(
 				r.get(ACCOUNTS.ID),

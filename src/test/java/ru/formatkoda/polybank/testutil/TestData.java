@@ -15,6 +15,8 @@ public final class TestData {
 	public static final BigDecimal AMOUNT = new BigDecimal("100.00");
 	public static final OffsetDateTime CREATED_AT = OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, ZoneOffset.UTC);
 
+	public static final UserLogin SENIOR_MANAGER_LOGIN = new UserLogin("senior_manager");
+
 	private TestData() {
 	}
 
@@ -38,6 +40,18 @@ public final class TestData {
 		return new UserEntity(
 				10L,
 				USER_LOGIN,
+				"User",
+				"Test",
+				"password-hash",
+				CREATED_AT,
+				null
+		);
+	}
+
+	public static UserEntity userManager() {
+		return new UserEntity(
+				25L,
+				SENIOR_MANAGER_LOGIN,
 				"User",
 				"Test",
 				"password-hash",

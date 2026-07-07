@@ -7,9 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PutMapping;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
 import ru.formatkoda.polybank.dto.account.AccountResponseDto;
+import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -159,5 +160,56 @@ public class AccountController {
 		);
 
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/close")
+	public ResponseEntity<AccountResponseDto> closeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") String accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.closeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/freeze")
+	public ResponseEntity<AccountResponseDto> freezeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") String accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.freezeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{number}/unfreeze")
+	public ResponseEntity<AccountResponseDto> unFreezeAccount(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable(name = "number") String accountNumber
+	) {
+		AccountEntity accountEntity = accountService
+				.unFreezeAccountForUser(
+						userLogin,
+						new AccountNumber(String.valueOf(accountNumber)
+						)
+				);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 }
