@@ -81,51 +81,6 @@ public class AccountService {
 		return changeBalanceOrThrow(accountNumber, amount.negate());
 	}
 
-	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
-		return accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
-	}
-
-	private AccountEntity changeBalanceOrThrow(@NonNull AccountNumber accountNumber, @NonNull BigDecimal delta) {
-		return accountRepository
-				.changeAccountBalance(accountNumber, delta)
-				.orElseThrow(() -> diagnoseBalanceChangeFailure(accountNumber, delta));
-	}
-
-	private RuntimeException diagnoseBalanceChangeFailure(AccountNumber accountNumber, BigDecimal delta) {
-		AccountEntity account = findAccountOrThrow(accountNumber);
-
-		if (!AccountEntity.Status.ACTIVE.equals(account.status()))
-			throw new BusinessLogicException("account is inactive");
-
-		if (account.balance().add(delta).compareTo(BigDecimal.ZERO) < 0)
-			throw new BusinessLogicException("insufficient funds");
-
-		throw new BusinessLogicException("unknown exception");
-	}
-
-	private void validateAmount(BigDecimal amount) {
-		if (amount.signum() <= 0)
-			throw new BusinessLogicException("amount must be greater than 0");
-	}
-
-	public AccountEntity getAccountForUser(
-			UserLogin userLogin,
-			AccountNumber accountNumber) {
-		UserEntity user = userService.findUserByLogin(userLogin);
-
-		AccountEntity account = accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
-
-		if (!account.userId().equals(user.id())) {
-			throw new BusinessLogicException("account does not belong to this user");
-		}
-
-		return account;
-	}
-
 	@Transactional
 	public AccountEntity closeAccountForUser(
 			@NonNull UserLogin userLogin,
@@ -137,9 +92,7 @@ public class AccountService {
 			throw new BusinessLogicException("user is blocked");
 		}
 
-		AccountEntity account = accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
+		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -171,9 +124,7 @@ public class AccountService {
 			throw new BusinessLogicException("user is blocked");
 		}
 
-		AccountEntity account = accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
+		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -203,9 +154,7 @@ public class AccountService {
 			throw new BusinessLogicException("account is not active");
 		}
 
-		AccountEntity account = accountRepository
-				.findByNumber(accountNumber)
-				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
+		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
@@ -220,5 +169,34 @@ public class AccountService {
 		return accountRepository
 				.unFreezeAccount(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not unfrozen"));
+	}
+
+	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
+		return accountRepository
+				.findByNumber(accountNumber)
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
+	}
+
+	private AccountEntity changeBalanceOrThrow(@NonNull AccountNumber accountNumber, @NonNull BigDecimal delta) {
+		return accountRepository
+				.changeAccountBalance(accountNumber, delta)
+				.orElseThrow(() -> diagnoseBalanceChangeFailure(accountNumber, delta));
+	}
+
+	private RuntimeException diagnoseBalanceChangeFailure(AccountNumber accountNumber, BigDecimal delta) {
+		AccountEntity account = findAccountOrThrow(accountNumber);
+
+		if (!AccountEntity.Status.ACTIVE.equals(account.status()))
+			throw new BusinessLogicException("account is inactive");
+
+		if (account.balance().add(delta).compareTo(BigDecimal.ZERO) < 0)
+			throw new BusinessLogicException("insufficient funds");
+
+		throw new BusinessLogicException("unknown exception");
+	}
+
+	private void validateAmount(BigDecimal amount) {
+		if (amount.signum() <= 0)
+			throw new BusinessLogicException("amount must be greater than 0");
 	}
 }

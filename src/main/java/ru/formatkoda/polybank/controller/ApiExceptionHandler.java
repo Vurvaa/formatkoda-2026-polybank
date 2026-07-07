@@ -1,4 +1,4 @@
-package ru.formatkoda.polybank;
+package ru.formatkoda.polybank.controller;
 
 
 import org.springframework.http.HttpStatus;

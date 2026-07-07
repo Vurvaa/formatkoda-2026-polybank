@@ -14,6 +14,7 @@ import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ public class UserRepository {
 
     public Optional<UserEntity> blockUserById(Long userId) {
         return dsl.update(USERS)
-                .set(USERS.BLOCKED_AT, OffsetDateTime.now())
+                .set(USERS.BLOCKED_AT, OffsetDateTime.now(ZoneOffset.UTC))
                 .where(USERS.ID.eq(userId))
                 .returning()
                 .fetchOptionalInto(UserEntity.class);
@@ -59,7 +60,7 @@ public class UserRepository {
 
     public Optional<UserEntity> unBlockUserById(Long userId) {
         return dsl.update(USERS)
-                .set(USERS.BLOCKED_AT, (OffsetDateTime) null)
+                .setNull(USERS.BLOCKED_AT)
                 .where(USERS.ID.eq(userId))
                 .returning()
                 .fetchOptionalInto(UserEntity.class);

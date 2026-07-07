@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PutMapping;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.dto.account.AccountDetailsResponseDto;
+import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
@@ -44,23 +44,23 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
-	public ResponseEntity<AccountDetailsResponseDto> createAccount(
+	public ResponseEntity<AccountResponseDto> createAccount(
 			@AuthenticationPrincipal UserLogin login,
 			@Valid @RequestBody CreateAccountRequestDto createAccountDto
 	) {
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponseDto(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
-	public ResponseEntity<List<AccountDetailsResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
-		List<AccountDetailsResponseDto> accounts = accountService
+	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
+		List<AccountResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()
-				.map(AccountMapper::toAccountDetailsResponseDto)
+				.map(AccountMapper::toResponseDto)
 				.toList();
 
 		return ResponseEntity.ok(accounts);
@@ -69,13 +69,13 @@ public class AccountController {
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}")
-	public ResponseEntity<AccountDetailsResponseDto> getAccount(
+	public ResponseEntity<AccountResponseDto> getAccount(
 			@AuthenticationPrincipal UserLogin login,
 			@PathVariable String accountNumber
 	) {
 		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
 
-		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(account));
+		return ResponseEntity.ok(AccountMapper.toResponseDto(account));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
@@ -164,25 +164,10 @@ public class AccountController {
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/{number}")
-	public ResponseEntity<AccountDetailsResponseDto> getAccountDetails(
-			@AuthenticationPrincipal UserLogin userLogin,
-			@PathVariable(name = "number") Long accountNumber
-	) {
-		AccountEntity accountEntity = accountService.getAccountForUser(
-				userLogin,
-				new AccountNumber(String.valueOf(accountNumber))
-		);
-
-		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
-	}
-
-	@SecurityRequirement(name = "bearerAuth")
-	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/close")
-	public ResponseEntity<AccountDetailsResponseDto> closeAccount(
+	public ResponseEntity<AccountResponseDto> closeAccount(
 			@AuthenticationPrincipal UserLogin userLogin,
-			@PathVariable(name = "number") Long accountNumber
+			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
 				.closeAccountForUser(
@@ -191,15 +176,15 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/freeze")
-	public ResponseEntity<AccountDetailsResponseDto> freezeAccount(
+	public ResponseEntity<AccountResponseDto> freezeAccount(
 			@AuthenticationPrincipal UserLogin userLogin,
-			@PathVariable(name = "number") Long accountNumber
+			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
 				.freezeAccountForUser(
@@ -208,15 +193,15 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/unfreeze")
-	public ResponseEntity<AccountDetailsResponseDto> unFreezeAccount(
+	public ResponseEntity<AccountResponseDto> unFreezeAccount(
 			@AuthenticationPrincipal UserLogin userLogin,
-			@PathVariable(name = "number") Long accountNumber
+			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
 				.unFreezeAccountForUser(
@@ -225,6 +210,6 @@ public class AccountController {
 						)
 				);
 
-		return ResponseEntity.ok(AccountMapper.toAccountDetailsResponseDto(accountEntity));
+		return ResponseEntity.ok(AccountMapper.toResponseDto(accountEntity));
 	}
 }

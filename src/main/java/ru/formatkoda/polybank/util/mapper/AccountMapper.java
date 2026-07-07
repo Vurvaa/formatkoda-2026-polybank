@@ -1,18 +1,19 @@
 package ru.formatkoda.polybank.util.mapper;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
-import ru.formatkoda.polybank.dto.account.AccountDetailsResponseDto;
+import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 
 public class AccountMapper {
 	private AccountMapper() {
 	}
 
-	public static AccountDetailsResponseDto toAccountDetailsResponseDto(AccountEntity accountEntity) {
-		return new AccountDetailsResponseDto(
+	public static AccountResponseDto toResponseDto(AccountEntity accountEntity) {
+		return new AccountResponseDto(
 				accountEntity.number().value(),
 				accountEntity.balance(),
 				accountEntity.type(),
-				accountEntity.status()
+				accountEntity.status(),
+				accountEntity.createdAt()
 		);
 	}
 }

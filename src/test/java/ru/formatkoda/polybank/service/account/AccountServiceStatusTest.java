@@ -60,9 +60,9 @@ public class AccountServiceStatusTest {
                 testLogin
         );
 
-        AccountEntity checkAccountEntity = accountService.getAccountForUser(
-                userLogin,
-                new AccountNumber(testAccountNumber)
+        AccountEntity checkAccountEntity = accountService.findOwnedAccount(
+                new AccountNumber(testAccountNumber),
+                userLogin
         );
 
         Assertions.assertEquals(accountEntity, checkAccountEntity);
@@ -103,9 +103,9 @@ public class AccountServiceStatusTest {
 
         Assertions.assertThrows(
                 BusinessLogicException.class,
-                () -> accountService.getAccountForUser(
-                        userLogin,
-                        new AccountNumber(testAccountNumber)
+                () -> accountService.findOwnedAccount(
+                        new AccountNumber(testAccountNumber),
+                        userLogin
                 )
         );
 
@@ -136,9 +136,9 @@ public class AccountServiceStatusTest {
 
         Assertions.assertThrows(
                 ResourceNotFoundException.class,
-                () -> accountService.getAccountForUser(
-                        userLogin,
-                        new AccountNumber(testAccountNumber)
+                () -> accountService.findOwnedAccount(
+                        new AccountNumber(testAccountNumber),
+                        userLogin
                 )
         );
 
@@ -154,7 +154,7 @@ public class AccountServiceStatusTest {
 
     @ParameterizedTest
     @EnumSource(AccountEntity.Type.class)
-    void shouldCloseNotZeroBalanceAccount(AccountEntity.Type Type) {
+    void shouldCloseNotZeroBalanceAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
 
         UserLogin userLogin = new UserLogin(
@@ -177,7 +177,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ZERO,
-                Type,
+                type,
                 AccountEntity.Status.ACTIVE,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -186,7 +186,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ZERO,
-                Type,
+                type,
                 AccountEntity.Status.CLOSED,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -218,7 +218,7 @@ public class AccountServiceStatusTest {
 
     @ParameterizedTest
     @EnumSource(AccountEntity.Type.class)
-    void shouldNotCloseAlreadyClosedAccount(AccountEntity.Type Type) {
+    void shouldNotCloseAlreadyClosedAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
 
         UserLogin userLogin = new UserLogin(
@@ -241,7 +241,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ZERO,
-                Type,
+                type,
                 AccountEntity.Status.CLOSED,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -268,7 +268,7 @@ public class AccountServiceStatusTest {
 
     @ParameterizedTest
     @EnumSource(AccountEntity.Type.class)
-    void shouldNotCloseNotZeroBalanceAccount(AccountEntity.Type Type) {
+    void shouldNotCloseNotZeroBalanceAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
 
         UserLogin userLogin = new UserLogin(
@@ -291,7 +291,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.CLOSED,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -318,7 +318,7 @@ public class AccountServiceStatusTest {
 
     @ParameterizedTest
     @EnumSource(AccountEntity.Type.class)
-    void shouldNotCloseAnotherUserAccount(AccountEntity.Type Type) {
+    void shouldNotCloseAnotherUserAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
 
@@ -342,7 +342,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testAccountOwnerId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.CLOSED,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -458,7 +458,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = "CREDIT"
     )
-    void shouldFreezeActiveNotCreditAccount(AccountEntity.Type Type) {
+    void shouldFreezeActiveNotCreditAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
 
         UserLogin userLogin = new UserLogin(
@@ -481,7 +481,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.ACTIVE,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -490,7 +490,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.FROZEN,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -581,7 +581,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.INCLUDE,
             names = "CREDIT"
     )
-    void shouldNotCloseCreditAccount(AccountEntity.Type Type) {
+    void shouldNotCloseCreditAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -603,7 +603,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.CLOSED,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -634,7 +634,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = "CREDIT"
     )
-    void shouldNotFreezeAnotherUserAccount(AccountEntity.Type Type) {
+    void shouldNotFreezeAnotherUserAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -657,7 +657,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testAccountOwnerId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.FROZEN,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -772,7 +772,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = "CREDIT"
     )
-    void shouldUnfreezeFrozenAccount(AccountEntity.Type Type) {
+    void shouldUnfreezeFrozenAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -794,7 +794,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.FROZEN,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -803,7 +803,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.ACTIVE,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
@@ -870,7 +870,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = "CREDIT"
     )
-    void shouldNotUnfreezeActiveAccount(AccountEntity.Type Type) {
+    void shouldNotUnfreezeActiveAccount(AccountEntity.Type type) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -892,7 +892,7 @@ public class AccountServiceStatusTest {
                 accountNumber,
                 testUserId,
                 BigDecimal.ONE,
-                Type,
+                type,
                 AccountEntity.Status.ACTIVE,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );

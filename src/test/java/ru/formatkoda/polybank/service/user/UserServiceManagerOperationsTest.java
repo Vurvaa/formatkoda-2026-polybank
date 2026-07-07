@@ -122,32 +122,34 @@ public class UserServiceManagerOperationsTest {
 
     @Test
     void shouldUnblockAccountUser() {
-        UserEntity user = user();
+        UserEntity blockedUser = mock(UserEntity.class);
+        when(blockedUser.isBlocked()).thenReturn(true);
+        when(blockedUser.login()).thenReturn(new UserLogin("blockedUserLogin"));
+
         UserEntity userManager = userManager();
 
-        UserLogin userLogin = user.login();
+        UserLogin blockedUserLogin = blockedUser.login();
         UserLogin managerLogin = userManager.login();
 
         when(userRepository.findUserByLogin(userManager.login()))
                 .thenReturn(Optional.of(userManager));
 
-        when(userRepository.findUserByLogin(user.login()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findUserByLogin(blockedUser.login()))
+                .thenReturn(Optional.of(blockedUser));
 
-        when(userRepository.findAllUserRoles(user)).thenReturn(List.of("CLIENT"));
+        when(userRepository.findAllUserRoles(blockedUser)).thenReturn(List.of("CLIENT"));
 
-        UserEntity blockedUser = mock(UserEntity.class);
+        UserEntity unblockedUser = mock(UserEntity.class);
+        UserWithRolesView unblockedUserWithRole = mock(UserWithRolesView.class);
 
-        UserWithRolesView blockedUserWithRole = mock(UserWithRolesView.class);
+        when(userRepository.unBlockUserById(blockedUser.id())).thenReturn(Optional.of(unblockedUser));
+        when(userMapper.toUserWithRolesView(unblockedUser, List.of("CLIENT"))).thenReturn(unblockedUserWithRole);
 
-        when(userRepository.blockUserById(user.id())).thenReturn(Optional.of(blockedUser));
-        when(userMapper.toUserWithRolesView(blockedUser, List.of("CLIENT"))).thenReturn(blockedUserWithRole);
+        UserWithRolesView checkUserWithRolesView = userService.unBlockUserByLogin(managerLogin, blockedUserLogin);
 
-        UserWithRolesView checkUserWithRolesView = userService.blockUserByLogin(managerLogin, userLogin);
+        Assertions.assertEquals(unblockedUserWithRole, checkUserWithRolesView);
 
-        Assertions.assertEquals(blockedUserWithRole, checkUserWithRolesView);
-
-        verify(userMapper, times(1)).toUserWithRolesView(blockedUser, List.of("CLIENT"));
+        verify(userMapper, times(1)).toUserWithRolesView(unblockedUser, List.of("CLIENT"));
     }
 
     @Test
