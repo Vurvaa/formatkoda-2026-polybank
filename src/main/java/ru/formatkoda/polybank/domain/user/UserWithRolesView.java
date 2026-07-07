@@ -10,9 +10,8 @@ public record UserWithRolesView(
         @NonNull UserLogin login,
         @NonNull String name,
         @NonNull String lastName,
-        @NonNull String passwordHash,
         @NonNull List<String> roles,
         @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
-)
-{}
+) {
+}

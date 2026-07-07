@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
+import ru.formatkoda.polybank.util.pagination.PageRequest;
 
 import static ru.formatkoda.polybank.jooq.generated.Tables.ROLES;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;
@@ -28,6 +29,16 @@ public class UserRepository {
         return dsl.selectFrom(USERS)
                 .where(USERS.LOGIN.eq(login.value()))
                 .fetchOptional(this::toEntity);
+    }
+
+    public List<UserEntity> findAllUsers(PageRequest pageRequest) {
+        return dsl
+                .selectFrom(USERS)
+                .orderBy(USERS.CREATED_AT.desc(), USERS.LOGIN.desc())
+                .limit(pageRequest.size())
+                .offset(pageRequest.offset())
+                .fetch(this::toEntity);
+
     }
 
     public long createUserAndReturnId(UserEntity user) {
