@@ -2,7 +2,6 @@ package ru.formatkoda.polybank.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.exception.DataAccessException;
 import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.user.UserEntity;
@@ -41,16 +40,11 @@ public class UserRepository {
 
     }
 
-    public long createUserAndReturnId(UserEntity user) {
-        Long id = dsl.insertInto(USERS)
+    public Optional<Long> createUserAndReturnId(UserEntity user) {
+        return dsl.insertInto(USERS)
                 .set(toRecord(user))
                 .returning(USERS.ID)
-                .fetchOne(USERS.ID);
-
-        if (id == null)
-            throw new DataAccessException("error inserting entity with login: " + user.login());
-
-        return id;
+                .fetchOptional(USERS.ID);
     }
 
     public void bindUserWithRole(long userId, long roleId) {
