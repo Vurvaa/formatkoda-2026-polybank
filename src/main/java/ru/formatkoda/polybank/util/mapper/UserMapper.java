@@ -49,25 +49,24 @@ public class UserMapper {
         );
     }
 
+    public UserDetailsResponseDto toResponse(UserWithRolesView user) {
+        return new UserDetailsResponseDto(
+                user.login(),
+                user.name(),
+                user.lastName(),
+                user.roles(),
+                user.createdAt(),
+                user.blockedAt()
+        );
+    }
+
     public UserWithRolesView toUserWithRolesView(UserEntity user, List<String> roles) {
         return new UserWithRolesView(
                 user.id(),
                 user.login(),
                 user.name(),
                 user.lastName(),
-                user.passwordHash(),
                 roles,
-                user.createdAt(),
-                user.blockedAt()
-        );
-    }
-
-    public UserDetailsResponseDto toUserDetailsResponseDto(UserWithRolesView user) {
-        return new UserDetailsResponseDto(
-                user.login().value(),
-                user.name(),
-                user.lastName(),
-                user.roles(),
                 user.createdAt(),
                 user.blockedAt()
         );

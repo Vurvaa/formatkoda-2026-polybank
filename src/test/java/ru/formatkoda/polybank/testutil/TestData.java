@@ -4,10 +4,12 @@ import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 public final class TestData {
 	public static final AccountNumber ACCOUNT_NUMBER = new AccountNumber("12345678901234567890");
@@ -55,6 +57,18 @@ public final class TestData {
 				"User",
 				"Test",
 				"password-hash",
+				CREATED_AT,
+				null
+		);
+	}
+
+	public static UserWithRolesView userWithRoles() {
+		return new UserWithRolesView(
+				25L,
+				USER_LOGIN,
+				"User",
+				"Test",
+				List.of("CLIENT"),
 				CREATED_AT,
 				null
 		);
