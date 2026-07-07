@@ -100,7 +100,7 @@ public class UserService {
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
         List<UserWithRolesView> users = userRepository
                 .findAllUsers(pageRequest).stream()
-                .map(this::toUserWithRolesView)
+                .map(userRepository::toUserWithRolesView)
                 .toList();
 
         return new PageResult<>(
@@ -108,17 +108,6 @@ public class UserService {
                 pageRequest.page(),
                 pageRequest.size(),
                 users.size()
-        );
-    }
-
-    private UserWithRolesView toUserWithRolesView(UserEntity user) {
-        return new UserWithRolesView(
-                user.login(),
-                user.name(),
-                user.lastName(),
-                userRepository.findAllUserRoles(user),
-                user.createdAt(),
-                user.blockedAt()
         );
     }
 }

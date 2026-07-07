@@ -7,6 +7,7 @@ import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 
@@ -84,6 +85,17 @@ public class UserRepository {
                 .on(USERS_ROLES.ROLE_ID.eq(ROLES.ID))
                 .where(USERS_ROLES.USER_ID.eq(user.id()))
                 .fetch(ROLES.NAME);
+    }
+
+    public UserWithRolesView toUserWithRolesView(UserEntity user) {
+        return new UserWithRolesView(
+                user.login(),
+                user.name(),
+                user.lastName(),
+                findAllUserRoles(user),
+                user.createdAt(),
+                user.blockedAt()
+        );
     }
 
     private UsersRecord toRecord(UserEntity user) {

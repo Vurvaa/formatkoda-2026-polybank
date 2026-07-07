@@ -10,17 +10,25 @@ import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 
+import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.testutil.TestData;
+import ru.formatkoda.polybank.util.pagination.PageRequest;
+import ru.formatkoda.polybank.util.pagination.PageResult;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static ru.formatkoda.polybank.testutil.TestData.user;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +41,54 @@ class UserServiceTest {
 
     @InjectMocks
     UserService userService;
+
+    @Test
+    void findAllUsersWithRolesShouldReturnPageResultWithMappedUsers() {
+        PageRequest pageRequest = new PageRequest(0, 10);
+
+        UserEntity user1 = TestData.user();
+
+        UserEntity user2 = TestData.user();
+
+        when(userRepository.findAllUsers(pageRequest))
+                .thenReturn(List.of(user1, user2));
+
+        PageResult<UserWithRolesView> result =
+                userService.findAllUsersWithRoles(pageRequest);
+
+        assertThat(result).isNotNull();
+
+        assertThat(result.page()).isZero();
+        assertThat(result.size()).isEqualTo(10);
+        assertThat(result.total()).isEqualTo(2);
+
+        assertThat(result.items().get(0).login()).isEqualTo(TestData.USER_LOGIN);
+
+        assertThat(result.items().get(1).login()).isEqualTo(TestData.USER_LOGIN);
+
+        verify(userRepository).findAllUsers(pageRequest);
+    }
+
+    @Test
+    void findAllUsersWithRolesShouldReturnEmptyPageResultWhenRepositoryReturnsEmptyList() {
+        PageRequest pageRequest = new PageRequest(1, 5);
+
+        when(userRepository.findAllUsers(pageRequest))
+                .thenReturn(List.of());
+
+        PageResult<UserWithRolesView> result =
+                userService.findAllUsersWithRoles(pageRequest);
+
+        assertThat(result).isNotNull();
+
+        Assertions.assertTrue(result.items().isEmpty());
+        assertThat(result.page()).isEqualTo(1);
+        assertThat(result.size()).isEqualTo(5);
+        assertThat(result.total()).isZero();
+
+        verify(userRepository).findAllUsers(pageRequest);
+        verifyNoMoreInteractions(userRepository);
+    }
 
     @Test
     void createUserShouldThrowExceptionWhenLoginIsDuplicated() {

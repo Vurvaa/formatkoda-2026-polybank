@@ -10,8 +10,8 @@ public record UserDetailsResponseDto(
         @NonNull UserLogin login,
         @NonNull String name,
         @NonNull String lastName,
-        @NonNull List<String> userRoles,
+        /*@NonNull*/ List<String> userRoles,
         @NonNull OffsetDateTime createdAt,
-        @NonNull OffsetDateTime blockedAt
+        OffsetDateTime blockedAt
 ) {
 }

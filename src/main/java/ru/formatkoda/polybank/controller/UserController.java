@@ -80,8 +80,8 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("isAuthenticated()")
-    //@Secured({"ROLE_MANAGER", "ROLE_SENIOR_MANAGER"})
-    @GetMapping("/fetch-all")
+    @Secured({"ROLE_MANAGER", "ROLE_SENIOR_MANAGER"})
+    @GetMapping("/all")
     public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
