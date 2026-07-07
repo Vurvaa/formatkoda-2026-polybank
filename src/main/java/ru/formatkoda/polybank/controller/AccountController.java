@@ -212,4 +212,34 @@ public class AccountController {
 
 		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
+	@PutMapping("/{number}/block")
+	public ResponseEntity<AccountResponseDto> blockAccount(
+			@Valid @AuthenticationPrincipal UserLogin managerLogin,
+			@PathVariable(name = "number") String accountNumber
+	) {
+		AccountEntity accountEntity = accountService.blockAccountByNumber(
+				managerLogin,
+				new AccountNumber(accountNumber)
+		);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
+	@PutMapping("/{number}/unblock")
+	public ResponseEntity<AccountResponseDto> unBlockAccount(
+			@Valid @AuthenticationPrincipal UserLogin managerLogin,
+			@PathVariable(name = "number") String accountNumber
+	) {
+		AccountEntity accountEntity = accountService.unBlockAccountByNumber(
+				managerLogin,
+				new AccountNumber(accountNumber)
+		);
+
+		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
+	}
 }

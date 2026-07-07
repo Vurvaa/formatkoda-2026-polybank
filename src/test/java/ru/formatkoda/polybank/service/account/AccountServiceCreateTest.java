@@ -45,7 +45,7 @@ class AccountServiceCreateTest {
 		UserEntity userEntity = mock(UserEntity.class);
 		when(userEntity.id()).thenReturn(1L);
 
-		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(userEntity);
+		when(userService.findNotBlockedUserByLogin(USER_LOGIN)).thenReturn(userEntity);
 
 		AccountEntity accountEntity = new AccountEntity(
 				0L,
@@ -62,7 +62,7 @@ class AccountServiceCreateTest {
 
 		Assertions.assertEquals(accountEntity, accountEntityToCheck);
 
-		verify(userService, times(1)).findUserByLogin(USER_LOGIN);
+		verify(userService, times(1)).findNotBlockedUserByLogin(USER_LOGIN);
 		verify(accountRepository, times(1)).createAccountForUser(userEntity.id(), accountType);
 
 		verifyNoMoreInteractions(userService, accountRepository);
@@ -73,16 +73,16 @@ class AccountServiceCreateTest {
 	void shouldNotCreateAccountWhenUserIsBlocked(Type accountType) {
 		UserEntity userEntity = mock(UserEntity.class);
 		when(userEntity.id()).thenReturn(1L);
-		when(userEntity.isBlocked()).thenReturn(true);
 
-		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(userEntity);
+		when(userService.findNotBlockedUserByLogin(USER_LOGIN))
+				.thenThrow(new BusinessLogicException("user is blocked"));
 
 		Assertions.assertThrows(
 				BusinessLogicException.class,
 				() -> accountService.createAccountForUser(accountType, USER_LOGIN)
 		);
 
-		verify(userService, times(1)).findUserByLogin(USER_LOGIN);
+		verify(userService, times(1)).findNotBlockedUserByLogin(USER_LOGIN);
 		verify(accountRepository, times(0))
 				.createAccountForUser(userEntity.id(), accountType);
 

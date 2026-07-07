@@ -28,7 +28,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public UserLogin createUser(UserEntity user) {
+    public UserLogin createUser(@NonNull UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findUserByLogin(user.login());
         if (userOptional.isPresent())
             throw new BusinessLogicException("user already exists");
@@ -44,13 +44,25 @@ public class UserService {
         return user.login();
     }
 
-    public UserEntity findUserByLogin(UserLogin login) {
+    public UserEntity findUserByLogin(@NonNull UserLogin login) {
         return userRepository.findUserByLogin(login)
                 .orElseThrow(() -> new ResourceNotFoundException("not found user with this login"));
     }
 
+    public UserEntity findNotBlockedUserByLogin(@NonNull UserLogin login) {
+        UserEntity user = findUserByLogin(login);
+        if (user.isBlocked()) {
+            throw new BusinessLogicException(String.format("user %s is blocked", login.value()));
+        }
+
+        return user;
+    }
+
     @Transactional
-    public UserWithRolesView blockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
+    public UserWithRolesView blockUserByLogin(
+            @NonNull UserLogin managerLogin,
+            @NonNull UserLogin userLogin
+    ) {
         UserEntity manager = findUserByLogin(managerLogin);
         UserEntity user = findUserByLogin(userLogin);
         if (user.id().equals(manager.id())) {
@@ -72,7 +84,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithRolesView unBlockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
+    public UserWithRolesView unBlockUserByLogin(
+            @NonNull UserLogin managerLogin,
+            @NonNull UserLogin userLogin) {
         UserEntity manager = findUserByLogin(managerLogin);
         UserEntity user = findUserByLogin(userLogin);
         if (user.id().equals(manager.id())) {
@@ -93,7 +107,7 @@ public class UserService {
         );
     }
 
-    public List<String> findAllUserRoles(UserEntity user) {
+    public List<String> findAllUserRoles(@NonNull UserEntity user) {
         return userRepository.findAllUserRoles(user);
     }
 
