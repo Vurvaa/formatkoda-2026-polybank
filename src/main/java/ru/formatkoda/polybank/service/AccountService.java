@@ -167,6 +167,8 @@ public class AccountService {
 		AccountEntity account = findAccountOrThrow(accountNumber);
 		if (account.status().equals(AccountEntity.Status.BLOCKED)) {
 			return account;
+		} else if (account.status().equals(AccountEntity.Status.CLOSED)) {
+			throw new BusinessLogicException("closed account cannot be blocked");
 		}
 
 		return accountRepository
