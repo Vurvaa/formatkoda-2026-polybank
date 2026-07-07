@@ -1,16 +1,17 @@
 package ru.formatkoda.polybank.dto.transaction;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
-
-import java.math.BigDecimal;
 
 public record TransferRequestDto(
 		@NotBlank @Length(min = 20, max = 20) String fromAccountNumber,
 		@NotBlank @Length(min = 20, max = 20) String toAccountNumber,
-		@NotNull @DecimalMin(value = "0.01") @Digits(integer = 18, fraction = 2) BigDecimal amount
+		@NotBlank
+		@Pattern(
+				regexp = "^(0|[1-9]\\d{0,15})\\.\\d{0,2}$",
+				message = "amount must be a decimal string with no more than 2 fraction digits"
+		)
+		String amount
 ) {
 }

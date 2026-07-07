@@ -14,7 +14,7 @@ interface OperationModalProps {
 }
 
 interface OperationFormValues {
-  amount: number;
+  amount: string;
   toAccountNumber?: string;
 }
 

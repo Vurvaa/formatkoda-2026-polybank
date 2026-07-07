@@ -191,7 +191,7 @@ class UserServiceTest {
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.of(expectedRole));
         when(userRepository.createUserAndReturnId(user()))
-                .thenReturn(1L);
+                .thenReturn(Optional.of(1L));
         doNothing().when(userRepository).bindUserWithRole(anyLong(), anyLong());
     }
 }

@@ -12,7 +12,7 @@ export type AccountType =
 
 export interface AccountResponseDto {
   number: string;
-  balance: number;
+  balance: string;
   type: AccountType;
   status: AccountStatus;
   createdAt: string;
@@ -20,11 +20,11 @@ export interface AccountResponseDto {
 
 export interface AccountOperationRequestDto {
   accountNumber: string;
-  amount: number;
+  amount: string;
 }
 
 export interface TransferRequestDto {
   fromAccountNumber: string;
   toAccountNumber: string;
-  amount: number;
+  amount: string;
 }

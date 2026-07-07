@@ -16,7 +16,7 @@ public class TransactionMapper {
 				transaction.id(),
 				transaction.fromAccountNumber() == null ? null : transaction.fromAccountNumber().value(),
 				transaction.toAccountNumber() == null ? null : transaction.toAccountNumber().value(),
-				transaction.amount(),
+				transaction.amount().toPlainString(),
 				TransactionType.valueOf(transaction.type().name()),
 				TransactionStatus.valueOf(transaction.status().name()),
 				transaction.createdAt()
