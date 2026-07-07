@@ -48,7 +48,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PostMapping("/{userLogin}/block")
+    @PutMapping("/{userLogin}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
             @Valid @PathVariable String userLogin
@@ -63,7 +63,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PostMapping("/{userLogin}/unblock")
+    @PutMapping("/{userLogin}/unblock")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
             @Valid @PathVariable String userLogin
@@ -77,7 +77,7 @@ public class UserController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER') or hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
     @GetMapping
     public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,

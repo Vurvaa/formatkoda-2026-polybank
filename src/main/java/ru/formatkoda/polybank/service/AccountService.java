@@ -184,7 +184,9 @@ public class AccountService {
 		userService.findNotBlockedUserByLogin(managerLogin);
 
 		AccountEntity account = findAccountOrThrow(accountNumber);
-		if (!account.status().equals(AccountEntity.Status.BLOCKED)) {
+		if (account.status().equals(AccountEntity.Status.CLOSED)) {
+			throw new BusinessLogicException("closed account cannot be unblocked");
+		} else if (!account.status().equals(AccountEntity.Status.BLOCKED)) {
 			return account;
 		}
 

@@ -45,7 +45,7 @@ class AccountServiceBlockUnblockTest {
     @EnumSource(
             value = AccountEntity.Status.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = "BLOCKED"
+            names = {"BLOCKED", "CLOSED"}
     )
     void shouldBlockAccountByNumber(AccountEntity.Status status) {
         AccountEntity account = accountWithStatus(status);
@@ -78,6 +78,24 @@ class AccountServiceBlockUnblockTest {
 
         assertThat(result).isSameAs(blockedAccount);
         assertThat(result.status()).isEqualTo(AccountEntity.Status.BLOCKED);
+
+        verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
+        verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verifyNoMoreInteractions(userService, accountRepository);
+    }
+
+    @Test
+    void shouldNotBlockClosedAccount() {
+        AccountEntity closedAccount = accountWithStatus(AccountEntity.Status.CLOSED);
+
+        when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
+        when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(closedAccount));
+
+        assertThatThrownBy(() -> accountService.blockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER))
+                .isInstanceOf(BusinessLogicException.class)
+                .hasMessage("closed account cannot be blocked");
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
@@ -160,7 +178,7 @@ class AccountServiceBlockUnblockTest {
     @EnumSource(
             value = AccountEntity.Status.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = "BLOCKED"
+            names = {"BLOCKED", "CLOSED"}
     )
     void shouldReturnAccountWhenUnblockingNotBlockedAccount(AccountEntity.Status status) {
         AccountEntity account = accountWithStatus(status);
@@ -172,6 +190,23 @@ class AccountServiceBlockUnblockTest {
 
         assertThat(result).isSameAs(account);
         assertThat(result.status()).isEqualTo(status);
+
+        verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
+        verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verifyNoMoreInteractions(userService, accountRepository);
+    }
+
+    @Test
+    void shouldNotUnblockClosedAccount() {
+        AccountEntity closedAccount = accountWithStatus(AccountEntity.Status.CLOSED);
+
+        when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
+        when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(closedAccount));
+
+        assertThatThrownBy(() -> accountService.unBlockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER))
+                .isInstanceOf(BusinessLogicException.class);
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
