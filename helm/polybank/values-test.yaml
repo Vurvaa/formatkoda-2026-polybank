@@ -12,11 +12,11 @@ service:
 
 resources:
   requests:
-    memory: "128Mi"
-    cpu: "50m"
+    memory: "256Mi"
+    cpu: "100m""
   limits:
-    memory: "254Mi"
-    cpu: "100m"
+    memory: "1Gi"
+    cpu: "500m"
 
 startupProbe:
   initialDelaySeconds: 10
@@ -70,7 +70,7 @@ postgresql:
       storageClass: "local-path"
     resources:
       requests:
-        cpu: "50m"
+        cpu: "100m"
         memory: "128Mi"
       limits:
         cpu: "250m"
