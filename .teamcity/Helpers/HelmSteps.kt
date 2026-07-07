@@ -35,7 +35,7 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
             helm dependency build %helm.chart.path%/polybank/
 
             HELM_APP_VAR_ARGS=""
-            for name in %env.app.vars.names%; do
+            for name in ${'$'}(echo "%env.app.vars.names%" | tr ',' ' '); do
                 val="${'$'}(printenv "${'$'}name" || true)"
                 HELM_APP_VAR_ARGS="${'$'}HELM_APP_VAR_ARGS --set-string appVars.${'$'}{name}.value=${'$'}val"
             done

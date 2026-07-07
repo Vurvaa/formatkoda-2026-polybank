@@ -79,15 +79,6 @@ object MrBuild : BuildType({
     }
 
     features {
-        pullRequests {
-            vcsRootExtId = "${DslContext.settingsRoot.id}"
-            provider = gitlab {
-                authType = token {
-                    token = "%env.GITLAB_TOKEN%"
-                }
-            }
-        }
-
         commitStatusPublisher {
             vcsRootExtId = "${DslContext.settingsRoot.id}"
             publisher = gitlab {
