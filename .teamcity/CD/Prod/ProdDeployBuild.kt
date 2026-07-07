@@ -8,7 +8,7 @@ import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 
 object ProdDeployBuild : BuildType({
-    name = "CD - (prod) Deploy on prod."
+    name = "CD - (prod) deploy on prod."
 
     vcs {
         root(DslContext.settingsRoot)
@@ -35,13 +35,6 @@ object ProdDeployBuild : BuildType({
                 pgDatabaseParam = "POSTGRES_DB",
             )
         )
-    }
-
-    triggers {
-        finishBuildTrigger {
-            buildType = "${ProdBuild.id}"
-            successfulOnly = true
-        }
     }
 
     failureConditions {

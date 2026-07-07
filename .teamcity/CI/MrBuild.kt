@@ -73,6 +73,7 @@ object MrBuild : BuildType({
     triggers {
         vcs {
             branchFilter = """
+                +:refs/heads/*
                 -:refs/heads/main
             """.trimIndent()
         }
