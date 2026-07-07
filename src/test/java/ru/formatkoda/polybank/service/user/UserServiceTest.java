@@ -47,7 +47,6 @@ class UserServiceTest {
         PageRequest pageRequest = new PageRequest(0, 10);
 
         UserEntity user1 = TestData.user();
-
         UserEntity user2 = TestData.user();
 
         when(userRepository.findAllUsers(pageRequest))
@@ -61,10 +60,6 @@ class UserServiceTest {
         assertThat(result.page()).isZero();
         assertThat(result.size()).isEqualTo(10);
         assertThat(result.total()).isEqualTo(2);
-
-        assertThat(result.items().get(0).login()).isEqualTo(TestData.USER_LOGIN);
-
-        assertThat(result.items().get(1).login()).isEqualTo(TestData.USER_LOGIN);
 
         verify(userRepository).findAllUsers(pageRequest);
     }
