@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-export function formatMoney(value: number): string {
+export function formatMoney(value: string): string {
   const numberValue = Number(value);
 
   if (Number.isNaN(numberValue)) {
