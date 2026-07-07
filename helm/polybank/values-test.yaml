@@ -18,6 +18,11 @@ resources:
     memory: "512Mi"
     cpu: "500m"
 
+startupProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 40
+
 webapp:
   appName: polybank-webapp
   replicas: 1

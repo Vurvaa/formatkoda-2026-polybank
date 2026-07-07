@@ -3,7 +3,7 @@ appName: polybank-backend
 image:
   repository: 192.168.130.81:5000/polybank
   tag: latest
-replicas: 2
+replicas: 3
 appServicePort: 8080
 metricsContainerPort: 5300
 service:
@@ -18,6 +18,11 @@ resources:
   limits:
     memory: "1Gi"
     cpu: "1000m"
+
+startupProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 30
 
 appVars:
   APP_JWT_EXPIRATION_MINUTES:
