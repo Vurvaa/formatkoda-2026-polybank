@@ -51,9 +51,12 @@ public class UserController {
     @PostMapping("/{userLogin}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable UserLogin userLogin
+            @Valid @PathVariable String userLogin
     ) {
-        UserWithRolesView user = userService.blockUserByLogin(managerLogin, userLogin);
+        UserWithRolesView user = userService.blockUserByLogin(
+                managerLogin,
+                new UserLogin(userLogin)
+        );
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
@@ -63,9 +66,12 @@ public class UserController {
     @PostMapping("/{userLogin}/unblock")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
             @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable UserLogin userLogin
+            @Valid @PathVariable String userLogin
     ) {
-        UserWithRolesView user = userService.unBlockUserByLogin(managerLogin, userLogin);
+        UserWithRolesView user = userService.unBlockUserByLogin(
+                managerLogin,
+                new UserLogin(userLogin)
+        );
 
         return ResponseEntity.ok(userMapper.toResponse(user));
     }

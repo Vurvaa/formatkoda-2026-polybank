@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountServiceStatusTest {
+class AccountServiceStatusTest {
     @Mock
     private AccountRepository accountRepository;
 
@@ -101,10 +101,12 @@ public class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.of(accountEntity));
 
+        AccountNumber testAccountNumberInstance = new AccountNumber(testAccountNumber);
+
         Assertions.assertThrows(
                 BusinessLogicException.class,
                 () -> accountService.findOwnedAccount(
-                        new AccountNumber(testAccountNumber),
+                        testAccountNumberInstance,
                         userLogin
                 )
         );
@@ -134,10 +136,12 @@ public class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.empty());
 
+        AccountNumber testAccountNumberInstance = new AccountNumber(testAccountNumber);
+
         Assertions.assertThrows(
                 ResourceNotFoundException.class,
                 () -> accountService.findOwnedAccount(
-                        new AccountNumber(testAccountNumber),
+                        testAccountNumberInstance,
                         userLogin
                 )
         );
@@ -404,7 +408,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = {"ACTIVE", "CLOSED"}
     )
-    void shouldNotCloseNotActiveOrClosedAccount(AccountEntity.Status Status) {
+    void shouldNotCloseNotActiveOrClosedAccount(AccountEntity.Status status) {
         String testLogin = "TestLogin";
 
         UserLogin userLogin = new UserLogin(
@@ -428,7 +432,7 @@ public class AccountServiceStatusTest {
                 testUserId,
                 BigDecimal.ZERO,
                 AccountEntity.Type.CURRENT,
-                Status,
+                status,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
 
@@ -719,7 +723,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = {"ACTIVE", "FROZEN"}
     )
-    void shouldNotFreezeNotActiveOrFrozenAccount(AccountEntity.Status Status) {
+    void shouldNotFreezeNotActiveOrFrozenAccount(AccountEntity.Status status) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -742,7 +746,7 @@ public class AccountServiceStatusTest {
                 testUserId,
                 BigDecimal.ONE,
                 AccountEntity.Type.CURRENT,
-                Status,
+                status,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
 
@@ -812,7 +816,7 @@ public class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.of(accountEntity));
         when(accountRepository
-                .unFreezeAccount(
+                .makeActiveAccount(
                         accountNumber
                 )
         ).thenReturn(Optional.of(accountEntityUnFrozen));
@@ -828,7 +832,7 @@ public class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(1)).unFreezeAccount(accountNumber);
+        verify(accountRepository, times(1)).makeActiveAccount(accountNumber);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -859,7 +863,7 @@ public class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).unFreezeAccount(accountNumber);
+        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -912,7 +916,7 @@ public class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).unFreezeAccount(accountNumber);
+        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -923,7 +927,7 @@ public class AccountServiceStatusTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = {"ACTIVE", "FROZEN"}
     )
-    void shouldNotUnfreezeActiveAccount(AccountEntity.Status Status) {
+    void shouldNotUnfreezeActiveAccount(AccountEntity.Status status) {
         String testLogin = "TestLogin";
         Long testUserId = 1L;
         Long testAccountId = 1L;
@@ -946,7 +950,7 @@ public class AccountServiceStatusTest {
                 testUserId,
                 BigDecimal.ONE,
                 AccountEntity.Type.SAVINGS,
-                Status,
+                status,
                 OffsetDateTime.parse("2026-07-01T12:00:00Z")
         );
 
@@ -965,7 +969,7 @@ public class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).unFreezeAccount(accountNumber);
+        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }

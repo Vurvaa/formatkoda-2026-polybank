@@ -24,9 +24,7 @@ public class AccountService {
 
 	@Transactional
 	public AccountEntity createAccountForUser(@NonNull AccountEntity.Type accountType, @NonNull UserLogin userLogin) {
-		UserEntity user = userService.findUserByLogin(userLogin);
-		if (user.isBlocked())
-			throw new BusinessLogicException("user is blocked");
+		UserEntity user = userService.findNotBlockedUserByLogin(userLogin);
 
 		return accountRepository
 				.createAccountForUser(user.id(),accountType)
@@ -86,11 +84,7 @@ public class AccountService {
 			@NonNull UserLogin userLogin,
 			@NonNull AccountNumber accountNumber
 	) {
-		UserEntity user = userService.findUserByLogin(userLogin);
-
-		if (user.isBlocked()) {
-			throw new BusinessLogicException("user is blocked");
-		}
+		UserEntity user = userService.findNotBlockedUserByLogin(userLogin);
 
 		AccountEntity account = findAccountOrThrow(accountNumber);
 
@@ -118,11 +112,7 @@ public class AccountService {
 			@NonNull UserLogin userLogin,
 			@NonNull AccountNumber accountNumber
 	) {
-		UserEntity user = userService.findUserByLogin(userLogin);
-
-		if (user.isBlocked()) {
-			throw new BusinessLogicException("user is blocked");
-		}
+		UserEntity user = userService.findNotBlockedUserByLogin(userLogin);
 
 		AccountEntity account = findAccountOrThrow(accountNumber);
 
@@ -148,11 +138,7 @@ public class AccountService {
 			@NonNull UserLogin userLogin,
 			@NonNull AccountNumber accountNumber
 	) {
-		UserEntity user = userService.findUserByLogin(userLogin);
-
-		if (user.isBlocked()) {
-			throw new BusinessLogicException("account is not active");
-		}
+		UserEntity user = userService.findNotBlockedUserByLogin(userLogin);
 
 		AccountEntity account = findAccountOrThrow(accountNumber);
 
@@ -167,8 +153,42 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.unFreezeAccount(accountNumber)
+				.makeActiveAccount(accountNumber)
 				.orElseThrow(() -> new BusinessLogicException("account not unfrozen"));
+	}
+
+	@Transactional
+	public AccountEntity blockAccountByNumber(
+			@NonNull UserLogin managerLogin,
+			@NonNull AccountNumber accountNumber
+	) {
+		userService.findNotBlockedUserByLogin(managerLogin);
+
+		AccountEntity account = findAccountOrThrow(accountNumber);
+		if (account.status().equals(AccountEntity.Status.BLOCKED)) {
+			return account;
+		}
+
+		return accountRepository
+				.blockAccount(accountNumber)
+				.orElseThrow(() -> new BusinessLogicException("account not blocked"));
+	}
+
+	@Transactional
+	public AccountEntity unBlockAccountByNumber(
+			@NonNull UserLogin managerLogin,
+			@NonNull AccountNumber accountNumber
+	) {
+		userService.findNotBlockedUserByLogin(managerLogin);
+
+		AccountEntity account = findAccountOrThrow(accountNumber);
+		if (!account.status().equals(AccountEntity.Status.BLOCKED)) {
+			return account;
+		}
+
+		return accountRepository
+				.makeActiveAccount(accountNumber)
+				.orElseThrow(() -> new BusinessLogicException("account not unblocked"));
 	}
 
 	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
@@ -183,7 +203,10 @@ public class AccountService {
 				.orElseThrow(() -> diagnoseBalanceChangeFailure(accountNumber, delta));
 	}
 
-	private RuntimeException diagnoseBalanceChangeFailure(AccountNumber accountNumber, BigDecimal delta) {
+	private RuntimeException diagnoseBalanceChangeFailure(
+			@NonNull AccountNumber accountNumber,
+			@NonNull BigDecimal delta
+	) {
 		AccountEntity account = findAccountOrThrow(accountNumber);
 
 		if (!AccountEntity.Status.ACTIVE.equals(account.status()))
@@ -195,7 +218,7 @@ public class AccountService {
 		throw new BusinessLogicException("unknown exception");
 	}
 
-	private void validateAmount(BigDecimal amount) {
+	private void validateAmount(@NonNull BigDecimal amount) {
 		if (amount.signum() <= 0)
 			throw new BusinessLogicException("amount must be greater than 0");
 	}

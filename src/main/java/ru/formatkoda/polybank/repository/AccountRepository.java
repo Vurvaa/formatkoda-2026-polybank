@@ -83,11 +83,20 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	public Optional<AccountEntity> unFreezeAccount(AccountNumber accountNumber) {
+	public Optional<AccountEntity> blockAccount(AccountNumber accountNumber) {
+		return dsl
+				.update(ACCOUNTS)
+				.set(ACCOUNTS.STATUS, AccountEntity.Status.BLOCKED.name())
+				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
+				.returning()
+				.fetchOptional(this::toEntity);
+	}
+
+	public Optional<AccountEntity> makeActiveAccount(AccountNumber accountNumber) {
 		return dsl
 				.update(ACCOUNTS)
 				.set(ACCOUNTS.STATUS, AccountEntity.Status.ACTIVE.name())
-				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
+				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.returning()
 				.fetchOptional(this::toEntity);
 	}
