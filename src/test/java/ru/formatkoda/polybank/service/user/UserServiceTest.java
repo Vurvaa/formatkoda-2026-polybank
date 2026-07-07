@@ -17,6 +17,7 @@ import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.testutil.TestData;
+import ru.formatkoda.polybank.util.mapper.UserMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -39,6 +41,9 @@ class UserServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    UserMapper userMapper;
+
     @InjectMocks
     UserService userService;
 
@@ -51,6 +56,9 @@ class UserServiceTest {
 
         when(userRepository.findAllUsers(pageRequest))
                 .thenReturn(List.of(user1, user2));
+
+        when(userMapper.toUserWithRolesView(any(), any()))
+                .thenReturn(TestData.userWithRoles());
 
         PageResult<UserWithRolesView> result =
                 userService.findAllUsersWithRoles(pageRequest);

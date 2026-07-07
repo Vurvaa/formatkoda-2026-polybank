@@ -100,7 +100,8 @@ public class UserService {
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
         List<UserWithRolesView> users = userRepository
                 .findAllUsers(pageRequest).stream()
-                .map(userRepository::toUserWithRolesView)
+                .map(u -> userMapper
+                        .toUserWithRolesView(u, userRepository.findAllUserRoles(u)))
                 .toList();
 
         return new PageResult<>(

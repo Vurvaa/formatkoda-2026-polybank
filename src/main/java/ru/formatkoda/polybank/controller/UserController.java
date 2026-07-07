@@ -6,18 +6,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
-import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.domain.user.UserLogin;
-import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
@@ -27,9 +22,6 @@ import ru.formatkoda.polybank.util.mapper.UserMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;
-
-import java.util.List;
-import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -79,9 +71,8 @@ public class UserController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("isAuthenticated()")
-    @Secured({"ROLE_MANAGER", "ROLE_SENIOR_MANAGER"})
-    @GetMapping("/all")
+    @PreAuthorize("hasRole('SENIOR_MANAGER') or hasRole('MANAGER')")
+    @GetMapping
     public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size

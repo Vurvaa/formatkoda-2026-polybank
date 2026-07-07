@@ -7,7 +7,6 @@ import org.jooq.Record;
 import org.springframework.stereotype.Repository;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
-import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 
@@ -17,7 +16,6 @@ import static ru.formatkoda.polybank.jooq.generated.Tables.USERS_ROLES;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +37,8 @@ public class UserRepository {
                 .orderBy(USERS.CREATED_AT.desc(), USERS.LOGIN.desc())
                 .limit(pageRequest.size())
                 .offset(pageRequest.offset())
-                .fetchInto(UserEntity.class);
+                .fetch(this::toEntity);
+
     }
 
     public long createUserAndReturnId(UserEntity user) {
@@ -85,17 +84,6 @@ public class UserRepository {
                 .on(USERS_ROLES.ROLE_ID.eq(ROLES.ID))
                 .where(USERS_ROLES.USER_ID.eq(user.id()))
                 .fetch(ROLES.NAME);
-    }
-
-    public UserWithRolesView toUserWithRolesView(UserEntity user) {
-        return new UserWithRolesView(
-                user.login(),
-                user.name(),
-                user.lastName(),
-                findAllUserRoles(user),
-                user.createdAt(),
-                user.blockedAt()
-        );
     }
 
     private UsersRecord toRecord(UserEntity user) {

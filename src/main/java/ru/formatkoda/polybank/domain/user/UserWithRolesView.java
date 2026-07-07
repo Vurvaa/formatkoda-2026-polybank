@@ -10,7 +10,7 @@ public record UserWithRolesView(
         @NonNull UserLogin login,
         @NonNull String name,
         @NonNull String lastName,
-        @NonNull List<String> userRoles,
+        @NonNull List<String> roles,
         @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
 ) {

@@ -54,7 +54,7 @@ public class UserMapper {
                 user.login(),
                 user.name(),
                 user.lastName(),
-                user.userRoles(),
+                user.roles(),
                 user.createdAt(),
                 user.blockedAt()
         );
@@ -66,7 +66,6 @@ public class UserMapper {
                 user.login(),
                 user.name(),
                 user.lastName(),
-                user.passwordHash(),
                 roles,
                 user.createdAt(),
                 user.blockedAt()
@@ -75,7 +74,7 @@ public class UserMapper {
 
     public UserDetailsResponseDto toUserDetailsResponseDto(UserWithRolesView user) {
         return new UserDetailsResponseDto(
-                user.login().value(),
+                user.login(),
                 user.name(),
                 user.lastName(),
                 user.roles(),
