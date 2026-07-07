@@ -37,7 +37,8 @@ public class UserService {
                 .findRoleEntityByName("CLIENT")
                 .orElseThrow(() -> new ResourceNotFoundException("not found CLIENT role"));
 
-        long userId = userRepository.createUserAndReturnId(user);
+        Long userId = userRepository.createUserAndReturnId(user)
+                .orElseThrow(() -> new BusinessLogicException("unable to create user"));
 
         userRepository.bindUserWithRole(userId, role.id());
 

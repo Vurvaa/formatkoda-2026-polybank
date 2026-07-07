@@ -17,7 +17,7 @@ export interface TransactionResponseDto {
   id: number;
   fromAccountNumber: string | null;
   toAccountNumber: string | null;
-  amount: number;
+  amount: string;
   type: TransactionType;
   status: TransactionStatus;
   createdAt: string;

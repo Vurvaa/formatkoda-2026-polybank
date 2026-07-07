@@ -65,7 +65,7 @@ export function TransactionsTable({
       title: 'Сумма',
       dataIndex: 'amount',
       align: 'right',
-      render: (value: number) => formatMoney(value)
+      render: (value: string) => formatMoney(value)
     },
     {
       title: 'Статус',

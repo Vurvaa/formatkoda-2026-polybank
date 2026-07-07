@@ -42,7 +42,7 @@ export function AccountsPage() {
       title: 'Баланс',
       dataIndex: 'balance',
       align: 'right',
-      render: (value: number) => formatMoney(value)
+      render: (value: string) => formatMoney(value)
     },
     {
       title: 'Создан',

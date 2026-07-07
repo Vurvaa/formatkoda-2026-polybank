@@ -32,6 +32,7 @@ import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -117,7 +118,7 @@ public class AccountController {
 
 		TransactionWithAccountNumbersView transaction = transactionService.topUp(
 				accountNumber,
-				request.amount(),
+				new BigDecimal(request.amount()),
 				login
 		);
 
@@ -135,7 +136,7 @@ public class AccountController {
 
 		TransactionWithAccountNumbersView transaction = transactionService.withdraw(
 				accountNumber,
-				request.amount(),
+				new BigDecimal(request.amount()),
 				login
 		);
 
@@ -155,7 +156,7 @@ public class AccountController {
 		TransactionWithAccountNumbersView transaction = transactionService.transfer(
 				fromAccountNumber,
 				toAccountNumber,
-				request.amount(),
+				new BigDecimal(request.amount()),
 				login
 		);
 
