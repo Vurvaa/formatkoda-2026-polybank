@@ -47,7 +47,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithRolesView blockUserById(UserLogin managerLogin, UserLogin userLogin) {
+    public UserWithRolesView blockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
         UserEntity manager = userRepository
                 .findUserByLogin(managerLogin)
                 .orElseThrow(() -> new ResourceNotFoundException("manager not found"));
@@ -73,7 +73,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithRolesView unBlockUserById(UserLogin managerLogin, UserLogin userLogin) {
+    public UserWithRolesView unBlockUserByLogin(UserLogin managerLogin, UserLogin userLogin) {
         UserEntity manager = userRepository
                 .findUserByLogin(managerLogin)
                 .orElseThrow(() -> new ResourceNotFoundException("manager not found"));

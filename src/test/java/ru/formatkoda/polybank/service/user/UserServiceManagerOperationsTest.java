@@ -58,7 +58,7 @@ public class UserServiceManagerOperationsTest {
         when(userRepository.blockUserById(user.id())).thenReturn(Optional.of(blockedUser));
         when(userMapper.toUserWithRolesView(blockedUser, List.of("CLIENT"))).thenReturn(blockedUserWithRole);
 
-        UserWithRolesView checkUserWithRolesView = userService.blockUserById(managerLogin, userLogin);
+        UserWithRolesView checkUserWithRolesView = userService.blockUserByLogin(managerLogin, userLogin);
 
         Assertions.assertEquals(blockedUserWithRole, checkUserWithRolesView);
 
@@ -82,7 +82,7 @@ public class UserServiceManagerOperationsTest {
         when(userRepository.findUserByLogin(blockedUser.login()))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.blockUserById(managerLogin, blockedUserLogin));
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.blockUserByLogin(managerLogin, blockedUserLogin));
 
         verify(userMapper, times(0)).toUserWithRolesView(blockedUser, List.of("CLIENT"));
         verify(userRepository, times(0)).blockUserById(blockedUser.id());
@@ -112,11 +112,96 @@ public class UserServiceManagerOperationsTest {
 
         when(userMapper.toUserWithRolesView(blockedUser, List.of("CLIENT"))).thenReturn(blockedUserWithRole);
 
-        UserWithRolesView checkUserWithRolesView = userService.blockUserById(managerLogin, blockedUserLogin);
+        UserWithRolesView checkUserWithRolesView = userService.blockUserByLogin(managerLogin, blockedUserLogin);
 
         Assertions.assertEquals(blockedUserWithRole, checkUserWithRolesView);
 
         verify(userMapper, times(1)).toUserWithRolesView(blockedUser, List.of("CLIENT"));
         verify(userRepository, times(0)).blockUserById(blockedUser.id());
+    }
+
+    @Test
+    void shouldUnblockAccountUser() {
+        UserEntity user = user();
+        UserEntity userManager = userManager();
+
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = userManager.login();
+
+        when(userRepository.findUserByLogin(userManager.login()))
+                .thenReturn(Optional.of(userManager));
+
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.findAllUserRoles(user)).thenReturn(List.of("CLIENT"));
+
+        UserEntity blockedUser = mock(UserEntity.class);
+
+        UserWithRolesView blockedUserWithRole = mock(UserWithRolesView.class);
+
+        when(userRepository.blockUserById(user.id())).thenReturn(Optional.of(blockedUser));
+        when(userMapper.toUserWithRolesView(blockedUser, List.of("CLIENT"))).thenReturn(blockedUserWithRole);
+
+        UserWithRolesView checkUserWithRolesView = userService.blockUserByLogin(managerLogin, userLogin);
+
+        Assertions.assertEquals(blockedUserWithRole, checkUserWithRolesView);
+
+        verify(userMapper, times(1)).toUserWithRolesView(blockedUser, List.of("CLIENT"));
+    }
+
+    @Test
+    void shouldNotUnBlockUnexistingUser() {
+        UserEntity blockedUser = mock(UserEntity.class);
+        when(blockedUser.id()).thenReturn((long) 35);
+        when(blockedUser.login()).thenReturn(new UserLogin("blockedUserLogin"));
+
+        UserEntity userManager = userManager();
+
+        UserLogin blockedUserLogin = blockedUser.login();
+        UserLogin managerLogin = userManager.login();
+
+        when(userRepository.findUserByLogin(userManager.login()))
+                .thenReturn(Optional.of(userManager));
+
+        when(userRepository.findUserByLogin(blockedUser.login()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.unBlockUserByLogin(managerLogin, blockedUserLogin));
+
+        verify(userMapper, times(0)).toUserWithRolesView(blockedUser, List.of("CLIENT"));
+        verify(userRepository, times(0)).blockUserById(blockedUser.id());
+    }
+
+    @Test
+    void shouldNotUnBlockAlreadyUnBlockedUser() {
+        UserEntity unblockedUser = mock(UserEntity.class);
+        when(unblockedUser.isBlocked()).thenReturn(false);
+        when(unblockedUser.id()).thenReturn((long) 35);
+        when(unblockedUser.login()).thenReturn(new UserLogin("unBlockedUserLogin"));
+
+        UserEntity userManager = userManager();
+
+        UserLogin blockedUserLogin = unblockedUser.login();
+        UserLogin managerLogin = userManager.login();
+
+        when(userRepository.findUserByLogin(userManager.login()))
+                .thenReturn(Optional.of(userManager));
+
+        when(userRepository.findUserByLogin(unblockedUser.login()))
+                .thenReturn(Optional.of(unblockedUser));
+
+        when(userRepository.findAllUserRoles(unblockedUser)).thenReturn(List.of("CLIENT"));
+
+        UserWithRolesView blockedUserWithRole = mock(UserWithRolesView.class);
+
+        when(userMapper.toUserWithRolesView(unblockedUser, List.of("CLIENT"))).thenReturn(blockedUserWithRole);
+
+        UserWithRolesView checkUserWithRolesView = userService.unBlockUserByLogin(managerLogin, blockedUserLogin);
+
+        Assertions.assertEquals(blockedUserWithRole, checkUserWithRolesView);
+
+        verify(userMapper, times(1)).toUserWithRolesView(unblockedUser, List.of("CLIENT"));
+        verify(userRepository, times(0)).blockUserById(unblockedUser.id());
     }
 }

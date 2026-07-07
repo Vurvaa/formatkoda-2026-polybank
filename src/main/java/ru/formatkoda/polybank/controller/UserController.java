@@ -51,7 +51,7 @@ public class UserController {
             @AuthenticationPrincipal UserLogin managerLogin,
             @Valid @PathVariable UserLogin userLogin
     ) {
-        UserWithRolesView user = userService.blockUserById(managerLogin, userLogin);
+        UserWithRolesView user = userService.blockUserByLogin(managerLogin, userLogin);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }
@@ -63,7 +63,7 @@ public class UserController {
             @AuthenticationPrincipal UserLogin managerLogin,
             @Valid @PathVariable UserLogin userLogin
     ) {
-        UserWithRolesView user = userService.unBlockUserById(managerLogin, userLogin);
+        UserWithRolesView user = userService.unBlockUserByLogin(managerLogin, userLogin);
 
         return ResponseEntity.ok(userMapper.toUserDetailsResponseDto(user));
     }
