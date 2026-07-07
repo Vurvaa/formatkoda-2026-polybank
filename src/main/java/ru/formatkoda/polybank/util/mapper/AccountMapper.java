@@ -10,7 +10,7 @@ public class AccountMapper {
 	public static AccountResponseDto toResponse(AccountEntity accountEntity) {
 		return new AccountResponseDto(
 				accountEntity.number().value(),
-				accountEntity.balance(),
+				accountEntity.balance().toPlainString(),
 				accountEntity.type(),
 				accountEntity.status(),
 				accountEntity.createdAt()
