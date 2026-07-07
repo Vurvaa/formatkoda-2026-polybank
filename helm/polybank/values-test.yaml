@@ -12,11 +12,11 @@ service:
 
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "100m"
+    memory: "128Mi"
+    cpu: "50m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "254Mi"
+    cpu: "100m"
 
 startupProbe:
   initialDelaySeconds: 10
@@ -34,11 +34,11 @@ webapp:
     nodePort: 30191
   resources:
     requests:
+      memory: "32Mi"
+      cpu: "25m"
+    limits:
       memory: "64Mi"
       cpu: "50m"
-    limits:
-      memory: "128Mi"
-      cpu: "100m"
 
 appVars:
   APP_CORS_ALLOWED_ORIGIN:
@@ -84,11 +84,11 @@ postgresql:
       storageClass: "local-path"
     resources:
       requests:
-        cpu: "50m"
-        memory: "128Mi"
+        cpu: "25m"
+        memory: "64Mi"
       limits:
-        cpu: "250m"
-        memory: "256Mi"
+        cpu: "100m"
+        memory: "128Mi"
     podAntiAffinityPreset: hard
 
 postgresAuth:

@@ -3,7 +3,7 @@ appName: polybank-backend
 image:
   repository: 192.168.130.81:5000/polybank
   tag: latest
-replicas: 3
+replicas: 2
 appServicePort: 8080
 metricsContainerPort: 5300
 service:
@@ -50,7 +50,7 @@ webapp:
   image:
     repository: 192.168.130.81:5000/polybank-webapp
     tag: latest
-  replicas: 2
+  replicas: 1
   containerPort: 80
   service:
     type: NodePort
@@ -95,7 +95,7 @@ postgresql:
         memory: "1Gi"
     podAntiAffinityPreset: hard
   readReplicas:
-    replicaCount: 2
+    replicaCount: 1
     persistence:
       enabled: true
       size: 10Gi
