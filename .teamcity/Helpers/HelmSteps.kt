@@ -27,10 +27,23 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
             export KUBECONFIG=%k8s.kubeconfig%
             kubectl get nodes
 
-            kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
+            NEEDS_RECREATE=0
+            if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
                 -o jsonpath='{.metadata.labels.app\.kubernetes\.io/managed-by}' 2>/dev/null \
-                | grep -q "Helm" \
-                || kubectl delete secret polybank-backend-secret -n ${p.namespaceParam} --ignore-not-found=true
+                | grep -q "Helm"; then
+                NEEDS_RECREATE=1
+            fi
+
+            if kubectl get secret polybank-backend-secret -n ${p.namespaceParam} >/dev/null 2>&1; then
+                if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
+                    -o jsonpath='{.data.replication-password}' 2>/dev/null | grep -q .; then
+                    NEEDS_RECREATE=1
+                fi
+            fi
+
+            if [ "${'$'}NEEDS_RECREATE" = "1" ]; then
+                kubectl delete secret polybank-backend-secret -n ${p.namespaceParam} --ignore-not-found=true
+            fi
 
             helm dependency build %helm.chart.path%/polybank/
 
@@ -57,6 +70,12 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string postgresAuth.username="${'$'}(printenv ${p.pgUserParam})" \
                 --set-string postgresAuth.password="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string postgresAuth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string global.postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string global.postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
+                --set-string global.postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string postgresAuth.database="${'$'}(printenv ${p.pgDatabaseParam})" \
                 ${'$'}HELM_APP_VAR_ARGS \
                 ${p.extraSetArgs} \
