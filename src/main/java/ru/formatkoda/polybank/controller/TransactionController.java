@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -117,4 +118,20 @@ public class TransactionController {
 
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
 	}
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
+    @PutMapping("/{transactionId}/cancel")
+    public ResponseEntity<TransactionResponseDto> cancelTransaction(
+            @AuthenticationPrincipal UserLogin managerLogin,
+            @PathVariable Long transactionId
+    ) {
+        TransactionWithAccountNumbersView transaction =
+                transactionService.cancelTransaction(
+                        managerLogin,
+                        transactionId
+                );
+
+        return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
+    }
 }
