@@ -23,7 +23,6 @@ import ru.formatkoda.polybank.service.UserService;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -459,7 +458,7 @@ class TransactionServiceCancelTest {
 				"Test",
 				"password-hash",
 				CREATED_AT,
-				OffsetDateTime.now()
+				CREATED_AT
 		);
 	}
 }
