@@ -8,8 +8,10 @@ import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
+import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
@@ -26,6 +28,7 @@ import java.util.List;
 public class TransactionService {
 	private final TransactionRepository transactionRepository;
 	private final AccountService accountService;
+	private final UserService userService;
 
 	public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
 			@NonNull AccountNumber accountNumber,
@@ -102,6 +105,72 @@ public class TransactionService {
 		);
 
 		return TransactionMapper.toView(transaction, fromAccountNumber, toAccountNumber);
+	}
+
+	public TransactionEntity findTransactionOrThrow(@NonNull Long id) {
+		return transactionRepository
+				.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("transaction not found"));
+	}
+
+	@Transactional
+	public TransactionWithAccountNumbersView cancelTransaction(
+			@NonNull UserLogin managerLogin,
+			@NonNull Long transactionId
+	) {
+		UserEntity manager = userService.findUserByLogin(managerLogin);
+		if (manager.isBlocked()) {
+			throw new BusinessLogicException("manager is blocked");
+		}
+
+		TransactionEntity transaction = findTransactionOrThrow(transactionId);
+		if (!transaction.status().equals(TransactionEntity.Status.COMPLETED)) {
+			throw new BusinessLogicException("transaction must be in completed state to cancel");
+		}
+
+		Long refundAccountToId = null;
+		AccountNumber refundToAccountNumber = null;
+		if (transaction.fromAccountId() != null) {
+			AccountEntity accountTo = accountService.findAccountOrThrow(transaction.fromAccountId());
+			accountTo = accountService.topUpAccount(
+					accountTo.number(),
+					transaction.amount()
+			);
+			refundAccountToId = accountTo.id();
+			refundToAccountNumber = accountTo.number();
+		}
+
+		Long refundAccountFromId = null;
+		AccountNumber refundFromAccountNumber = null;
+		if (transaction.toAccountId() != null) {
+			AccountEntity accountFrom = accountService.findAccountOrThrow(transaction.toAccountId());
+			accountFrom = accountService.withdrawFromAccount(
+					accountFrom.number(),
+					transaction.amount()
+			);
+			refundAccountFromId = accountFrom.id();
+			refundFromAccountNumber = accountFrom.number();
+		}
+
+		TransactionEntity updatedTransaction = transactionRepository
+				.changeTransactionStatus(
+						transactionId,
+						TransactionEntity.Status.CANCELED
+				).orElseThrow(() -> new BusinessLogicException("transaction status not changed"));
+
+		TransactionEntity refundTransaction = saveCompletedTransaction(
+				refundAccountFromId,
+				refundAccountToId,
+				updatedTransaction.amount(),
+				TransactionEntity.Type.REFUND
+		);
+
+		return TransactionMapper.toView(
+				refundTransaction,
+				refundFromAccountNumber,
+				refundToAccountNumber
+		);
+
 	}
 
 	private TransactionEntity saveCompletedTransaction(

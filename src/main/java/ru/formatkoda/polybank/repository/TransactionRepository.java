@@ -11,6 +11,7 @@ import ru.formatkoda.polybank.jooq.generated.tables.Accounts;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ru.formatkoda.polybank.jooq.generated.Tables.ACCOUNTS;
 import static ru.formatkoda.polybank.jooq.generated.Tables.TRANSACTIONS;
@@ -57,6 +58,22 @@ public class TransactionRepository {
 				.set(TRANSACTIONS.CREATED_AT, transaction.createdAt())
 				.returning()
 				.fetchOne(this::toEntity);
+	}
+
+	public Optional<TransactionEntity> findById(long id) {
+		return dsl
+				.select(TRANSACTIONS)
+				.where(TRANSACTIONS.ID.eq(id))
+				.fetchOptional(this::toEntity);
+	}
+
+	public Optional<TransactionEntity> changeTransactionStatus(long id, TransactionEntity.Status status) {
+		return dsl
+				.update(TRANSACTIONS)
+				.set(TRANSACTIONS.STATUS, status.name())
+				.where(TRANSACTIONS.ID.eq(id))
+				.returning()
+				.fetchOptional(this::toEntity);
 	}
 
 	private TransactionWithAccountNumbersView toTransactionWithAccountNumbersView(
