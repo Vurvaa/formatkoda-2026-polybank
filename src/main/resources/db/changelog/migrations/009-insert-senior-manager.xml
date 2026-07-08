@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd">
+
+    <changeSet id="009-add-senior-manager" author="yaroslav">
+        <insert tableName="users">
+            <column name="name" value="super_senior_manager"/>
+            <column name="last_name" value="super_senior_manager"/>
+            <column name="login" value="super_senior_manager"/>
+            <column name="password_hash" value="$2a$10$QLcDZWa.n1ioA7.dVhILoeGIyvLgJjqf5Uv668li3XYq33xnAVYna"/>
+        </insert>
+        <insert tableName="users_roles">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE login='super_senior_manager')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM roles WHERE name='SENIOR_MANAGER')"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
