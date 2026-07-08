@@ -160,6 +160,33 @@ public class UserService {
         return userMapper.toUserWithRolesView(user, roles);
     }
 
+    @Transactional
+    public UserWithRolesView createStaffUser(
+            @NonNull UserLogin managerLogin,
+            @NonNull UserEntity staffUser,
+            @NonNull String roleName
+    ) {
+        findNotBlockedUserByLogin(managerLogin);
+
+        if (roleName.equals("CLIENT")) {
+            throw new BusinessLogicException("only staff user can be created by manager");
+        } else if (userRepository.findUserByLogin(staffUser.login()).isPresent()) {
+            throw new BusinessLogicException("user with given login already exists");
+        }
+
+        long roleId = findRoleIdOrThrow(roleName);
+
+        UserEntity createdUser = userRepository.createUser(
+                staffUser
+        ).orElseThrow(() -> new BusinessLogicException("user not created"));
+        userRepository.bindUserWithRole(createdUser.id(), roleId);
+
+        return userMapper.toUserWithRolesView(
+                createdUser,
+                findAllUserRoles(createdUser)
+        );
+    }
+
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
         List<UserWithRolesView> users = userRepository
                 .findAllUsers(pageRequest).stream()
