@@ -53,12 +53,17 @@ public class UserMapper {
     }
 
     public UserEntity toEntity(StaffUserRegistrationDto user) {
+        String passwordHash = Objects.requireNonNull(
+                passwordEncoder.encode(user.password()),
+                "encoded password must not be null"
+        );
+
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
                 user.name(),
                 user.lastName(),
-                passwordEncoder.encode(user.password()),
+                passwordHash,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
