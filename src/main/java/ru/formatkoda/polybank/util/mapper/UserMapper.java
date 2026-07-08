@@ -58,7 +58,7 @@ public class UserMapper {
                 new UserLogin(user.login()),
                 user.name(),
                 user.lastName(),
-                user.password(),
+                passwordEncoder.encode(user.password()),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );

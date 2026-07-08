@@ -160,21 +160,7 @@ public class UserService {
         return userMapper.toUserWithRolesView(user, roles);
     }
 
-    public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
-        List<UserWithRolesView> users = userRepository
-                .findAllUsers(pageRequest).stream()
-                .map(u -> userMapper
-                        .toUserWithRolesView(u, userRepository.findAllUserRoles(u)))
-                .toList();
-
-        return new PageResult<>(
-                users,
-                pageRequest.page(),
-                pageRequest.size(),
-                users.size()
-        );
-    }
-
+    @Transactional
     public UserWithRolesView createStaffUser(
             @NonNull UserLogin managerLogin,
             @NonNull UserEntity staffUser,
@@ -201,6 +187,21 @@ public class UserService {
         return userMapper.toUserWithRolesView(
                 createdUser,
                 findAllUserRoles(createdUser)
+        );
+    }
+
+    public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
+        List<UserWithRolesView> users = userRepository
+                .findAllUsers(pageRequest).stream()
+                .map(u -> userMapper
+                        .toUserWithRolesView(u, userRepository.findAllUserRoles(u)))
+                .toList();
+
+        return new PageResult<>(
+                users,
+                pageRequest.page(),
+                pageRequest.size(),
+                users.size()
         );
     }
 
