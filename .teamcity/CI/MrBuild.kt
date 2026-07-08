@@ -5,13 +5,14 @@ import Helpers.prepareDatabaseStep
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
-import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.buildSteps.maven
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 object MrBuild : BuildType({
     name = "CI - all checks."
+
+    val javap = "%java.home%"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -26,7 +27,7 @@ object MrBuild : BuildType({
             name = "Compile"
             goals = "clean compile"
             runnerArgs = "-B -Pdb-codegen"
-            jdkHome = "%java.home%"
+            jdkHome = javap
         }
 
         maven {
@@ -34,7 +35,7 @@ object MrBuild : BuildType({
             name = "Unit Tests"
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
-            jdkHome = "%java.home%"
+            jdkHome = javap
         }
 
         maven {
@@ -51,7 +52,7 @@ object MrBuild : BuildType({
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                 -Dsonar.qualitygate.wait=true
             """.trimIndent().replace("\n", " ")
-            jdkHome = "%java.home%"
+            jdkHome = javap
         }
 
         script {

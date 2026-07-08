@@ -66,6 +66,7 @@ spec:
       annotations:
         reloader.stakater.com/auto: "true"
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: {{ .Values.webapp.appName }}
           image: {{ .Values.webapp.image.repository }}:{{ .Values.webapp.image.tag }}
@@ -100,9 +101,11 @@ spec:
             requests:
               memory: "{{ .Values.webapp.resources.requests.memory }}"
               cpu: "{{ .Values.webapp.resources.requests.cpu }}"
+              ephemeral-storage: "64Mi"
             limits:
               memory: "{{ .Values.webapp.resources.limits.memory }}"
               cpu: "{{ .Values.webapp.resources.limits.cpu }}"
+              ephemeral-storage: "128Mi"
           ports:
             - name: http
               containerPort: {{ .Values.webapp.containerPort }}

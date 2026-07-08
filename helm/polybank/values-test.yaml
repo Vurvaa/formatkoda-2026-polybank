@@ -66,6 +66,7 @@ postgresql:
   primary:
     persistence:
       enabled: true
+      existingClaim: ""
       size: 2Gi
       storageClass: "local-path"
     resources:

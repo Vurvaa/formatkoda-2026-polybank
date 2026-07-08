@@ -84,6 +84,7 @@ postgresql:
   primary:
     persistence:
       enabled: true
+      existingClaim: "data-polybank-postgresql-0"
       size: 10Gi
       storageClass: "local-path"
     resources:

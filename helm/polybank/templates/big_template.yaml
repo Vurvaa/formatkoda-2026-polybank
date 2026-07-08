@@ -59,6 +59,7 @@ spec:
         prometheus.io/path: "/metrics"
         reloader.stakater.com/auto: "true"
     spec:
+      automountServiceAccountToken: false
       {{- $pgHost := "" }}
       {{- $pgPort := 5432 }}
       {{- if .Values.postgresql.enabled }}
@@ -84,6 +85,15 @@ spec:
           envFrom:
             - secretRef:
                 name: polybank-backend-secret
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+              ephemeral-storage: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+              ephemeral-storage: "64Mi"
       containers:
         - name: {{ .Values.appName }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -118,9 +128,11 @@ spec:
             requests:
               memory: "{{ .Values.resources.requests.memory }}"
               cpu: "{{ .Values.resources.requests.cpu }}"
+              ephemeral-storage: "256Mi"
             limits:
               memory: "{{ .Values.resources.limits.memory }}"
               cpu: "{{ .Values.resources.limits.cpu }}"
+              ephemeral-storage: "512Mi"
           envFrom:
             - secretRef:
                 name: polybank-backend-secret
