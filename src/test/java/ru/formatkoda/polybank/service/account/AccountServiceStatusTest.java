@@ -198,8 +198,9 @@ class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.of(accountEntity));
         when(accountRepository
-                .closeAccount(
-                        accountNumber
+                .changeAccountStatus(
+                        accountNumber,
+                        AccountEntity.Status.CLOSED
                 )
         ).thenReturn(Optional.of(accountEntityClosed));
 
@@ -214,7 +215,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(1)).closeAccount(accountNumber);
+        verify(accountRepository, times(1)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -263,7 +264,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).closeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -312,7 +313,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).closeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -362,7 +363,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).closeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -392,7 +393,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).closeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -445,7 +446,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).closeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -496,8 +497,9 @@ class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.of(accountEntity));
         when(accountRepository
-                .freezeAccount(
-                        accountNumber
+                .changeAccountStatus(
+                        accountNumber,
+                        AccountEntity.Status.FROZEN
                 )
         ).thenReturn(Optional.of(accountEntityFrozen));
 
@@ -512,7 +514,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(1)).freezeAccount(accountNumber);
+        verify(accountRepository, times(1)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -566,7 +568,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).freezeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -618,7 +620,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).freezeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -671,7 +673,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).freezeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -701,7 +703,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).freezeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -753,7 +755,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).freezeAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -803,8 +805,9 @@ class AccountServiceStatusTest {
                 .findByNumber(new AccountNumber(testAccountNumber))
         ).thenReturn(Optional.of(accountEntity));
         when(accountRepository
-                .makeActiveAccount(
-                        accountNumber
+                .changeAccountStatus(
+                        accountNumber,
+                        AccountEntity.Status.ACTIVE
                 )
         ).thenReturn(Optional.of(accountEntityUnFrozen));
 
@@ -819,7 +822,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(1)).makeActiveAccount(accountNumber);
+        verify(accountRepository, times(1)).changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -849,7 +852,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(0))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -901,7 +904,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
@@ -953,7 +956,7 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findNotBlockedUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(accountRepository, times(0)).makeActiveAccount(accountNumber);
+        verify(accountRepository, times(0)).changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE);
 
         verifyNoMoreInteractions(userService, accountRepository);
     }
