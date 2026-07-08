@@ -19,23 +19,23 @@ export const accountService = {
   },
 
   async topUp(payload: AccountOperationRequestDto): Promise<TransactionResponseDto> {
-    const response = await api.post<TransactionResponseDto>('/account/top-up', payload);
+    const response = await api.post<TransactionResponseDto>('/transaction/top-up', payload);
     return response.data;
   },
 
   async withdraw(payload: AccountOperationRequestDto): Promise<TransactionResponseDto> {
-    const response = await api.post<TransactionResponseDto>('/account/withdraw', payload);
+    const response = await api.post<TransactionResponseDto>('/transaction/withdraw', payload);
     return response.data;
   },
 
   async transfer(payload: TransferRequestDto): Promise<TransactionResponseDto> {
-    const response = await api.post<TransactionResponseDto>('/account/transfer', payload);
+    const response = await api.post<TransactionResponseDto>('/transaction/transfer', payload);
     return response.data;
   },
 
   async getTransactions(accountNumber: string, page: number, size: number): Promise<PageResponse<TransactionResponseDto>> {
     const response = await api.get<PageResponse<TransactionResponseDto>>(
-      `/account/${accountNumber}/transactions`, { params: { page, size } });
+      `/transaction/${accountNumber}`, { params: { page, size } });
     return response.data;
   }
 };
