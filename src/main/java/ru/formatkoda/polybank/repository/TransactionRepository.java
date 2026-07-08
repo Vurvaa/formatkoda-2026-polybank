@@ -67,11 +67,15 @@ public class TransactionRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	public Optional<TransactionEntity> changeTransactionStatus(long id, TransactionEntity.Status status) {
+	public Optional<TransactionEntity> changeTransactionStatus(
+			long id,
+			TransactionEntity.Status expectedStatus,
+			TransactionEntity.Status status
+	) {
 		return dsl
 				.update(TRANSACTIONS)
 				.set(TRANSACTIONS.STATUS, status.name())
-				.where(TRANSACTIONS.ID.eq(id))
+				.where(TRANSACTIONS.ID.eq(id).and(TRANSACTIONS.STATUS.eq(expectedStatus.name())))
 				.returning()
 				.fetchOptional(this::toEntity);
 	}

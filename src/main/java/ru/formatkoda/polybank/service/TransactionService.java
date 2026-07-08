@@ -126,7 +126,16 @@ public class TransactionService {
 		TransactionEntity transaction = findTransactionOrThrow(transactionId);
 		if (!transaction.status().equals(TransactionEntity.Status.COMPLETED)) {
 			throw new BusinessLogicException("transaction must be in completed state to cancel");
+		} else if (transaction.type().equals(TransactionEntity.Type.REFUND)) {
+			throw new BusinessLogicException("refund transaction cannot be cancelled");
 		}
+
+		TransactionEntity updatedTransaction = transactionRepository
+				.changeTransactionStatus(
+						transactionId,
+						TransactionEntity.Status.COMPLETED,
+						TransactionEntity.Status.CANCELED
+				).orElseThrow(() -> new BusinessLogicException("transaction refund not completed"));
 
 		Long refundAccountToId = null;
 		AccountNumber refundToAccountNumber = null;
@@ -151,12 +160,6 @@ public class TransactionService {
 			refundAccountFromId = accountFrom.id();
 			refundFromAccountNumber = accountFrom.number();
 		}
-
-		TransactionEntity updatedTransaction = transactionRepository
-				.changeTransactionStatus(
-						transactionId,
-						TransactionEntity.Status.CANCELED
-				).orElseThrow(() -> new BusinessLogicException("transaction status not changed"));
 
 		TransactionEntity refundTransaction = saveCompletedTransaction(
 				refundAccountFromId,
