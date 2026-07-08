@@ -101,7 +101,7 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.closeAccount(accountNumber)
+				.changeAccountStatus(accountNumber, AccountEntity.Status.CLOSED)
 				.orElseThrow(
 						() -> new BusinessLogicException("account not closed")
 				);
@@ -129,7 +129,7 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.freezeAccount(accountNumber)
+				.changeAccountStatus(accountNumber, AccountEntity.Status.FROZEN)
 				.orElseThrow(() -> new BusinessLogicException("account not frozen"));
 	}
 
@@ -153,7 +153,7 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.makeActiveAccount(accountNumber)
+				.changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE)
 				.orElseThrow(() -> new BusinessLogicException("account not unfrozen"));
 	}
 
@@ -172,7 +172,7 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.blockAccount(accountNumber)
+				.changeAccountStatus(accountNumber, AccountEntity.Status.BLOCKED)
 				.orElseThrow(() -> new BusinessLogicException("account not blocked"));
 	}
 
@@ -191,7 +191,7 @@ public class AccountService {
 		}
 
 		return accountRepository
-				.makeActiveAccount(accountNumber)
+				.changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE)
 				.orElseThrow(() -> new BusinessLogicException("account not unblocked"));
 	}
 

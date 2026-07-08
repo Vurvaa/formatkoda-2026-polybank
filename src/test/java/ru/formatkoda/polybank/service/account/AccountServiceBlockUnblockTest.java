@@ -53,7 +53,7 @@ class AccountServiceBlockUnblockTest {
 
         when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
         when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(account));
-        when(accountRepository.blockAccount(ACCOUNT_NUMBER)).thenReturn(Optional.of(blockedAccount));
+        when(accountRepository.changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED)).thenReturn(Optional.of(blockedAccount));
 
         AccountEntity result = accountService.blockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER);
 
@@ -62,8 +62,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository).blockAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -81,8 +81,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -99,8 +99,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -115,8 +115,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -140,7 +140,7 @@ class AccountServiceBlockUnblockTest {
 
         when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
         when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(account));
-        when(accountRepository.blockAccount(ACCOUNT_NUMBER)).thenReturn(Optional.empty());
+        when(accountRepository.changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> accountService.blockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER))
                 .isInstanceOf(BusinessLogicException.class)
@@ -148,8 +148,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository).blockAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
+        verify(accountRepository).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -160,7 +160,7 @@ class AccountServiceBlockUnblockTest {
 
         when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
         when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(blockedAccount));
-        when(accountRepository.makeActiveAccount(ACCOUNT_NUMBER)).thenReturn(Optional.of(activeAccount));
+        when(accountRepository.changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE)).thenReturn(Optional.of(activeAccount));
 
         AccountEntity result = accountService.unBlockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER);
 
@@ -169,8 +169,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository).makeActiveAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -193,8 +193,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -210,8 +210,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -226,8 +226,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).makeActiveAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 
@@ -251,7 +251,7 @@ class AccountServiceBlockUnblockTest {
 
         when(userService.findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN)).thenReturn(userManager());
         when(accountRepository.findByNumber(ACCOUNT_NUMBER)).thenReturn(Optional.of(blockedAccount));
-        when(accountRepository.makeActiveAccount(ACCOUNT_NUMBER)).thenReturn(Optional.empty());
+        when(accountRepository.changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> accountService.unBlockAccountByNumber(SENIOR_MANAGER_LOGIN, ACCOUNT_NUMBER))
                 .isInstanceOf(BusinessLogicException.class)
@@ -259,8 +259,8 @@ class AccountServiceBlockUnblockTest {
 
         verify(userService).findNotBlockedUserByLogin(SENIOR_MANAGER_LOGIN);
         verify(accountRepository).findByNumber(ACCOUNT_NUMBER);
-        verify(accountRepository).makeActiveAccount(ACCOUNT_NUMBER);
-        verify(accountRepository, never()).blockAccount(ACCOUNT_NUMBER);
+        verify(accountRepository).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.ACTIVE);
+        verify(accountRepository, never()).changeAccountStatus(ACCOUNT_NUMBER, AccountEntity.Status.BLOCKED);
         verifyNoMoreInteractions(userService, accountRepository);
     }
 

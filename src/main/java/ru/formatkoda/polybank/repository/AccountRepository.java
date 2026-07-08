@@ -65,38 +65,11 @@ public class AccountRepository {
 		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
 	}
 
-	public Optional<AccountEntity> closeAccount(AccountNumber accountNumber) {
+	public Optional<AccountEntity> changeAccountStatus(AccountNumber accountNumber, AccountEntity.Status status) {
 		return dsl
 				.update(ACCOUNTS)
-				.set(ACCOUNTS.STATUS, AccountEntity.Status.CLOSED.name())
+				.set(ACCOUNTS.STATUS, status.name())
 				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
-				.returning()
-				.fetchOptional(this::toEntity);
-	}
-
-	public Optional<AccountEntity> freezeAccount(AccountNumber accountNumber) {
-		return dsl
-				.update(ACCOUNTS)
-				.set(ACCOUNTS.STATUS, AccountEntity.Status.FROZEN.name())
-				.where(ACCOUNTS.NUMBER.equal(accountNumber.value()))
-				.returning()
-				.fetchOptional(this::toEntity);
-	}
-
-	public Optional<AccountEntity> blockAccount(AccountNumber accountNumber) {
-		return dsl
-				.update(ACCOUNTS)
-				.set(ACCOUNTS.STATUS, AccountEntity.Status.BLOCKED.name())
-				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
-				.returning()
-				.fetchOptional(this::toEntity);
-	}
-
-	public Optional<AccountEntity> makeActiveAccount(AccountNumber accountNumber) {
-		return dsl
-				.update(ACCOUNTS)
-				.set(ACCOUNTS.STATUS, AccountEntity.Status.ACTIVE.name())
-				.where(ACCOUNTS.NUMBER.eq(accountNumber.value()))
 				.returning()
 				.fetchOptional(this::toEntity);
 	}
