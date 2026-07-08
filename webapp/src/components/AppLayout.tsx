@@ -1,13 +1,13 @@
 import { BankOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Button, Layout, Space, Typography } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
 
 const { Header, Content } = Layout;
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isManager } = useAuth();
 
   function handleLogout() {
     logout();
@@ -22,6 +22,11 @@ export function AppLayout() {
           <Typography.Title level={4} className="app-title">
             POLYBANK
           </Typography.Title>
+
+          <Link to="/accounts">
+            <Button type="primary">Счета</Button>
+          </Link>
+          {isManager && <Link to="/users">Пользователи</Link>}
         </Space>
 
         <Button icon={<LogoutOutlined />} onClick={handleLogout}>

@@ -6,6 +6,7 @@ import { AccountsPage } from './pages/AccountsPage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { RegisterPage } from './pages/RegisterPage.tsx';
+import { UsersPage } from './pages/UsersPage.tsx';
 
 export function App() {
   return (
@@ -17,6 +18,7 @@ export function App() {
           <Route path="/" element={<Navigate to="/accounts" replace />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/accounts/:accountNumber" element={<AccountDetailsPage />} />
+          <Route path="/users" element={<UsersPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
