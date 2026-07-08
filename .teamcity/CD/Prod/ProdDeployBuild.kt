@@ -21,6 +21,13 @@ object ProdDeployBuild : BuildType({
         }
     }
 
+    triggers {
+        finishBuildTrigger {
+            buildType = "${ProdBuild.id}"
+            successfulOnly = true
+        }
+    }
+
     steps {
         helmDeployStep(
             HelmDeployParams(

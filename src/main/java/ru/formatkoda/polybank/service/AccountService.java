@@ -68,6 +68,16 @@ public class AccountService {
 	}
 
 	@Transactional
+	public AccountEntity withdrawFromAccount(
+			@NonNull AccountNumber accountNumber,
+			@NonNull BigDecimal amount) {
+		validateAmount(amount);
+		findAccountOrThrow(accountNumber);
+
+		return changeBalanceOrThrow(accountNumber, amount.negate());
+	}
+
+	@Transactional
 	public AccountEntity withdrawFromOwnedAccount(
 			@NonNull AccountNumber accountNumber,
 			@NonNull BigDecimal amount,
@@ -193,6 +203,12 @@ public class AccountService {
 		return accountRepository
 				.changeAccountStatus(accountNumber, AccountEntity.Status.ACTIVE)
 				.orElseThrow(() -> new BusinessLogicException("account not unblocked"));
+	}
+
+	public AccountEntity findAccountOrThrow(@NonNull Long accountId) {
+		return accountRepository
+				.findAccountById(accountId)
+				.orElseThrow(() -> new ResourceNotFoundException("account not found"));
 	}
 
 	private AccountEntity findAccountOrThrow(@NonNull AccountNumber accountNumber) {
