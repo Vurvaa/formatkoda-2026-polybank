@@ -29,8 +29,8 @@ import ru.formatkoda.polybank.util.pagination.PageResult;
 import java.math.BigDecimal;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/transaction")
+@RequiredArgsConstructor
 public class TransactionController {
 
 	private final TransactionService transactionService;
