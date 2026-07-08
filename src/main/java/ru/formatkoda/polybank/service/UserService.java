@@ -106,21 +106,38 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithRolesView removeManagerRoleByLogin(
+    public UserWithRolesView removeUserRole(
             @NonNull UserLogin managerLogin,
-            @NonNull UserLogin userLogin
+            @NonNull UserLogin userLogin,
+            @NonNull String roleName
     ) {
-        findNotBlockedUserByLogin(managerLogin);
-
+        UserEntity manager = findNotBlockedUserByLogin(managerLogin);
         UserEntity user = findUserByLogin(userLogin);
+
+        if  (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("user can not remove himself");
+        }
         List<String> userRoles = findAllUserRoles(user);
-        if (!userRoles.contains("MANAGER")) {
-            throw new BusinessLogicException("user has not manager role");
+
+        if (!userRoles.contains(roleName)) {
+            throw new BusinessLogicException(
+                    String.format(
+                            "user has not %s role",
+                            roleName
+                    )
+            );
+        } else if (userRoles.size() < 2) {
+            throw new BusinessLogicException("user has only one role, use block instead");
         }
 
-        long managerRoleId = findRoleIdOrThrow("MANAGER");
-        if (!userRepository.removeUserRole(user.id(), managerRoleId)) {
-            throw new BusinessLogicException("user manager role not removed");
+        long roleId = findRoleIdOrThrow(roleName);
+        if (!userRepository.removeUserRole(user.id(), roleId)) {
+            throw new BusinessLogicException(
+                    String.format(
+                            "user %s role not removed",
+                            roleName
+                    )
+            );
         }
 
         UserEntity updatedUser = findUserByLogin(userLogin);

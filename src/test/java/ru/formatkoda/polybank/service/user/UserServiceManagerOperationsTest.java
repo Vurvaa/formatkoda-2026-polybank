@@ -247,7 +247,7 @@ class UserServiceManagerOperationsTest {
         when(userMapper.toUserWithRolesView(user, List.of("CLIENT")))
                 .thenReturn(updatedUserWithRoles);
 
-        UserWithRolesView result = userService.removeManagerRoleByLogin(managerLogin, userLogin);
+        UserWithRolesView result = userService.removeUserRole(managerLogin, userLogin, "MANAGER");
 
         Assertions.assertEquals(updatedUserWithRoles, result);
         Assertions.assertEquals(user.id(), result.id());
@@ -263,6 +263,67 @@ class UserServiceManagerOperationsTest {
     }
 
     @Test
+    void shouldRemoveClientRole() {
+        UserEntity user = user();
+        UserEntity userManager = userManager();
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = userManager.login();
+        RoleEntity clientRole = new RoleEntity(1L, "CLIENT");
+        UserWithRolesView updatedUserWithRoles = new UserWithRolesView(
+                user.id(),
+                user.login(),
+                user.name(),
+                user.lastName(),
+                List.of("MANAGER"),
+                user.createdAt(),
+                user.blockedAt()
+        );
+
+        when(userRepository.findUserByLogin(userManager.login()))
+                .thenReturn(Optional.of(userManager));
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user))
+                .thenReturn(Optional.of(user));
+        when(userRepository.findAllUserRoles(user))
+                .thenReturn(List.of("CLIENT", "MANAGER"))
+                .thenReturn(List.of("MANAGER"));
+        when(roleRepository.findRoleEntityByName("CLIENT"))
+                .thenReturn(Optional.of(clientRole));
+        when(userRepository.removeUserRole(user.id(), clientRole.id()))
+                .thenReturn(true);
+        when(userMapper.toUserWithRolesView(user, List.of("MANAGER")))
+                .thenReturn(updatedUserWithRoles);
+
+        UserWithRolesView result = userService.removeUserRole(managerLogin, userLogin, "CLIENT");
+
+        Assertions.assertEquals(updatedUserWithRoles, result);
+        Assertions.assertEquals(List.of("MANAGER"), result.roles());
+
+        verify(userRepository, times(1)).removeUserRole(user.id(), clientRole.id());
+        verify(userMapper, times(1)).toUserWithRolesView(user, List.of("MANAGER"));
+    }
+
+    @Test
+    void shouldNotRemoveRoleFromHimself() {
+        UserEntity user = user();
+        UserLogin userLogin = user.login();
+
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.removeUserRole(userLogin, userLogin, "MANAGER")
+        );
+
+        Assertions.assertEquals("user can not remove himself", exception.getMessage());
+
+        verify(userRepository, times(0)).findAllUserRoles(user);
+        verify(roleRepository, times(0)).findRoleEntityByName("MANAGER");
+        verify(userRepository, times(0)).removeUserRole(user.id(), 2L);
+    }
+
+    @Test
     void shouldNotRemoveManagerRoleWhenManagerNotFound() {
         UserEntity user = user();
         UserEntity userManager = userManager();
@@ -274,7 +335,7 @@ class UserServiceManagerOperationsTest {
 
         ResourceNotFoundException exception = Assertions.assertThrows(
                 ResourceNotFoundException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
         Assertions.assertEquals("not found user with this login", exception.getMessage());
@@ -303,7 +364,7 @@ class UserServiceManagerOperationsTest {
 
         BusinessLogicException exception = Assertions.assertThrows(
                 BusinessLogicException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
         Assertions.assertEquals("user senior_manager is blocked", exception.getMessage());
@@ -327,10 +388,34 @@ class UserServiceManagerOperationsTest {
 
         BusinessLogicException exception = Assertions.assertThrows(
                 BusinessLogicException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
-        Assertions.assertEquals("user has not manager role", exception.getMessage());
+        Assertions.assertEquals("user has not MANAGER role", exception.getMessage());
+
+        verify(roleRepository, times(0)).findRoleEntityByName("MANAGER");
+        verify(userRepository, times(0)).removeUserRole(user.id(), 2L);
+    }
+
+    @Test
+    void shouldNotRemoveManagerRoleWhenUserHasOnlyManagerRole() {
+        UserEntity user = user();
+        UserEntity userManager = userManager();
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = userManager.login();
+
+        when(userRepository.findUserByLogin(userManager.login()))
+                .thenReturn(Optional.of(userManager));
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
+        when(userRepository.findAllUserRoles(user)).thenReturn(List.of("MANAGER"));
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
+        );
+
+        Assertions.assertEquals("user has only one role, use block instead", exception.getMessage());
 
         verify(roleRepository, times(0)).findRoleEntityByName("MANAGER");
         verify(userRepository, times(0)).removeUserRole(user.id(), 2L);
@@ -350,7 +435,7 @@ class UserServiceManagerOperationsTest {
 
         ResourceNotFoundException exception = Assertions.assertThrows(
                 ResourceNotFoundException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
         Assertions.assertEquals("not found user with this login", exception.getMessage());
@@ -375,7 +460,7 @@ class UserServiceManagerOperationsTest {
 
         ResourceNotFoundException exception = Assertions.assertThrows(
                 ResourceNotFoundException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
         Assertions.assertEquals("role with name MANAGER not found", exception.getMessage());
@@ -403,10 +488,10 @@ class UserServiceManagerOperationsTest {
 
         BusinessLogicException exception = Assertions.assertThrows(
                 BusinessLogicException.class,
-                () -> userService.removeManagerRoleByLogin(managerLogin, userLogin)
+                () -> userService.removeUserRole(managerLogin, userLogin, "MANAGER")
         );
 
-        Assertions.assertEquals("user manager role not removed", exception.getMessage());
+        Assertions.assertEquals("user MANAGER role not removed", exception.getMessage());
 
         verify(userRepository, times(1)).removeUserRole(user.id(), managerRole.id());
     }
