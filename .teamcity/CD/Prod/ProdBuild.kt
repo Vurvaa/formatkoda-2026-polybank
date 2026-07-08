@@ -81,9 +81,7 @@ object ProdBuild : BuildType({
     triggers {
         vcs {
             branchFilter = """
-            +:*
-            -:main
-            -:feature/*
+            +:regexp:^\d+\.\d+\.\d+$
         """.trimIndent()
         }
     }

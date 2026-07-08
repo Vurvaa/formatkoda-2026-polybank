@@ -25,13 +25,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
-import static ru.formatkoda.polybank.testutil.TestData.user;
+import static org.mockito.Mockito.*;
+import static ru.formatkoda.polybank.testutil.TestData.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -94,16 +92,53 @@ class UserServiceTest {
     }
 
     @Test
+    void findUserWithRolesSuccessReturnsView() {
+        UserEntity user = user();
+        UserWithRolesView expectedUser = userWithRoles();
+        List<String> roles = List.of("CLIENT");
+
+        when(userRepository.findUserByLogin(user.login()))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.findAllUserRoles(user))
+                .thenReturn(roles);
+
+        when(userMapper.toUserWithRolesView(user, roles))
+                .thenReturn(expectedUser);
+
+        UserWithRolesView result = userService.findUserWithRoles(user.login());
+
+        assertNotNull(result);
+        verify(userMapper).toUserWithRolesView(user, roles);
+    }
+
+    @Test
+    void findUserWithRolesUserNotFoundThrowsException() {
+        UserEntity user = user();
+        UserLogin login = user.login();
+        String expectedMessage = "not found user with this login";
+
+        when(userRepository.findUserByLogin(user().login()))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> userService.findUserWithRoles(login));
+
+        assertEquals(expectedMessage, exception.getMessage());
+        verify(userMapper, never()).toUserWithRolesView(any(), any());
+    }
+
+        @Test
     void createUserShouldThrowExceptionWhenLoginIsDuplicated() {
         UserEntity user = user();
 
         when(userRepository.findUserByLogin(user.login()))
                 .thenReturn(Optional.of(user));
 
-        BusinessLogicException actualException = Assertions.assertThrows(BusinessLogicException.class,
+        BusinessLogicException actualException = assertThrows(BusinessLogicException.class,
                 () -> userService.createUser(user));
 
-        Assertions.assertEquals("user already exists", actualException.getMessage());
+        assertEquals("user already exists", actualException.getMessage());
     }
 
     @Test
@@ -113,10 +148,10 @@ class UserServiceTest {
         when(roleRepository.findRoleEntityByName("CLIENT"))
                 .thenReturn(Optional.empty());
 
-        ResourceNotFoundException actualException = Assertions.assertThrows(
+        ResourceNotFoundException actualException = assertThrows(
                 ResourceNotFoundException.class,
                 () -> userService.createUser(user));
-        Assertions.assertEquals("role with name CLIENT not found", actualException.getMessage());
+        assertEquals("role with name CLIENT not found", actualException.getMessage());
     }
 
     @Test
@@ -137,8 +172,8 @@ class UserServiceTest {
 
         UserLogin userLogin = userService.createUser(user());
 
-        Assertions.assertNotNull(userLogin);
-        Assertions.assertEquals(userLogin, user().login());
+        assertNotNull(userLogin);
+        assertEquals(userLogin, user().login());
     }
 
     @Test
@@ -158,11 +193,10 @@ class UserServiceTest {
 
         UserLogin login = user().login();
 
-        ResourceNotFoundException actualException = Assertions
-                .assertThrows(ResourceNotFoundException.class,
+        ResourceNotFoundException actualException = assertThrows(ResourceNotFoundException.class,
                         () -> userService.findUserByLogin(login));
 
-        Assertions.assertEquals("not found user with this login", actualException.getMessage());
+        assertEquals("not found user with this login", actualException.getMessage());
     }
 
     @Test

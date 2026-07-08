@@ -153,6 +153,13 @@ public class UserService {
         return userRepository.findAllUserRoles(user);
     }
 
+    public UserWithRolesView findUserWithRoles(@NonNull UserLogin login) {
+        UserEntity user = findUserByLogin(login);
+        List<String> roles = findAllUserRoles(user);
+
+        return userMapper.toUserWithRolesView(user, roles);
+    }
+
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
         List<UserWithRolesView> users = userRepository
                 .findAllUsers(pageRequest).stream()
