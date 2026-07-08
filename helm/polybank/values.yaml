@@ -9,8 +9,6 @@ metricsContainerPort: 5300
 service:
   type: NodePort
   nodePort: 30090
-ingress:
-  enabled: false
 resources:
   requests:
     memory: "256Mi"

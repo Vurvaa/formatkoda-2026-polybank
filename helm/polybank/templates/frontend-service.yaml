@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: polybank-webapp
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: polybank
+    app.kubernetes.io/component: webapp
+spec:
+  type: {{ .Values.webapp.service.type }}
+  selector:
+    app: {{ .Values.webapp.appName }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      {{- if and (eq .Values.webapp.service.type "NodePort") .Values.webapp.service.nodePort }}
+      nodePort: {{ .Values.webapp.service.nodePort }}
+      {{- end }}
