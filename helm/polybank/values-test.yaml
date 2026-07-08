@@ -1,67 +1,49 @@
-namespace: polybank
+namespace: polybank-test
 appName: polybank-backend
+replicas: 1
+
 image:
-  repository: 192.168.130.81:5000/polybank
+  repository: 192.168.130.81:5000/polybank-test
   tag: latest
-replicas: 2
-appServicePort: 8080
-metricsContainerPort: 5300
+
 service:
   type: NodePort
-  nodePort: 30090
-ingress:
-  enabled: false
+  nodePort: 30190
+
 resources:
   requests:
     memory: "256Mi"
     cpu: "100m"
   limits:
     memory: "1Gi"
-    cpu: "1000m"
+    cpu: "500m"
 
 startupProbe:
   initialDelaySeconds: 10
   periodSeconds: 5
-  failureThreshold: 30
-
-appVars:
-  APP_JWT_EXPIRATION_MINUTES:
-    secret: false
-    value: "60"
-  APP_CORS_ALLOWED_ORIGIN:
-    secret: false
-    value: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
-  APP_JWT_SECRET:
-    secret: true
-    value: ""
-
-postgresAuth:
-  username: polybank_user
-  password: ""
-  postgresPassword: ""
-  database: polybank_db
-
-externalPostgres:
-  host: ""
-  port: 5432
+  failureThreshold: 40
 
 webapp:
   appName: polybank-webapp
-  image:
-    repository: 192.168.130.81:5000/polybank-webapp
-    tag: latest
   replicas: 1
-  containerPort: 80
+  image:
+    repository: 192.168.130.81:5000/polybank-webapp-test
+    tag: latest
   service:
     type: NodePort
-    nodePort: 30091
+    nodePort: 30191
   resources:
     requests:
+      memory: "32Mi"
+      cpu: "25m"
+    limits:
       memory: "64Mi"
       cpu: "50m"
-    limits:
-      memory: "128Mi"
-      cpu: "200m"
+
+appVars:
+  APP_CORS_ALLOWED_ORIGIN:
+    secret: false
+    value: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
 
 postgresql:
   enabled: true
@@ -72,8 +54,8 @@ postgresql:
   image:
     repository: bitnamilegacy/postgresql
   auth:
-    username: polybank_user
-    database: polybank_db
+    username: polybank_test_user
+    database: polybank_test_db
     existingSecret: "polybank-backend-secret"
     secretKeys:
       adminPasswordKey: postgres-password
@@ -84,28 +66,32 @@ postgresql:
   primary:
     persistence:
       enabled: true
-      existingClaim: "data-polybank-postgresql-0"
-      size: 10Gi
-      storageClass: "local-path"
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "1Gi"
-    podAntiAffinityPreset: hard
-  readReplicas:
-    replicaCount: 1
-    persistence:
-      enabled: true
-      size: 10Gi
+      existingClaim: ""
+      size: 2Gi
       storageClass: "local-path"
     resources:
       requests:
         cpu: "50m"
         memory: "128Mi"
       limits:
-        cpu: "300m"
-        memory: "512Mi"
+        cpu: "100m"
+        memory: "256Mi"
     podAntiAffinityPreset: hard
+  readReplicas:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 2Gi
+      storageClass: "local-path"
+    resources:
+      requests:
+        cpu: "25m"
+        memory: "64Mi"
+      limits:
+        cpu: "50m"
+        memory: "128Mi"
+    podAntiAffinityPreset: hard
+
+postgresAuth:
+  username: polybank_test_user
+  database: polybank_test_db
