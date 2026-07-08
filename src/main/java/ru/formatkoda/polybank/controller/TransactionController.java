@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/transaction")
 public class TransactionController {
 
 	private final TransactionService transactionService;
