@@ -47,6 +47,14 @@ public class UserRepository {
                 .fetchOptional(USERS.ID);
     }
 
+    public Optional<UserEntity> createUser(UserEntity user) {
+        return dsl
+                .insertInto(USERS)
+                .set(toRecord(user))
+                .returning()
+                .fetchOptional(this::toEntity);
+    }
+
     public void bindUserWithRole(long userId, long roleId) {
         dsl.insertInto(USERS_ROLES,
                         USERS_ROLES.USER_ID,

@@ -7,6 +7,7 @@ import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
+import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
@@ -45,6 +46,18 @@ public class UserMapper {
                 new UserLogin(user.login()),
                 "",
                 "",
+                user.password(),
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null
+        );
+    }
+
+    public UserEntity toEntity(StaffUserRegistrationDto user) {
+        return new UserEntity(
+                null,
+                new UserLogin(user.login()),
+                user.name(),
+                user.lastName(),
                 user.password(),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
