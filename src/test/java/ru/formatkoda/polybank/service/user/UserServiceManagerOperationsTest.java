@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
@@ -17,10 +18,15 @@ import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -494,5 +500,246 @@ class UserServiceManagerOperationsTest {
         Assertions.assertEquals("user MANAGER role not removed", exception.getMessage());
 
         verify(userRepository, times(1)).removeUserRole(user.id(), managerRole.id());
+    }
+
+    @Test
+    void shouldCreateManagerBySeniorManager() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserEntity createdManager = createdManager();
+        RoleEntity managerRole = new RoleEntity(2L, "MANAGER");
+        UserWithRolesView createdManagerWithRoles = new UserWithRolesView(
+                createdManager.id(),
+                createdManager.login(),
+                createdManager.name(),
+                createdManager.lastName(),
+                List.of("MANAGER"),
+                createdManager.createdAt(),
+                createdManager.blockedAt()
+        );
+
+        when(userRepository.findUserByLogin(seniorManager.login()))
+                .thenReturn(Optional.of(seniorManager));
+        when(userRepository.findUserByLogin(managerToCreate.login()))
+                .thenReturn(Optional.empty());
+        when(roleRepository.findRoleEntityByName("MANAGER"))
+                .thenReturn(Optional.of(managerRole));
+        when(userRepository.createUser(managerToCreate))
+                .thenReturn(Optional.of(createdManager));
+        when(userRepository.findAllUserRoles(createdManager))
+                .thenReturn(List.of("MANAGER"));
+        when(userMapper.toUserWithRolesView(createdManager, List.of("MANAGER")))
+                .thenReturn(createdManagerWithRoles);
+
+        UserWithRolesView result = userService.createStaffUser(
+                seniorManager.login(),
+                managerToCreate,
+                "MANAGER"
+        );
+
+        Assertions.assertEquals(createdManagerWithRoles, result);
+        Assertions.assertEquals(List.of("MANAGER"), result.roles());
+        Assertions.assertNull(result.blockedAt());
+
+        verify(roleRepository, times(1)).findRoleEntityByName("MANAGER");
+        verify(userRepository, times(1)).createUser(managerToCreate);
+        verify(userRepository, times(1)).bindUserWithRole(createdManager.id(), managerRole.id());
+        verify(userMapper, times(1)).toUserWithRolesView(createdManager, List.of("MANAGER"));
+    }
+
+    @Test
+    void createStaffUserShouldBeTransactional() throws NoSuchMethodException {
+        Method method = UserService.class.getMethod(
+                "createStaffUser",
+                UserLogin.class,
+                UserEntity.class,
+                String.class
+        );
+        Transactional transactional = method.getAnnotation(Transactional.class);
+
+        Assertions.assertNotNull(transactional);
+        Assertions.assertFalse(transactional.readOnly());
+    }
+
+    @Test
+    void shouldNotCreateManagerWhenSeniorManagerIsBlocked() {
+        UserEntity blockedSeniorManager = new UserEntity(
+                25L,
+                SENIOR_MANAGER_LOGIN,
+                "User",
+                "Test",
+                "password-hash",
+                CREATED_AT,
+                CREATED_AT
+        );
+        UserEntity managerToCreate = managerToCreate();
+        UserLogin managerLogin = blockedSeniorManager.login();
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(blockedSeniorManager));
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
+        );
+
+        Assertions.assertEquals("blocked manager cannot create new staff user", exception.getMessage());
+
+        verify(userRepository, never()).findUserByLogin(managerToCreate.login());
+        verify(roleRepository, never()).findRoleEntityByName("MANAGER");
+        verify(userRepository, never()).createUser(any());
+        verify(userRepository, never()).bindUserWithRole(anyLong(), anyLong());
+    }
+
+    @Test
+    void shouldNotCreateManagerWhenLoginAlreadyExists() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserLogin managerLogin = seniorManager.login();
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(seniorManager));
+        when(userRepository.findUserByLogin(managerToCreate.login()))
+                .thenReturn(Optional.of(managerToCreate));
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
+        );
+
+        Assertions.assertEquals("user with given login already exists", exception.getMessage());
+
+        verify(roleRepository, never()).findRoleEntityByName("MANAGER");
+        verify(userRepository, never()).createUser(any());
+        verify(userRepository, never()).bindUserWithRole(anyLong(), anyLong());
+    }
+
+    @Test
+    void shouldNotCreateManagerWhenManagerRoleNotFound() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserLogin managerLogin = seniorManager.login();
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(seniorManager));
+        when(userRepository.findUserByLogin(managerToCreate.login()))
+                .thenReturn(Optional.empty());
+        when(roleRepository.findRoleEntityByName("MANAGER"))
+                .thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = Assertions.assertThrows(
+                ResourceNotFoundException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
+        );
+
+        Assertions.assertEquals("role with name MANAGER not found", exception.getMessage());
+
+        verify(userRepository, never()).createUser(any());
+        verify(userRepository, never()).bindUserWithRole(anyLong(), anyLong());
+    }
+
+    @Test
+    void shouldNotCreateClientRoleViaManagerCreationEndpoint() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserLogin managerLogin = seniorManager.login();
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(seniorManager));
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "CLIENT")
+        );
+
+        Assertions.assertEquals("only staff user can be created by manager", exception.getMessage());
+
+        verify(roleRepository, never()).findRoleEntityByName("CLIENT");
+        verify(userRepository, never()).createUser(any());
+        verify(userRepository, never()).bindUserWithRole(anyLong(), anyLong());
+    }
+
+    @Test
+    void shouldNotBindRoleWhenManagerUserWasNotCreated() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserLogin managerLogin = seniorManager.login();
+        RoleEntity managerRole = new RoleEntity(2L, "MANAGER");
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(seniorManager));
+        when(userRepository.findUserByLogin(managerToCreate.login()))
+                .thenReturn(Optional.empty());
+        when(roleRepository.findRoleEntityByName("MANAGER"))
+                .thenReturn(Optional.of(managerRole));
+        when(userRepository.createUser(managerToCreate))
+                .thenReturn(Optional.empty());
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
+        );
+
+        Assertions.assertEquals("user not created", exception.getMessage());
+
+        verify(userRepository, times(1)).createUser(managerToCreate);
+        verify(userRepository, never()).bindUserWithRole(anyLong(), anyLong());
+        verify(userMapper, never()).toUserWithRolesView(any(), any());
+    }
+
+    @Test
+    void shouldNotCompleteWhenManagerRoleBindingFails() {
+        UserEntity seniorManager = userManager();
+        UserEntity managerToCreate = managerToCreate();
+        UserEntity createdManager = createdManager();
+        UserLogin managerLogin = seniorManager.login();
+        RoleEntity managerRole = new RoleEntity(2L, "MANAGER");
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(seniorManager));
+        when(userRepository.findUserByLogin(managerToCreate.login()))
+                .thenReturn(Optional.empty());
+        when(roleRepository.findRoleEntityByName("MANAGER"))
+                .thenReturn(Optional.of(managerRole));
+        when(userRepository.createUser(managerToCreate))
+                .thenReturn(Optional.of(createdManager));
+        doThrow(new BusinessLogicException("user role not created"))
+                .when(userRepository)
+                .bindUserWithRole(createdManager.id(), managerRole.id());
+
+        BusinessLogicException exception = Assertions.assertThrows(
+                BusinessLogicException.class,
+                () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
+        );
+
+        Assertions.assertEquals("user role not created", exception.getMessage());
+
+        verify(userRepository, times(1)).createUser(managerToCreate);
+        verify(userRepository, times(1)).bindUserWithRole(createdManager.id(), managerRole.id());
+        verify(userMapper, never()).toUserWithRolesView(any(), any());
+    }
+
+    private UserEntity managerToCreate() {
+        return new UserEntity(
+                null,
+                new UserLogin("new_manager"),
+                "Manager",
+                "Test",
+                "password-hash",
+                CREATED_AT,
+                null
+        );
+    }
+
+    private UserEntity createdManager() {
+        return new UserEntity(
+                30L,
+                new UserLogin("new_manager"),
+                "Manager",
+                "Test",
+                "password-hash",
+                CREATED_AT,
+                null
+        );
     }
 }
