@@ -166,10 +166,7 @@ public class UserService {
             @NonNull UserEntity staffUser,
             @NonNull String roleName
     ) {
-        UserEntity manager = findUserByLogin(managerLogin);
-        if (manager.isBlocked()) {
-            throw new BusinessLogicException("blocked manager cannot create new staff user");
-        }
+        findNotBlockedUserByLogin(managerLogin);
 
         if (roleName.equals("CLIENT")) {
             throw new BusinessLogicException("only staff user can be created by manager");

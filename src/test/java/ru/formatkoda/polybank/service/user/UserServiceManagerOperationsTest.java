@@ -583,7 +583,7 @@ class UserServiceManagerOperationsTest {
                 () -> userService.createStaffUser(managerLogin, managerToCreate, "MANAGER")
         );
 
-        Assertions.assertEquals("blocked manager cannot create new staff user", exception.getMessage());
+        Assertions.assertEquals("user senior_manager is blocked", exception.getMessage());
 
         verify(userRepository, never()).findUserByLogin(managerToCreate.login());
         verify(roleRepository, never()).findRoleEntityByName("MANAGER");
