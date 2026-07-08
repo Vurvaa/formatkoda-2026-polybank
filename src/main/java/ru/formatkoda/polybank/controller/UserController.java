@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
@@ -16,12 +17,17 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
+import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
+import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.UserService;
+import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -29,6 +35,7 @@ import ru.formatkoda.polybank.util.pagination.PageResult;
 public class UserController {
     private final AuthService authService;
     private final UserService userService;
+    private final AccountService accountService;
     private final UserMapper userMapper;
 
     @PostMapping("/sign-up")
@@ -115,5 +122,22 @@ public class UserController {
         );
 
         return ResponseEntity.ok(userMapper.toResponse(user));
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
+    @GetMapping("/{userLogin}/info")
+    public ResponseEntity<UserInfoResponseDto> getUserInfo(@PathVariable String userLogin) {
+        UserLogin login = new UserLogin(userLogin);
+        List<AccountInfo> accounts = accountService.findAllForUser(login)
+                .stream()
+                .map(AccountMapper::toAccountInfo)
+                .toList();
+
+        UserWithRolesView user = userService.findUserWithRoles(login);
+
+        return ResponseEntity.ok(
+                userMapper.toResponse(user, accounts)
+        );
     }
 }

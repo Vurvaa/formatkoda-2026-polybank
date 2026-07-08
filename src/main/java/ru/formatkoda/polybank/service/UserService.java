@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -151,6 +152,13 @@ public class UserService {
 
     public List<String> findAllUserRoles(@NonNull UserEntity user) {
         return userRepository.findAllUserRoles(user);
+    }
+
+    public UserWithRolesView findUserWithRoles(@NonNull UserLogin login) {
+        UserEntity user = findUserByLogin(login);
+        List<String> roles = findAllUserRoles(user);
+
+        return userMapper.toUserWithRolesView(user, roles);
     }
 
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
