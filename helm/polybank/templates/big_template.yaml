@@ -8,7 +8,12 @@ data:
   SERVER_PORT: {{ .Values.appServicePort | quote }}
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
-  JWT_EXPIRATION_MINUTES: {{ .Values.jwt.expirationMinutes | quote }}
+
+  {{- range $key, $var := .Values.appVars }}
+  {{- if not $var.secret }}
+  {{ $key }}: {{ required (printf "Set .Values.appVars.%s.value" $key) $var.value | quote }}
+  {{- end }}
+  {{- end }}
 
 ---
 
@@ -54,6 +59,19 @@ spec:
         prometheus.io/path: "/metrics"
         reloader.stakater.com/auto: "true"
     spec:
+      automountServiceAccountToken: false
+      {{- $pgHost := "" }}
+      {{- $pgPort := 5432 }}
+      {{- if .Values.postgresql.enabled }}
+      {{- if eq (.Values.postgresql.architecture | default "standalone") "replication" }}
+      {{- $pgHost = printf "%s-postgresql-primary" .Release.Name }}
+      {{- else }}
+      {{- $pgHost = printf "%s-postgresql" .Release.Name }}
+      {{- end }}
+      {{- else }}
+      {{- $pgHost = .Values.externalPostgres.host }}
+      {{- $pgPort = .Values.externalPostgres.port | default 5432 }}
+      {{- end }}
       initContainers:
         - name: wait-for-postgres
           image: postgres:16-alpine
@@ -62,11 +80,20 @@ spec:
             - sh
             - -c
             - >-
-              until pg_isready -h polybank-postgresql -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              until pg_isready -h {{ $pgHost }} -p {{ $pgPort }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
               do echo "waiting for postgres"; sleep 2; done
           envFrom:
             - secretRef:
                 name: polybank-backend-secret
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+              ephemeral-storage: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+              ephemeral-storage: "64Mi"
       containers:
         - name: {{ .Values.appName }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -74,18 +101,18 @@ spec:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 1
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds | default 10 }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds | default 5 }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds | default 3 }}
             successThreshold: 1
-            failureThreshold: 10
+            failureThreshold: {{ .Values.startupProbe.failureThreshold | default 30 }}
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
-            timeoutSeconds: 1
+            timeoutSeconds: 3
             successThreshold: 1
             failureThreshold: 3
           livenessProbe:
@@ -94,16 +121,18 @@ spec:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
-            timeoutSeconds: 1
+            timeoutSeconds: 3
             successThreshold: 1
             failureThreshold: 5
           resources:
             requests:
               memory: "{{ .Values.resources.requests.memory }}"
               cpu: "{{ .Values.resources.requests.cpu }}"
+              ephemeral-storage: "256Mi"
             limits:
               memory: "{{ .Values.resources.limits.memory }}"
               cpu: "{{ .Values.resources.limits.cpu }}"
+              ephemeral-storage: "512Mi"
           envFrom:
             - secretRef:
                 name: polybank-backend-secret
