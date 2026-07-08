@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
+import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
@@ -138,6 +139,26 @@ public class UserController {
 
         return ResponseEntity.ok(
                 userMapper.toResponse(user, accounts)
+        );
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('SENIOR_MANAGER')")
+    @PostMapping
+    public ResponseEntity<UserDetailsResponseDto> createStaffUser(
+            @AuthenticationPrincipal UserLogin managerLogin,
+            @Valid @RequestBody StaffUserRegistrationDto staffUserRegistrationDto
+    ) {
+        UserWithRolesView staffUser = userService.createStaffUser(
+                managerLogin,
+                userMapper.toEntity(staffUserRegistrationDto),
+                staffUserRegistrationDto.roleName()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                userMapper.toResponse(
+                        staffUser
+                )
         );
     }
 }
