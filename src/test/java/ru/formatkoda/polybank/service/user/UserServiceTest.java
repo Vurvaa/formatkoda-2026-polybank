@@ -116,7 +116,7 @@ class UserServiceTest {
         ResourceNotFoundException actualException = Assertions.assertThrows(
                 ResourceNotFoundException.class,
                 () -> userService.createUser(user));
-        Assertions.assertEquals("not found CLIENT role", actualException.getMessage());
+        Assertions.assertEquals("role with name CLIENT not found", actualException.getMessage());
     }
 
     @Test

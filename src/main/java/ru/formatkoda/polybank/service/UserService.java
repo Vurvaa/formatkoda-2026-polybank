@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -33,14 +32,12 @@ public class UserService {
         if (userOptional.isPresent())
             throw new BusinessLogicException("user already exists");
 
-        RoleEntity role = roleRepository
-                .findRoleEntityByName("CLIENT")
-                .orElseThrow(() -> new ResourceNotFoundException("not found CLIENT role"));
+        long roleId = findRoleIdOrThrow("CLIENT");
 
         Long userId = userRepository.createUserAndReturnId(user)
                 .orElseThrow(() -> new BusinessLogicException("unable to create user"));
 
-        userRepository.bindUserWithRole(userId, role.id());
+        userRepository.bindUserWithRole(userId, roleId);
 
         return user.login();
     }
@@ -108,6 +105,50 @@ public class UserService {
         );
     }
 
+    @Transactional
+    public UserWithRolesView removeUserRole(
+            @NonNull UserLogin managerLogin,
+            @NonNull UserLogin userLogin,
+            @NonNull String roleName
+    ) {
+        UserEntity manager = findNotBlockedUserByLogin(managerLogin);
+        UserEntity user = findUserByLogin(userLogin);
+
+        if  (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("user can not remove himself");
+        }
+        List<String> userRoles = findAllUserRoles(user);
+
+        if (!userRoles.contains(roleName)) {
+            throw new BusinessLogicException(
+                    String.format(
+                            "user has not %s role",
+                            roleName
+                    )
+            );
+        } else if (userRoles.size() < 2) {
+            throw new BusinessLogicException("user has only one role, use block instead");
+        }
+
+        long roleId = findRoleIdOrThrow(roleName);
+        if (!userRepository.removeUserRole(user.id(), roleId)) {
+            throw new BusinessLogicException(
+                    String.format(
+                            "user %s role not removed",
+                            roleName
+                    )
+            );
+        }
+
+        UserEntity updatedUser = findUserByLogin(userLogin);
+        List<String> updatedUserRoles = findAllUserRoles(updatedUser);
+
+        return userMapper.toUserWithRolesView(
+                updatedUser,
+                updatedUserRoles
+        );
+    }
+
     public List<String> findAllUserRoles(@NonNull UserEntity user) {
         return userRepository.findAllUserRoles(user);
     }
@@ -125,5 +166,14 @@ public class UserService {
                 pageRequest.size(),
                 users.size()
         );
+    }
+
+    private long findRoleIdOrThrow(@NonNull String roleName) {
+        return roleRepository
+                .findRoleEntityByName(roleName)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(String.format("role with name %s not found", roleName)
+                        )
+                ).id();
     }
 }
