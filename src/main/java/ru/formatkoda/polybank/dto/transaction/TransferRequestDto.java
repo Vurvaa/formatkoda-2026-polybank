@@ -9,7 +9,7 @@ public record TransferRequestDto(
 		@NotBlank @Length(min = 20, max = 20) String toAccountNumber,
 		@NotBlank
 		@Pattern(
-				regexp = "^(0|[1-9]\\d{0,15})\\.\\d{0,2}$",
+				regexp = "^(0|[1-9]\\d{0,15})(\\.\\d{1,2})?$",
 				message = "amount must be a decimal string with no more than 2 fraction digits"
 		)
 		String amount
