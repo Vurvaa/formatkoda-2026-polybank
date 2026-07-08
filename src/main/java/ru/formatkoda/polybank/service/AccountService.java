@@ -100,7 +100,7 @@ public class AccountService {
 
 		if (!account.userId().equals(user.id())) {
 			throw new BusinessLogicException("account does not belong to this user");
-		} else if (!account.balance().equals(BigDecimal.ZERO)) {
+		} else if (account.balance().signum() != 0) {
 			throw new BusinessLogicException("account balance is not zero");
 		}
 
