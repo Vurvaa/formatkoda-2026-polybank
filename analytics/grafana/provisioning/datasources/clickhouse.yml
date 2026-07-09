@@ -1,0 +1,24 @@
+apiVersion: 1
+
+prune: true
+
+datasources:
+  - name: ClickHouse
+    uid: clickhouse
+    type: grafana-clickhouse-datasource
+    access: proxy
+    isDefault: true
+    editable: false
+    jsonData:
+      host: clickhouse
+      port: 9000
+      protocol: native
+      username: analytics
+      defaultDatabase: analytics
+      configMode: classic
+      secure: false
+      dialTimeout: "10"
+      queryTimeout: "60"
+      validateSql: true
+    secureJsonData:
+      password: $CLICKHOUSE_GRAFANA_PASSWORD
