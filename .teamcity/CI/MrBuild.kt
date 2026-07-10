@@ -39,6 +39,13 @@ object MrBuild : BuildType({
         }
 
         maven {
+            id = "STYLE_CHECK"
+            name = "Checkstyle"
+            goals = "checkstyle:checkstyle"
+            jdkHome = javap
+        }
+
+        maven {
             id = "SONARQUBE"
             name = "SonarQube Analysis"
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: polybank-config
+  namespace: {{ .Release.Namespace }}
+data:
+  SPRING_APPLICATION_NAME: polybank
+  SERVER_PORT: {{ .Values.appServicePort | quote }}
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
+
+  {{- range $key, $var := .Values.appVars }}
+  {{- if not $var.secret }}
+  {{ $key }}: {{ required (printf "Set .Values.appVars.%s.value" $key) $var.value | quote }}
+  {{- end }}
+  {{- end }}

@@ -28,3 +28,7 @@ export interface TransferRequestDto {
   toAccountNumber: string;
   amount: string;
 }
+
+export interface CreateAccountRequestDto {
+  accountType: AccountType;
+}
