@@ -1,4 +1,4 @@
-import { Tag, Table, Typography, type TablePaginationConfig, type TableProps } from 'antd';
+import { Button, Popconfirm, Tag, Table, Typography, type TablePaginationConfig, type TableProps } from 'antd';
 import type {TransactionResponseDto, TransactionStatus, TransactionType} from '../models/transaction.ts';
 import { formatDateTime, formatMoney } from '../utils/format.ts';
 
@@ -9,6 +9,8 @@ interface TransactionsTableProps {
   size: number;
   total: number;
   onPageChange: (page: number, size: number) => void;
+  canCancel?: boolean;
+  onCancel?: (transactionId: number) => void;
 }
 
 const statusColor: Record<TransactionStatus, string> = {
@@ -34,7 +36,9 @@ export function TransactionsTable({
   page,
   size,
   total,
-  onPageChange
+  onPageChange,
+  canCancel = false,
+  onCancel
 }: Readonly<TransactionsTableProps>) {
   const columns: TableProps<TransactionResponseDto>['columns'] = [
     {
@@ -73,7 +77,27 @@ export function TransactionsTable({
       render: (value: TransactionStatus) => (
         <Tag color={statusColor[value]}>{value}</Tag>
       )
-    }
+    },
+    ...(canCancel
+      ? [
+          {
+            title: '',
+            key: 'actions',
+            align: 'right' as const,
+            render: (_: unknown, record: TransactionResponseDto) =>
+              record.status === 'PENDING' || record.status === 'COMPLETED' ? (
+                <Popconfirm
+                  title="Отменить транзакцию?"
+                  okText="Отменить"
+                  cancelText="Нет"
+                  onConfirm={() => onCancel?.(record.id)}
+                >
+                  <Button danger size="small">Отменить</Button>
+                </Popconfirm>
+              ) : null
+          }
+        ]
+      : [])
   ];
 
   const pagination: TablePaginationConfig = {

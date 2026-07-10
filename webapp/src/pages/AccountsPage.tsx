@@ -1,6 +1,8 @@
+import { PlusOutlined } from '@ant-design/icons';
 import { App as AntdApp, Button, Card, Space, Table, Typography, type TableProps } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CreateAccountModal } from '../components/CreateAccountModal.tsx';
 import type { AccountResponseDto } from '../models/account.ts';
 import { accountService } from '../services/accountService.ts';
 import { formatDateTime, formatMoney } from '../utils/format.ts';
@@ -9,6 +11,7 @@ import { getApiErrorMessage } from '../utils/errors.ts';
 export function AccountsPage() {
   const [accounts, setAccounts] = useState<AccountResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
   const { message } = AntdApp.useApp();
   const navigate = useNavigate();
 
@@ -63,7 +66,12 @@ export function AccountsPage() {
 
   return (
     <Space direction="vertical" size="large" className="page-stack">
-      <Typography.Title level={2}>Мои счета</Typography.Title>
+      <Space align="center" style={{ justifyContent: 'space-between', width: '100%' }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>Мои счета</Typography.Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+          Открыть счет
+        </Button>
+      </Space>
 
       <Card>
         <Table
@@ -76,6 +84,12 @@ export function AccountsPage() {
           scroll={{ x: 760 }}
         />
       </Card>
+
+      <CreateAccountModal
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
+        onSuccess={() => loadAccounts().then(r => r)}
+      />
     </Space>
   );
 }

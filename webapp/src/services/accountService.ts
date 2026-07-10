@@ -1,6 +1,7 @@
 import type {
   AccountOperationRequestDto,
   AccountResponseDto,
+  CreateAccountRequestDto,
   TransferRequestDto
 } from '../models/account.ts';
 import type { PageResponse } from '../models/page.ts';
@@ -15,6 +16,41 @@ export const accountService = {
 
   async get(accountNumber: string): Promise<AccountResponseDto> {
     const response = await api.get<AccountResponseDto>(`/account/${accountNumber}`);
+    return response.data;
+  },
+
+  async create(payload: CreateAccountRequestDto): Promise<AccountResponseDto> {
+    const response = await api.post<AccountResponseDto>('/account', payload);
+    return response.data;
+  },
+
+  async close(accountNumber: string): Promise<AccountResponseDto> {
+    const response = await api.put<AccountResponseDto>(`/account/${accountNumber}/close`);
+    return response.data;
+  },
+
+  async freeze(accountNumber: string): Promise<AccountResponseDto> {
+    const response = await api.put<AccountResponseDto>(`/account/${accountNumber}/freeze`);
+    return response.data;
+  },
+
+  async unfreeze(accountNumber: string): Promise<AccountResponseDto> {
+    const response = await api.put<AccountResponseDto>(`/account/${accountNumber}/unfreeze`);
+    return response.data;
+  },
+
+  async block(accountNumber: string): Promise<AccountResponseDto> {
+    const response = await api.put<AccountResponseDto>(`/account/${accountNumber}/block`);
+    return response.data;
+  },
+
+  async unblock(accountNumber: string): Promise<AccountResponseDto> {
+    const response = await api.put<AccountResponseDto>(`/account/${accountNumber}/unblock`);
+    return response.data;
+  },
+
+  async cancelTransaction(transactionId: number): Promise<TransactionResponseDto> {
+    const response = await api.put<TransactionResponseDto>(`/transaction/${transactionId}/cancel`);
     return response.data;
   },
 

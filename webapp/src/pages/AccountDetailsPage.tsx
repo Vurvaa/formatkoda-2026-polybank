@@ -1,9 +1,18 @@
-import { ArrowLeftOutlined, DownloadOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
-import { App as AntdApp, Button, Card, Descriptions, Space, Typography } from 'antd';
+import {
+  ArrowLeftOutlined,
+  DownloadOutlined,
+  LockOutlined,
+  SendOutlined,
+  StopOutlined,
+  UnlockOutlined,
+  UploadOutlined
+} from '@ant-design/icons';
+import { App as AntdApp, Button, Card, Descriptions, Popconfirm, Space, Tag, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { OperationModal, type AccountOperation } from '../components/OperationModal.tsx';
 import { TransactionsTable } from '../components/TransactionsTable.tsx';
+import { useAuth } from '../hooks/useAuth.tsx';
 import type { AccountResponseDto } from '../models/account.ts';
 import type { TransactionResponseDto } from '../models/transaction.ts';
 import { accountService } from '../services/accountService.ts';
@@ -20,7 +29,9 @@ export function AccountDetailsPage() {
   const [accountLoading, setAccountLoading] = useState(true);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [operation, setOperation] = useState<AccountOperation | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const { message } = AntdApp.useApp();
+  const { isManager } = useAuth();
 
   const loadAccount = useCallback(async () => {
     if (!accountNumber) {
@@ -77,6 +88,31 @@ export function AccountDetailsPage() {
     setSize(nextSize);
   }
 
+  async function runAccountAction(action: () => Promise<AccountResponseDto>, successMessage: string) {
+    setActionLoading(true);
+
+    try {
+      await action();
+      message.success(successMessage);
+      await loadAccount();
+    } catch (error) {
+      message.error(getApiErrorMessage(error, 'Не удалось выполнить действие'));
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleCancelTransaction(transactionId: number) {
+    try {
+      await accountService.cancelTransaction(transactionId);
+      message.success('Транзакция отменена');
+      loadAccount().then(r => r);
+      loadTransactions().then(r => r);
+    } catch (error) {
+      message.error(getApiErrorMessage(error, 'Не удалось отменить транзакцию'));
+    }
+  }
+
   return (
     <Space direction="vertical" size="large" className="page-stack">
       <Space direction="vertical" size="small">
@@ -101,6 +137,9 @@ export function AccountDetailsPage() {
           <Descriptions.Item label="Создан">
             {formatDateTime(account?.createdAt)}
           </Descriptions.Item>
+          <Descriptions.Item label="Статус">
+            {account ? <Tag>{account.status}</Tag> : '-'}
+          </Descriptions.Item>
         </Descriptions>
 
         <Space wrap className="account-actions">
@@ -113,6 +152,61 @@ export function AccountDetailsPage() {
           <Button icon={<SendOutlined />} onClick={() => setOperation('transfer')}>
             Перевести
           </Button>
+
+          {account?.status === 'ACTIVE' && (
+            <Button
+              icon={<LockOutlined />}
+              loading={actionLoading}
+              onClick={() => runAccountAction(() => accountService.freeze(accountNumber), 'Счет заморожен')}
+            >
+              Заморозить
+            </Button>
+          )}
+
+          {account?.status === 'FROZEN' && (
+            <Button
+              icon={<UnlockOutlined />}
+              loading={actionLoading}
+              onClick={() => runAccountAction(() => accountService.unfreeze(accountNumber), 'Счет разморожен')}
+            >
+              Разморозить
+            </Button>
+          )}
+
+          {account && account.status !== 'CLOSED' && (
+            <Popconfirm
+              title="Закрыть счет?"
+              description="Действие необратимо"
+              okText="Закрыть"
+              cancelText="Отмена"
+              onConfirm={() =>
+                runAccountAction(() => accountService.close(accountNumber), 'Счет закрыт')
+              }
+            >
+              <Button danger icon={<StopOutlined />} loading={actionLoading}>
+                Закрыть счет
+              </Button>
+            </Popconfirm>
+          )}
+
+          {isManager && account?.status !== 'BLOCKED' && (
+            <Button
+              danger
+              loading={actionLoading}
+              onClick={() => runAccountAction(() => accountService.block(accountNumber), 'Счет заблокирован')}
+            >
+              Заблокировать (менеджер)
+            </Button>
+          )}
+
+          {isManager && account?.status === 'BLOCKED' && (
+            <Button
+              loading={actionLoading}
+              onClick={() => runAccountAction(() => accountService.unblock(accountNumber), 'Счет разблокирован')}
+            >
+              Разблокировать (менеджер)
+            </Button>
+          )}
         </Space>
       </Card>
 
@@ -124,6 +218,8 @@ export function AccountDetailsPage() {
           size={size}
           total={total}
           onPageChange={handlePageChange}
+          canCancel={isManager}
+          onCancel={handleCancelTransaction}
         />
       </Card>
 
