@@ -188,17 +188,20 @@ public class UserService {
     }
 
     public PageResult<UserWithRolesView> findAllUsersWithRoles(@NonNull PageRequest pageRequest) {
-        List<UserWithRolesView> users = userRepository
-                .findAllUsers(pageRequest).stream()
-                .map(u -> userMapper
-                        .toUserWithRolesView(u, userRepository.findAllUserRoles(u)))
+        List<UserEntity> users = userRepository.findAllUsers(pageRequest);
+        Long total = userRepository.countAll();
+
+        List<UserWithRolesView> usersViews = users.stream()
+                .map(u -> userMapper.toUserWithRolesView(
+                        u, userRepository.findAllUserRoles(u))
+                )
                 .toList();
 
         return new PageResult<>(
-                users,
+                usersViews,
                 pageRequest.page(),
                 pageRequest.size(),
-                users.size()
+                total
         );
     }
 
