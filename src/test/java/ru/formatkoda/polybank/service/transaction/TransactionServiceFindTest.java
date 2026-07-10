@@ -39,8 +39,8 @@ class TransactionServiceFindTest {
 	private TransactionService transactionService;
 
 	@ParameterizedTest
-	@ValueSource(ints = {0, 5})
-	void shouldReturnTransactionsWhenAccountBelongsToUser(int size) {
+	@ValueSource(longs = {0, 5})
+	void shouldReturnTransactionsWhenAccountBelongsToUser(Long size) {
 		PageRequest pageRequest = new PageRequest(0, 20);
 
 		AccountEntity account = account();
@@ -55,6 +55,7 @@ class TransactionServiceFindTest {
 
 		when(accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN)).thenReturn(account);
 		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(transactions);
+		when(transactionRepository.countAll(account.id())).thenReturn(size);
 
 		PageResult<TransactionWithAccountNumbersView> actualResult = transactionService.findByAccountNumber(
 				ACCOUNT_NUMBER,
@@ -66,15 +67,16 @@ class TransactionServiceFindTest {
 
 		verify(accountService).findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN);
 		verify(transactionRepository).findViewsByAccountId(account.id(), pageRequest);
+		verify(transactionRepository).countAll(account.id());
 	}
 
-	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(int size) {
+	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(Long size) {
 		List<TransactionWithAccountNumbersView> transactions = new ArrayList<>();
 
-		for (int i = 0; i < size; i++)
+		for (long i = 0; i < size; i++)
 			transactions.add(
 					new TransactionWithAccountNumbersView(
-							(long) i,
+							i,
 							new AccountNumber("67675678901234567890"),
 							new AccountNumber("67670000000000000000"),
 							new BigDecimal("100.50"),
