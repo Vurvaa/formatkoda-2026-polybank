@@ -106,6 +106,39 @@ public class UserService {
     }
 
     @Transactional
+    public UserWithRolesView addUserRole(
+            @NonNull UserLogin managerLogin,
+            @NonNull UserLogin userLogin,
+            @NonNull String roleName
+    ) {
+        UserEntity manager = findNotBlockedUserByLogin(managerLogin);
+        UserEntity user = findUserByLogin(userLogin);
+
+        if (user.id().equals(manager.id())) {
+            throw new BusinessLogicException("user can not add role himself");
+        }
+
+        List<String> userRoles = findAllUserRoles(user);
+        if (userRoles.contains(roleName)) {
+            throw new BusinessLogicException(
+                    String.format(
+                            "user already has %s role",
+                            roleName
+                    )
+            );
+        }
+
+        long userId = user.id();
+        long roleId = findRoleIdOrThrow(roleName);
+        userRepository.bindUserWithRole(userId, roleId);
+
+        UserEntity updatedUser = findUserByLogin(userLogin);
+        List<String> updatedRoles = findAllUserRoles(updatedUser);
+
+        return userMapper.toUserWithRolesView(updatedUser, updatedRoles);
+    }
+
+    @Transactional
     public UserWithRolesView removeUserRole(
             @NonNull UserLogin managerLogin,
             @NonNull UserLogin userLogin,
@@ -205,7 +238,7 @@ public class UserService {
         );
     }
 
-    private long findRoleIdOrThrow(@NonNull String roleName) {
+    public long findRoleIdOrThrow(@NonNull String roleName) {
         return roleRepository
                 .findRoleEntityByName(roleName)
                 .orElseThrow(
