@@ -59,11 +59,6 @@ public class AccountRepository {
 				.fetchOptional(this::toEntity);
 	}
 
-	private String generateNextAccountNumber() {
-		BigInteger value = dsl.nextval(SEQUENCE_NAME);
-
-		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
-	}
 
 	public Optional<AccountEntity> changeAccountStatus(AccountNumber accountNumber, AccountEntity.Status status) {
 		return dsl
@@ -79,6 +74,12 @@ public class AccountRepository {
 				.select(ACCOUNTS)
 				.where(ACCOUNTS.ID.eq(id))
 				.fetchOptional(this::toEntity);
+	}
+
+	private String generateNextAccountNumber() {
+		BigInteger value = dsl.nextval(SEQUENCE_NAME);
+
+		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
 	}
 
 	private AccountEntity toEntity(Record r) {

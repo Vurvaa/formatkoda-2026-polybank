@@ -40,6 +40,12 @@ public class UserRepository {
 
     }
 
+    public Long countAll() {
+        return dsl.selectCount()
+                .from(USERS)
+                .fetchOne(0, Long.class);
+    }
+
     public Optional<Long> createUserAndReturnId(UserEntity user) {
         return dsl.insertInto(USERS)
                 .set(toRecord(user))

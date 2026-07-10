@@ -39,12 +39,13 @@ public class TransactionService {
 
 		List<TransactionWithAccountNumbersView> transactions = transactionRepository
 				.findViewsByAccountId(account.id(), pageRequest);
+		Long total = transactionRepository.countAll(account.id());
 
 		return new PageResult<>(
 				transactions,
 				pageRequest.page(),
 				pageRequest.size(),
-				transactions.size()
+				total
 		);
 	}
 
