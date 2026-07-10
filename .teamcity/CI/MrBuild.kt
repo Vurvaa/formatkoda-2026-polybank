@@ -26,32 +26,36 @@ object MrBuild : BuildType({
             id = "COMPILE"
             name = "Compile"
             goals = "clean compile"
+            pomLocation = "app/pom.xml"
+            workingDir = "app"
             runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
-            workingDir = "app"
         }
 
         maven {
             id = "UNIT_TESTS"
             name = "Unit Tests"
             goals = "test"
+            pomLocation = "app/pom.xml"
+            workingDir = "app"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
-            workingDir = "app"
         }
 
         maven {
             id = "STYLE_CHECK"
             name = "Checkstyle"
             goals = "checkstyle:checkstyle"
-            jdkHome = javap
+            pomLocation = "app/pom.xml"
             workingDir = "app"
+            jdkHome = javap
         }
 
         maven {
             id = "SONARQUBE"
             name = "SonarQube Analysis"
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
+            pomLocation = "app/pom.xml"
             workingDir = "app"
             runnerArgs = """
                 -Dsonar.host.url=%sonar.host.url%
