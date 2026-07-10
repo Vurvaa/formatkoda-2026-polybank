@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
@@ -29,6 +30,7 @@ public class TransactionService {
 	private final TransactionRepository transactionRepository;
 	private final AccountService accountService;
 	private final UserService userService;
+	private final TransactionEventPublisher transactionEventPublisher;
 
 	public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
 			@NonNull AccountNumber accountNumber,
@@ -64,7 +66,15 @@ public class TransactionService {
 				TransactionEntity.Type.DEPOSIT
 		);
 
-		return TransactionMapper.toView(transaction, null, accountNumber);
+		TransactionWithAccountNumbersView transactionView = TransactionMapper.toView(
+				transaction,
+				null,
+				accountNumber
+		);
+
+		transactionEventPublisher.publishTransactionCreated(transactionView);
+
+		return transactionView;
 	}
 
 	@Transactional
@@ -82,7 +92,15 @@ public class TransactionService {
 				TransactionEntity.Type.WITHDRAWAL
 		);
 
-		return TransactionMapper.toView(transaction, accountNumber, null);
+		TransactionWithAccountNumbersView transactionView = TransactionMapper.toView(
+				transaction,
+				accountNumber,
+				null
+		);
+
+		transactionEventPublisher.publishTransactionCreated(transactionView);
+
+		return transactionView;
 	}
 
 	@Transactional
@@ -105,7 +123,15 @@ public class TransactionService {
 				TransactionEntity.Type.TRANSFER
 		);
 
-		return TransactionMapper.toView(transaction, fromAccountNumber, toAccountNumber);
+		TransactionWithAccountNumbersView transactionView = TransactionMapper.toView(
+				transaction,
+				fromAccountNumber,
+				toAccountNumber
+		);
+
+		transactionEventPublisher.publishTransactionCreated(transactionView);
+
+		return transactionView;
 	}
 
 	public TransactionEntity findTransactionOrThrow(@NonNull Long id) {
@@ -169,11 +195,15 @@ public class TransactionService {
 				TransactionEntity.Type.REFUND
 		);
 
-		return TransactionMapper.toView(
+		TransactionWithAccountNumbersView transactionView = TransactionMapper.toView(
 				refundTransaction,
 				refundFromAccountNumber,
 				refundToAccountNumber
 		);
+
+		transactionEventPublisher.publishTransactionCreated(transactionView);
+
+		return transactionView;
 
 	}
 
