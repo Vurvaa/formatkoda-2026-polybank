@@ -202,8 +202,7 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>3.6.0</version>
 				<configuration>
-					<!-- google_checks.xml можно проверять по другой конфигурации, чуть более строгой -->
-					<configLocation>sun_checks.xml</configLocation>
+					<configLocation>checkstyle-ruleset.xml</configLocation>
 					<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>false</failsOnError>
