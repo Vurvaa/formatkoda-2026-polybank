@@ -12,7 +12,7 @@ import ru.formatkoda.polybank.messaging.publisher.AccountEventPublisher;
 @RequiredArgsConstructor
 public class KafkaAccountEventPublisher implements AccountEventPublisher {
 
-	private static final String ACCOUNT_EVENTS_TOPIC = "accounts";
+	private static final String ACCOUNT_EVENTS_TOPIC = "bank.accounts";
 	private static final String ACCOUNT_CREATED = "AccountCreated";
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;
