@@ -1,4 +1,4 @@
-import type { AccountResponseDto } from './account.ts';
+import type { AccountStatus, AccountType } from './account.ts';
 
 export interface UserLoginRef {
   value: string;
@@ -13,8 +13,15 @@ export interface UserDetailsResponseDto {
   blockedAt: string | null;
 }
 
+export interface AccountInfoDto {
+  number: string;
+  type: AccountType;
+  status: AccountStatus;
+  createdAt: string;
+}
+
 export interface UserInfoResponseDto extends UserDetailsResponseDto {
-  accounts: AccountResponseDto[];
+  accounts: AccountInfoDto[];
 }
 
 export interface StaffUserRegistrationDto {
