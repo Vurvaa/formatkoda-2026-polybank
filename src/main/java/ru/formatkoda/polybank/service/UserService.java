@@ -238,7 +238,7 @@ public class UserService {
         );
     }
 
-    public long findRoleIdOrThrow(@NonNull String roleName) {
+    private long findRoleIdOrThrow(@NonNull String roleName) {
         return roleRepository
                 .findRoleEntityByName(roleName)
                 .orElseThrow(
