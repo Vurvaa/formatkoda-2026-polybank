@@ -47,6 +47,14 @@ public class TransactionRepository {
 				.fetch(r -> toTransactionWithAccountNumbersView(r, fromAccount, toAccount));
 	}
 
+	public Long countAll(Long accountId) {
+		return dsl.selectCount()
+				.from(TRANSACTIONS)
+				.where(TRANSACTIONS.FROM_ACCOUNT_ID.eq(accountId)
+						.or(TRANSACTIONS.TO_ACCOUNT_ID.eq(accountId)))
+				.fetchOne(0, Long.class);
+	}
+
 	public TransactionEntity save(TransactionEntity transaction) {
 		return dsl
 				.insertInto(TRANSACTIONS)

@@ -54,6 +54,7 @@ class UserServiceTest {
 
         when(userRepository.findAllUsers(pageRequest))
                 .thenReturn(List.of(user1, user2));
+        when(userRepository.countAll()).thenReturn(2L);
 
         when(userMapper.toUserWithRolesView(any(), any()))
                 .thenReturn(TestData.userWithRoles());
@@ -68,6 +69,7 @@ class UserServiceTest {
         assertThat(result.total()).isEqualTo(2);
 
         verify(userRepository).findAllUsers(pageRequest);
+        verify(userRepository).countAll();
     }
 
     @Test
@@ -76,6 +78,7 @@ class UserServiceTest {
 
         when(userRepository.findAllUsers(pageRequest))
                 .thenReturn(List.of());
+        when(userRepository.countAll()).thenReturn(0L);
 
         PageResult<UserWithRolesView> result =
                 userService.findAllUsersWithRoles(pageRequest);
@@ -88,6 +91,7 @@ class UserServiceTest {
         assertThat(result.total()).isZero();
 
         verify(userRepository).findAllUsers(pageRequest);
+        verify(userRepository).countAll();
         verifyNoMoreInteractions(userRepository);
     }
 
