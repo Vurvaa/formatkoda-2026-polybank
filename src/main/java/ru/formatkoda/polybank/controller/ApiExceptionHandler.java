@@ -3,6 +3,7 @@ package ru.formatkoda.polybank.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,6 +47,18 @@ class ApiExceptionHandler {
 		);
 
 		return problem;
+	}
+
+	@ExceptionHandler(AuthenticationException.class)
+	ProblemDetail handleAuthenticationException(AuthenticationException ex) {
+		return buildProblem(
+				ex,
+				HttpStatus.UNAUTHORIZED,
+				"Authentication error",
+				Map.of(
+						"code", "UNAUTHORIZED"
+				)
+		);
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)

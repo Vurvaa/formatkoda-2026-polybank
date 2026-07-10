@@ -6,9 +6,6 @@ services:
     image: clickhouse/clickhouse-server:25.8
     container_name: bank-clickhouse
     restart: unless-stopped
-    depends_on:
-      kafka-init:
-        condition: service_completed_successfully
     ports:
       - "8123:8123"
       - "9000:9000"
