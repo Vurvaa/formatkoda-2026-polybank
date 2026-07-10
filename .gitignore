@@ -33,3 +33,7 @@ build/
 .vscode/
 
 .env
+
+webapp/vite.config.d.ts
+webapp/vite.config.js
+webapp/tsconfig.node.tsbuildinfo
