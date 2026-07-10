@@ -51,14 +51,25 @@ services:
           --bootstrap-server kafka:29092 \
           --create \
           --if-not-exists \
-          --topic bank.events \
+          --topic bank.transactions \
           --partitions 1 \
           --replication-factor 1
-
+        
         /opt/kafka/bin/kafka-topics.sh \
           --bootstrap-server kafka:29092 \
-          --describe \
-          --topic bank.events
+          --create \
+          --if-not-exists \
+          --topic bank.accounts \
+          --partitions 1 \
+          --replication-factor 1
+        
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic bank.users \
+          --partitions 1 \
+          --replication-factor 1
 
   clickhouse:
     image: clickhouse/clickhouse-server:25.8
