@@ -1,11 +1,14 @@
 package ru.formatkoda.polybank.messaging.event;
 
+import ru.formatkoda.polybank.domain.account.AccountEntity;
+
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 public record AccountCreatedEvent(
-		UUID eventId,
-		OffsetDateTime eventTime
-
+		Long accountId,
+		String accountNumber,
+		Long userId,
+		AccountEntity.Type accountType,
+		OffsetDateTime createdAt
 ) {
 }
