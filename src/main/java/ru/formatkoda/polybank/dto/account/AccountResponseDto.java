@@ -10,4 +10,5 @@ public record AccountResponseDto(
         AccountEntity.Type type,
         AccountEntity.Status status,
         OffsetDateTime createdAt
-) {}
+) {
+}

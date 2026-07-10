@@ -8,7 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -34,148 +42,148 @@ import java.util.List;
 @RequestMapping(path = "/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final AuthService authService;
-    private final UserService userService;
-    private final AccountService accountService;
-    private final UserMapper userMapper;
+	private final AuthService authService;
+	private final UserService userService;
+	private final AccountService accountService;
+	private final UserMapper userMapper;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<AuthUserDto> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
-        JwtToken token = authService.registerUser(userMapper.toEntity(user));
+	@PostMapping("/sign-up")
+	public ResponseEntity<AuthUserDto> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
+		JwtToken token = authService.registerUser(userMapper.toEntity(user));
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new AuthUserDto(token.token()));
-    }
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new AuthUserDto(token.token()));
+	}
 
-    @PostMapping("/sign-in")
-    public ResponseEntity<AuthUserDto> loginUser(@RequestBody @Valid UserLoginDto user) {
-         JwtToken token = authService.loginUser(userMapper.toEntity(user));
+	@PostMapping("/sign-in")
+	public ResponseEntity<AuthUserDto> loginUser(@RequestBody @Valid UserLoginDto user) {
+		JwtToken token = authService.loginUser(userMapper.toEntity(user));
 
-         return ResponseEntity.ok(new AuthUserDto(token.token()));
-    }
+		return ResponseEntity.ok(new AuthUserDto(token.token()));
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PutMapping("/{userLogin}/block")
-    public ResponseEntity<UserDetailsResponseDto> blockUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable String userLogin
-    ) {
-        UserWithRolesView user = userService.blockUserByLogin(
-                managerLogin,
-                new UserLogin(userLogin)
-        );
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@PutMapping("/{userLogin}/block")
+	public ResponseEntity<UserDetailsResponseDto> blockUser(
+			@AuthenticationPrincipal UserLogin managerLogin,
+			@Valid @PathVariable String userLogin
+	) {
+		UserWithRolesView user = userService.blockUserByLogin(
+				managerLogin,
+				new UserLogin(userLogin)
+		);
 
-        return ResponseEntity.ok(userMapper.toResponse(user));
-    }
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PutMapping("/{userLogin}/unblock")
-    public ResponseEntity<UserDetailsResponseDto> unBlockUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @PathVariable String userLogin
-    ) {
-        UserWithRolesView user = userService.unBlockUserByLogin(
-                managerLogin,
-                new UserLogin(userLogin)
-        );
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@PutMapping("/{userLogin}/unblock")
+	public ResponseEntity<UserDetailsResponseDto> unBlockUser(
+			@AuthenticationPrincipal UserLogin managerLogin,
+			@Valid @PathVariable String userLogin
+	) {
+		UserWithRolesView user = userService.unBlockUserByLogin(
+				managerLogin,
+				new UserLogin(userLogin)
+		);
 
-        return ResponseEntity.ok(userMapper.toResponse(user));
-    }
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
-    @GetMapping
-    public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        PageRequest pageRequest = new PageRequest(page, size);
-        PageResult<UserWithRolesView> result = userService.findAllUsersWithRoles(pageRequest);
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
+	@GetMapping
+	public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size
+	) {
+		PageRequest pageRequest = new PageRequest(page, size);
+		PageResult<UserWithRolesView> result = userService.findAllUsersWithRoles(pageRequest);
 
-        return ResponseEntity.ok(
-                new PageResponse<>(
-                        result.items()
-                                .stream()
-                                .map(userMapper::toResponse)
-                                .toList(),
-                        result.page(),
-                        result.size(),
-                        result.total()
+		return ResponseEntity.ok(
+				new PageResponse<>(
+						result.items()
+								.stream()
+								.map(userMapper::toResponse)
+								.toList(),
+						result.page(),
+						result.size(),
+						result.total()
 
-                )
-        );
-    }
+				)
+		);
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @DeleteMapping("/{userLogin}/roles/{roleName}")
-    public ResponseEntity<UserDetailsResponseDto> removeUserRole(
-            @AuthenticationPrincipal UserLogin managerLogin,
-            @PathVariable String userLogin,
-            @PathVariable String roleName
-    ) {
-        UserWithRolesView user = userService.removeUserRole(
-                managerLogin,
-                new UserLogin(userLogin),
-                roleName
-        );
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@DeleteMapping("/{userLogin}/roles/{roleName}")
+	public ResponseEntity<UserDetailsResponseDto> removeUserRole(
+			@AuthenticationPrincipal UserLogin managerLogin,
+			@PathVariable String userLogin,
+			@PathVariable String roleName
+	) {
+		UserWithRolesView user = userService.removeUserRole(
+				managerLogin,
+				new UserLogin(userLogin),
+				roleName
+		);
 
-        return ResponseEntity.ok(userMapper.toResponse(user));
-    }
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PutMapping("/{userLogin}/roles/{roleName}")
-    public ResponseEntity<UserDetailsResponseDto> addUserRole(
-            @AuthenticationPrincipal UserLogin managerLogin,
-            @PathVariable String userLogin,
-            @PathVariable String roleName
-    ) {
-        UserWithRolesView user = userService.addUserRole(
-                managerLogin,
-                new UserLogin(userLogin),
-                roleName
-        );
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@PutMapping("/{userLogin}/roles/{roleName}")
+	public ResponseEntity<UserDetailsResponseDto> addUserRole(
+			@AuthenticationPrincipal UserLogin managerLogin,
+			@PathVariable String userLogin,
+			@PathVariable String roleName
+	) {
+		UserWithRolesView user = userService.addUserRole(
+				managerLogin,
+				new UserLogin(userLogin),
+				roleName
+		);
 
-        return ResponseEntity.ok(userMapper.toResponse(user));
-    }
+		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
-    @GetMapping("/{userLogin}/info")
-    public ResponseEntity<UserInfoResponseDto> getUserInfo(@PathVariable String userLogin) {
-        UserLogin login = new UserLogin(userLogin);
-        List<AccountInfo> accounts = accountService.findAllForUser(login)
-                .stream()
-                .map(AccountMapper::toAccountInfo)
-                .toList();
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
+	@GetMapping("/{userLogin}/info")
+	public ResponseEntity<UserInfoResponseDto> getUserInfo(@PathVariable String userLogin) {
+		UserLogin login = new UserLogin(userLogin);
+		List<AccountInfo> accounts = accountService.findAllForUser(login)
+				.stream()
+				.map(AccountMapper::toAccountInfo)
+				.toList();
 
-        UserWithRolesView user = userService.findUserWithRoles(login);
+		UserWithRolesView user = userService.findUserWithRoles(login);
 
-        return ResponseEntity.ok(
-                userMapper.toResponse(user, accounts)
-        );
-    }
+		return ResponseEntity.ok(
+				userMapper.toResponse(user, accounts)
+		);
+	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('SENIOR_MANAGER')")
-    @PostMapping
-    public ResponseEntity<UserDetailsResponseDto> createStaffUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
-            @Valid @RequestBody StaffUserRegistrationDto staffUserRegistrationDto
-    ) {
-        UserWithRolesView staffUser = userService.createStaffUser(
-                managerLogin,
-                userMapper.toEntity(staffUserRegistrationDto),
-                staffUserRegistrationDto.roleName()
-        );
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@PostMapping
+	public ResponseEntity<UserDetailsResponseDto> createStaffUser(
+			@AuthenticationPrincipal UserLogin managerLogin,
+			@Valid @RequestBody StaffUserRegistrationDto staffUserRegistrationDto
+	) {
+		UserWithRolesView staffUser = userService.createStaffUser(
+				managerLogin,
+				userMapper.toEntity(staffUserRegistrationDto),
+				staffUserRegistrationDto.roleName()
+		);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                userMapper.toResponse(
-                        staffUser
-                )
-        );
-    }
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				userMapper.toResponse(
+						staffUser
+				)
+		);
+	}
 }
