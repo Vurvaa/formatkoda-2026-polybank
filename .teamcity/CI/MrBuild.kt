@@ -13,6 +13,8 @@ object MrBuild : BuildType({
     name = "CI - all checks."
 
     val javap = "%java.home%"
+    val addD = "app"
+    val pomL = "app/pom.xml"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -26,8 +28,8 @@ object MrBuild : BuildType({
             id = "COMPILE"
             name = "Compile"
             goals = "clean compile"
-            pomLocation = "app/pom.xml"
-            workingDir = "app"
+            pomLocation = pomL
+            workingDir = addD
             runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
         }
@@ -36,8 +38,8 @@ object MrBuild : BuildType({
             id = "UNIT_TESTS"
             name = "Unit Tests"
             goals = "test"
-            pomLocation = "app/pom.xml"
-            workingDir = "app"
+            pomLocation = pomL
+            workingDir = addD
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
         }
@@ -46,8 +48,8 @@ object MrBuild : BuildType({
             id = "STYLE_CHECK"
             name = "Checkstyle"
             goals = "checkstyle:checkstyle"
-            pomLocation = "app/pom.xml"
-            workingDir = "app"
+            pomLocation = pomL
+            workingDir = addD
             jdkHome = javap
         }
 
@@ -55,8 +57,8 @@ object MrBuild : BuildType({
             id = "SONARQUBE"
             name = "SonarQube Analysis"
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
-            pomLocation = "app/pom.xml"
-            workingDir = "app"
+            pomLocation = pomL
+            workingDir = addD
             runnerArgs = """
                 -Dsonar.host.url=%sonar.host.url%
                 -Dsonar.token=%env.SONAR_TOKEN%
