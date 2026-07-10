@@ -28,6 +28,7 @@ object MrBuild : BuildType({
             goals = "clean compile"
             runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
+            workingDir = "app"
         }
 
         maven {
@@ -36,6 +37,7 @@ object MrBuild : BuildType({
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
+            workingDir = "app"
         }
 
         maven {
@@ -43,12 +45,14 @@ object MrBuild : BuildType({
             name = "Checkstyle"
             goals = "checkstyle:checkstyle"
             jdkHome = javap
+            workingDir = "app"
         }
 
         maven {
             id = "SONARQUBE"
             name = "SonarQube Analysis"
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
+            workingDir = "app"
             runnerArgs = """
                 -Dsonar.host.url=%sonar.host.url%
                 -Dsonar.token=%env.SONAR_TOKEN%

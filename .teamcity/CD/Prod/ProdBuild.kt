@@ -32,6 +32,7 @@ object ProdBuild : BuildType({
                 #!/bin/sh
                 set -e
 
+                cd app
                 ./mvnw clean package -DskipTests -B -Pdb-codegen
             """.trimIndent()
         }
@@ -53,8 +54,9 @@ object ProdBuild : BuildType({
             name = "Docker Build"
             commandType = build {
                 source = file {
-                    path = "Dockerfile"
+                    path = "app/Dockerfile"
                 }
+                contextDir = "app"
                 namesAndTags = "%docker.registry%/polybank:%env.RELEASE_VERSION%"
             }
         }
