@@ -166,6 +166,8 @@ class UserServiceTest {
     void createUserShouldCallingRepositoriesMethods() {
         prepareMocksForCallingCreateUser(user().login());
 
+        when(userRepository.createUserAndReturnId(user())).thenReturn(Optional.of(10L));
+
         userService.createUser(user());
 
         verify(userRepository).findUserByLogin(user().login());
@@ -179,9 +181,12 @@ class UserServiceTest {
     void createUserShouldReturnUserLoginMatchesWithUserEntityLogin() {
         prepareMocksForCallingCreateUser(user().login());
 
+        when(userRepository.createUserAndReturnId(user())).thenReturn(Optional.of(10L));
+
         UserLogin userLogin = userService.createUser(user());
 
         verify(userEventPublisher).publishUserRegistered(user(), "CLIENT");
+        verify(userRepository).createUserAndReturnId(user());
 
         assertNotNull(userLogin);
         assertEquals(userLogin, user().login());
