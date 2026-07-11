@@ -21,12 +21,8 @@ spec:
       automountServiceAccountToken: false
       {{- $pgHost := "" }}
       {{- $pgPort := 5432 }}
-      {{- if .Values.postgresql.enabled }}
-      {{- if eq (.Values.postgresql.architecture | default "standalone") "replication" }}
-      {{- $pgHost = printf "%s-postgresql-primary" .Release.Name }}
-      {{- else }}
-      {{- $pgHost = printf "%s-postgresql" .Release.Name }}
-      {{- end }}
+      {{- if .Values.cnpg.enabled }}
+      {{- $pgHost = printf "%s-pg-rw" .Release.Name }}
       {{- else }}
       {{- $pgHost = .Values.externalPostgres.host }}
       {{- $pgPort = .Values.externalPostgres.port | default 5432 }}
