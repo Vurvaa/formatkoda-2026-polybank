@@ -61,49 +61,15 @@ webapp:
       memory: "128Mi"
       cpu: "200m"
 
-postgresql:
+cnpg:
   enabled: true
-  architecture: replication
-  global:
-    security:
-      allowInsecureImages: true
-  image:
-    repository: bitnamilegacy/postgresql
-  auth:
-    username: polybank_user
-    database: polybank_db
-    existingSecret: "polybank-backend-secret"
-    secretKeys:
-      adminPasswordKey: postgres-password
-      userPasswordKey: password
-      usernameKey: username
-      databaseKey: database
-      replicationPasswordKey: replication-password
-  primary:
-    persistence:
-      enabled: true
-      existingClaim: "data-polybank-postgresql-0"
-      size: 10Gi
-      storageClass: "local-path"
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "1Gi"
-    podAntiAffinityPreset: hard
-  readReplicas:
-    replicaCount: 1
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: "local-path"
-    resources:
-      requests:
-        cpu: "50m"
-        memory: "128Mi"
-      limits:
-        cpu: "300m"
-        memory: "512Mi"
-    podAntiAffinityPreset: hard
+  instances: 3
+  storageSize: 10Gi
+  storageClass: "local-path"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"

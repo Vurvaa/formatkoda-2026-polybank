@@ -46,52 +46,18 @@ appVars:
     secret: false
     value: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
 
-postgresql:
+cnpg:
   enabled: true
-  architecture: replication
-  global:
-    security:
-      allowInsecureImages: true
-  image:
-    repository: bitnamilegacy/postgresql
-  auth:
-    username: polybank_test_user
-    database: polybank_test_db
-    existingSecret: "polybank-backend-secret"
-    secretKeys:
-      adminPasswordKey: postgres-password
-      userPasswordKey: password
-      usernameKey: username
-      databaseKey: database
-      replicationPasswordKey: replication-password
-  primary:
-    persistence:
-      enabled: true
-      existingClaim: ""
-      size: 2Gi
-      storageClass: "local-path"
-    resources:
-      requests:
-        cpu: "50m"
-        memory: "128Mi"
-      limits:
-        cpu: "100m"
-        memory: "256Mi"
-    podAntiAffinityPreset: hard
-  readReplicas:
-    replicaCount: 1
-    persistence:
-      enabled: true
-      size: 2Gi
-      storageClass: "local-path"
-    resources:
-      requests:
-        cpu: "25m"
-        memory: "64Mi"
-      limits:
-        cpu: "50m"
-        memory: "128Mi"
-    podAntiAffinityPreset: hard
+  instances: 1
+  storageSize: 2Gi
+  storageClass: "local-path"
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
 
 postgresAuth:
   username: polybank_test_user
