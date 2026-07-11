@@ -1,0 +1,39 @@
+{{- if .Values.cnpg.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}-pg
+  namespace: {{ .Release.Namespace }}
+spec:
+  instances: {{ .Values.cnpg.instances | default 3 }}
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.postgresAuth.database | quote }}
+      owner: {{ .Values.postgresAuth.username | quote }}
+      secret:
+        name: {{ .Release.Name }}-pg-app-secret
+
+  storage:
+    size: {{ .Values.cnpg.storageSize | default "10Gi" }}
+    storageClass: {{ .Values.cnpg.storageClass | default "local-path" }}
+
+  affinity:
+    podAntiAffinityType: required
+    topologyKey: kubernetes.io/hostname
+
+  resources:
+    requests:
+      cpu: {{ .Values.cnpg.resources.requests.cpu | default "100m" }}
+      memory: {{ .Values.cnpg.resources.requests.memory | default "256Mi" }}
+    limits:
+      cpu: {{ .Values.cnpg.resources.limits.cpu | default "1000m" }}
+      memory: {{ .Values.cnpg.resources.limits.memory | default "1Gi" }}
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+
+  monitoring:
+    enablePodMonitor: false
+{{- end }}
