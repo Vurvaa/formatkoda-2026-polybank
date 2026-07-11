@@ -1,23 +1,19 @@
 namespace: polybank-test
 appName: polybank-backend
 replicas: 1
-
-
 image:
   repository: 192.168.130.81:5000/polybank-test
   tag: latest
-
 service:
   type: NodePort
   nodePort: 30190
-
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "100m"
+    memory: "192Mi"
+    cpu: "75m"
   limits:
-    memory: "1Gi"
-    cpu: "500m"
+    memory: "768Mi"
+    cpu: "750m"
 
 startupProbe:
   initialDelaySeconds: 10
