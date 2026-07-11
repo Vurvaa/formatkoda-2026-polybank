@@ -1,0 +1,7 @@
+DROP TABLE analytics.polybank_users_raw;
+DROP TABLE analytics.polybank_accounts_raw;
+DROP TABLE analytics.polybank_transactions_raw;
+DROP TABLE analytics.polybank_events_queue;
+DROP VIEW analytics.polybank_events_queue_users_to_raw;
+DROP VIEW analytics.polybank_events_queue_accounts_to_raw;
+DROP VIEW analytics.polybank_events_queue_transactions_to_raw;

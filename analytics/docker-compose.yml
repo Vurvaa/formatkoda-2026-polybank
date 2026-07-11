@@ -9,6 +9,8 @@ services:
     ports:
       - "8123:8123"
       - "9000:9000"
+    networks:
+      - polybank-net
     environment:
       CLICKHOUSE_DB: analytics
       CLICKHOUSE_USER: analytics
@@ -40,6 +42,9 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
+    networks:
+      - polybank-net
+    network_mode: host
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -53,3 +58,8 @@ volumes:
   clickhouse_data:
   clickhouse_logs:
   grafana_data:
+
+networks:
+  polybank-net:
+    external: true
+    name: polybank-net

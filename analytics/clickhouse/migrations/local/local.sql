@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_users_raw
     created_at DateTime64(3, 'UTC') MATERIALIZED parseDateTime64BestEffortOrZero(JSONExtractString(payload, 'createdAt'), 3, 'UTC'),
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
-)
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(event_time)
-ORDER BY (event_type, event_time, event_id);
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(event_time)
+    ORDER BY (event_type, event_time, event_id);
 
 CREATE TABLE IF NOT EXISTS analytics.polybank_accounts_raw
 (
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_accounts_raw
     created_at DateTime64(3, 'UTC') MATERIALIZED parseDateTime64BestEffortOrZero(JSONExtractString(payload, 'createdAt'), 3, 'UTC'),
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
-)
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(event_time)
-ORDER BY (event_type, event_time, event_id);
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(event_time)
+    ORDER BY (event_type, event_time, event_id);
 
 CREATE TABLE IF NOT EXISTS analytics.polybank_transactions_raw
 (
@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_transactions_raw
     created_at DateTime64(3, 'UTC') MATERIALIZED parseDateTime64BestEffortOrZero(JSONExtractString(payload, 'createdAt'), 3, 'UTC'),
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
-)
-ENGINE = MergeTree
-PARTITION BY toYYYYMM(event_time)
-ORDER BY (event_type, event_time, event_id);
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(event_time)
+    ORDER BY (event_type, event_time, event_id);
 
 CREATE TABLE IF NOT EXISTS analytics.polybank_events_queue
 (
@@ -69,10 +69,10 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_events_queue
     eventTime String,
     eventType LowCardinality(String),
     payload String
-)
-ENGINE = Kafka
-SETTINGS
-    kafka_broker_list = '192.168.130.82:9092',
+    )
+    ENGINE = Kafka
+    SETTINGS
+    kafka_broker_list = 'kafka:29092',
     kafka_topic_list = 'bank.users,bank.accounts,bank.transactions',
     kafka_group_name = 'clickhouse-analytics',
     kafka_format = 'JSONEachRow',

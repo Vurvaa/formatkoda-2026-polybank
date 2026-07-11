@@ -44,7 +44,17 @@ public class UserService {
 
         userRepository.bindUserWithRole(userId, roleId);
 
-        userEventPublisher.publishUserRegistered(user, CLIENT_ROLE);
+        UserEntity registered = new UserEntity(
+                userId,
+                user.login(),
+                user.name(),
+                user.lastName(),
+                user.passwordHash(),
+                user.createdAt(),
+                user.blockedAt()
+        );
+
+        userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
 
         return user.login();
     }
