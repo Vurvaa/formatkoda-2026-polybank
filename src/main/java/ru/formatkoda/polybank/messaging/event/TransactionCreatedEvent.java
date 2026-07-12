@@ -14,4 +14,5 @@ public record TransactionCreatedEvent(
 		TransactionEntity.Status transactionStatus,
 		OffsetDateTime createdAt
 ) {
+	public static final String TYPE = "TransactionCreated";
 }

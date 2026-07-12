@@ -11,4 +11,5 @@ public record AccountCreatedEvent(
 		AccountEntity.Type accountType,
 		OffsetDateTime createdAt
 ) {
+	public static final String TYPE = "AccountCreated";
 }

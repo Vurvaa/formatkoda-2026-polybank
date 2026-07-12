@@ -1,25 +1,24 @@
-package ru.formatkoda.polybank.messaging.kafka;
+package ru.formatkoda.polybank.messaging.outbox.publisher;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
-import ru.formatkoda.polybank.messaging.event.EventEnvelope;
 import ru.formatkoda.polybank.messaging.event.TransactionCreatedEvent;
+import ru.formatkoda.polybank.messaging.outbox.infrastructure.OutboxWriter;
 import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 
 @Component
 @RequiredArgsConstructor
-public class KafkaTransactionEventPublisher implements TransactionEventPublisher {
+public class TransactionOutboxPublisher implements TransactionEventPublisher {
 
-	private static final String TRANSACTION_EVENTS_TOPIC = "bank.transactions";
-	private static final String TRANSACTION_CREATED = "TransactionCreated";
+	private static final String TOPIC = "bank.transactions";
+	private static final String AGGREGATE_TYPE = "Transaction";
 
-	private final KafkaTemplate<String, Object> kafkaTemplate;
+	private final OutboxWriter outboxWriter;
 
 	@Override
 	public void publishTransactionCreated(TransactionWithAccountNumbersView transaction) {
-		TransactionCreatedEvent event = new TransactionCreatedEvent(
+		TransactionCreatedEvent payload = new TransactionCreatedEvent(
 				transaction.id(),
 				transaction.fromAccountNumber() == null ? null : transaction.fromAccountNumber().value(),
 				transaction.toAccountNumber() == null ? null : transaction.toAccountNumber().value(),
@@ -29,10 +28,12 @@ public class KafkaTransactionEventPublisher implements TransactionEventPublisher
 				transaction.createdAt()
 		);
 
-		kafkaTemplate.send(
-				TRANSACTION_EVENTS_TOPIC,
-				event.transactionId().toString(),
-				new EventEnvelope<>(TRANSACTION_CREATED, event)
+		outboxWriter.append(
+				TOPIC,
+				AGGREGATE_TYPE,
+				payload.transactionId().toString(),
+				TransactionCreatedEvent.TYPE,
+				payload
 		);
 	}
 }

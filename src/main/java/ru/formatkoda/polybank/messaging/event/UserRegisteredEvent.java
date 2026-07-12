@@ -10,4 +10,5 @@ public record UserRegisteredEvent(
 		String role,
 		OffsetDateTime createdAt
 ) {
+	public static final String TYPE = "UserRegistered";
 }
