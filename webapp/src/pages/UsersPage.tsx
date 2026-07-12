@@ -15,6 +15,7 @@ import {
   type TableProps
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
 import type { StaffUserRegistrationDto, UserDetailsResponseDto } from '../models/user.ts';
 import { userService } from '../services/userService.ts';
@@ -39,6 +40,9 @@ export function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm<StaffUserRegistrationDto>();
   const [submitting, setSubmitting] = useState(false);
+  const [addRoleTarget, setAddRoleTarget] = useState<string | null>(null);
+  const [addRoleForm] = Form.useForm<{ roleName: string }>();
+  const [addRoleSubmitting, setAddRoleSubmitting] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -102,6 +106,26 @@ export function UsersPage() {
     }
   }
 
+  async function handleAddRole(values: { roleName: string }) {
+    if (!addRoleTarget) {
+      return;
+    }
+
+    setAddRoleSubmitting(true);
+
+    try {
+      await userService.addRole(addRoleTarget, values.roleName);
+      message.success('Роль добавлена');
+      setAddRoleTarget(null);
+      addRoleForm.resetFields();
+      await loadUsers();
+    } catch (error) {
+      message.error(getApiErrorMessage(error, 'Не удалось добавить роль'));
+    } finally {
+      setAddRoleSubmitting(false);
+    }
+  }
+
   async function handleCreateStaff(values: StaffUserRegistrationDto) {
     setSubmitting(true);
 
@@ -122,7 +146,7 @@ export function UsersPage() {
     {
       title: 'Логин',
       key: 'login',
-      render: (_, record) => record.login.value
+      render: (_, record) => <Link to={`/users/${record.login.value}`}>{record.login.value}</Link>
     },
     { title: 'Имя', dataIndex: 'name' },
     { title: 'Фамилия', dataIndex: 'lastName' },
@@ -162,24 +186,29 @@ export function UsersPage() {
       align: 'right',
       render: (_, record) =>
         isSeniorManager ? (
-          record.blockedAt ? (
-            <Button
-              size="small"
-              loading={actionLogin === record.login.value}
-              onClick={() => handleUnblock(record.login.value)}
-            >
-              Разблокировать
+          <Space>
+            <Button size="small" onClick={() => setAddRoleTarget(record.login.value)}>
+              Добавить роль
             </Button>
-          ) : (
-            <Button
-              size="small"
-              danger
-              loading={actionLogin === record.login.value}
-              onClick={() => handleBlock(record.login.value)}
-            >
-              Заблокировать
-            </Button>
-          )
+            {record.blockedAt ? (
+              <Button
+                size="small"
+                loading={actionLogin === record.login.value}
+                onClick={() => handleUnblock(record.login.value)}
+              >
+                Разблокировать
+              </Button>
+            ) : (
+              <Button
+                size="small"
+                danger
+                loading={actionLogin === record.login.value}
+                onClick={() => handleBlock(record.login.value)}
+              >
+                Заблокировать
+              </Button>
+            )}
+          </Space>
         ) : null
     }
   ];
@@ -256,6 +285,27 @@ export function UsersPage() {
           >
             <Input.Password autoComplete="new-password" />
           </Form.Item>
+          <Form.Item
+            name="roleName"
+            label="Роль"
+            rules={[{ required: true, message: 'Выберите роль' }]}
+          >
+            <Select options={roleOptions} placeholder="Выберите роль" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={addRoleTarget ? `Добавить роль пользователю ${addRoleTarget}` : 'Добавить роль'}
+        open={Boolean(addRoleTarget)}
+        okText="Добавить"
+        cancelText="Отмена"
+        confirmLoading={addRoleSubmitting}
+        onCancel={() => setAddRoleTarget(null)}
+        onOk={() => addRoleForm.submit()}
+        destroyOnHidden
+      >
+        <Form form={addRoleForm} layout="vertical" onFinish={handleAddRole} preserve={false}>
           <Form.Item
             name="roleName"
             label="Роль"
