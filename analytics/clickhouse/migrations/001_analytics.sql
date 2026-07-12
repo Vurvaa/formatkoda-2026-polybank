@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_users_raw
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
-ENGINE = MergeTree
+ENGINE = ReplacingMergeTree
 PARTITION BY toYYYYMM(event_time)
 ORDER BY (event_type, event_time, event_id);
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_accounts_raw
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
-ENGINE = MergeTree
+ENGINE = ReplacingMergeTree
 PARTITION BY toYYYYMM(event_time)
 ORDER BY (event_type, event_time, event_id);
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS analytics.polybank_transactions_raw
 
     ingested_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
-ENGINE = MergeTree
+ENGINE = ReplacingMergeTree
 PARTITION BY toYYYYMM(event_time)
 ORDER BY (event_type, event_time, event_id);
 
