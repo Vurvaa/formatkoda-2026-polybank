@@ -22,12 +22,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
@@ -327,6 +330,164 @@ class UserServiceManagerOperationsTest {
         verify(userRepository, times(0)).findAllUserRoles(user);
         verify(roleRepository, times(0)).findRoleEntityByName("MANAGER");
         verify(userRepository, times(0)).removeUserRole(user.id(), 2L);
+    }
+
+    @Test
+    void addUserRoleShouldBindRoleAndReturnUpdatedUser() {
+        UserEntity user = user();
+        UserEntity manager = userManager();
+
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = manager.login();
+
+        String roleName = "SLAVE_MANAGER";
+        long roleId = 10L;
+
+        RoleEntity role = new RoleEntity(roleId, roleName);
+
+        List<String> currentRoles = List.of("CLIENT", "MANAGER");
+        List<String> updatedRoles = List.of(
+                "CLIENT",
+                "MANAGER",
+                "SLAVE_MANAGER"
+        );
+
+        UserWithRolesView expectedResult = new UserWithRolesView(
+                user.id(),
+                user.login(),
+                user.name(),
+                user.lastName(),
+                updatedRoles,
+                user.createdAt(),
+                user.blockedAt()
+        );
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(manager));
+
+        when(userRepository.findUserByLogin(userLogin))
+                .thenReturn(Optional.of(user))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.findAllUserRoles(user))
+                .thenReturn(currentRoles)
+                .thenReturn(updatedRoles);
+
+        when(roleRepository.findRoleEntityByName(roleName))
+                .thenReturn(Optional.of(role));
+
+        when(userMapper.toUserWithRolesView(user, updatedRoles))
+                .thenReturn(expectedResult);
+
+        UserWithRolesView result = userService.addUserRole(
+                managerLogin,
+                userLogin,
+                roleName
+        );
+
+        assertThat(result).isSameAs(expectedResult);
+
+        verify(userRepository).bindUserWithRole(user.id(), roleId);
+        verify(userMapper).toUserWithRolesView(user, updatedRoles);
+    }
+
+    @Test
+    void addUserRoleShouldThrowExceptionWhenManagerAddsRoleToHimself() {
+        UserEntity manager = userManager();
+
+        UserLogin managerLogin = manager.login();
+        String roleName = "SLAVE_MANAGER";
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(manager))
+                .thenReturn(Optional.of(manager));
+
+        assertThatThrownBy(() ->
+                userService.addUserRole(
+                        managerLogin,
+                        managerLogin,
+                        roleName
+                )
+        )
+                .isInstanceOf(BusinessLogicException.class)
+                .hasMessage("user can not add role himself");
+
+        verify(userRepository, never())
+                .bindUserWithRole(anyLong(), anyLong());
+
+        verifyNoInteractions(roleRepository);
+        verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void addUserRoleShouldThrowExceptionWhenUserAlreadyHasRole() {
+        UserEntity user = user();
+        UserEntity manager = userManager();
+
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = manager.login();
+
+        String roleName = "MANAGER";
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(manager));
+
+        when(userRepository.findUserByLogin(userLogin))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.findAllUserRoles(user))
+                .thenReturn(List.of("CLIENT", "MANAGER"));
+
+        assertThatThrownBy(() ->
+                userService.addUserRole(
+                        managerLogin,
+                        userLogin,
+                        roleName
+                )
+        ).isInstanceOf(BusinessLogicException.class)
+                .hasMessage("user already has MANAGER role");
+
+        verify(userRepository, never())
+                .bindUserWithRole(anyLong(), anyLong());
+
+        verifyNoInteractions(roleRepository);
+        verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void addUserRoleShouldThrowExceptionWhenRoleNotFound() {
+        UserEntity user = user();
+        UserEntity manager = userManager();
+
+        UserLogin userLogin = user.login();
+        UserLogin managerLogin = manager.login();
+
+        String roleName = "UNKNOWN_ROLE";
+
+        when(userRepository.findUserByLogin(managerLogin))
+                .thenReturn(Optional.of(manager));
+
+        when(userRepository.findUserByLogin(userLogin))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.findAllUserRoles(user))
+                .thenReturn(List.of("CLIENT"));
+
+        when(roleRepository.findRoleEntityByName(roleName))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                userService.addUserRole(
+                        managerLogin,
+                        userLogin,
+                        roleName
+                )
+        ).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(userRepository, never())
+                .bindUserWithRole(anyLong(), anyLong());
+
+        verifyNoInteractions(userMapper);
     }
 
     @Test
