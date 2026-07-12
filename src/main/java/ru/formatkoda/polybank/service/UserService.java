@@ -193,6 +193,27 @@ public class UserService {
         return userMapper.toUserWithRolesView(user, roles);
     }
 
+    public UserWithRolesView findUserWithRolesForRequester(
+            @NonNull UserLogin requesterLogin,
+            @NonNull UserLogin targetLogin
+    ) {
+        UserEntity targetUser = findUserByLogin(targetLogin);
+        List<String> targetRoles = findAllUserRoles(targetUser);
+
+        if (requesterLogin.equals(targetLogin)) {
+            return userMapper.toUserWithRolesView(targetUser, targetRoles);
+        }
+
+        UserEntity requester = findUserByLogin(requesterLogin);
+        List<String> requesterRoles = findAllUserRoles(requester);
+
+        if (!requesterRoles.contains("MANAGER") && !requesterRoles.contains("SENIOR_MANAGER")) {
+            throw new BusinessLogicException("not allowed to view another user's info");
+        }
+
+        return userMapper.toUserWithRolesView(targetUser, targetRoles);
+    }
+
     @Transactional
     public UserWithRolesView createStaffUser(
             @NonNull UserLogin managerLogin,

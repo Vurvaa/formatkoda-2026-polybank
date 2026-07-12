@@ -20,7 +20,6 @@ import { useAuth } from '../hooks/useAuth.tsx';
 import type { StaffUserRegistrationDto, UserDetailsResponseDto } from '../models/user.ts';
 import { userService } from '../services/userService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
-import { formatDateTime } from '../utils/format.ts';
 
 const roleOptions = [
   { label: 'MANAGER', value: 'MANAGER' },
@@ -36,13 +35,9 @@ export function UsersPage() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
   const [total, setTotal] = useState(0);
-  const [actionLogin, setActionLogin] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm<StaffUserRegistrationDto>();
   const [submitting, setSubmitting] = useState(false);
-  const [addRoleTarget, setAddRoleTarget] = useState<string | null>(null);
-  const [addRoleForm] = Form.useForm<{ roleName: string }>();
-  const [addRoleSubmitting, setAddRoleSubmitting] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -63,68 +58,6 @@ export function UsersPage() {
   useEffect(() => {
     loadUsers().then((r) => r);
   }, [loadUsers]);
-
-  async function handleBlock(login: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.block(login);
-      message.success('Пользователь заблокирован');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось заблокировать пользователя'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
-  async function handleUnblock(login: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.unblock(login);
-      message.success('Пользователь разблокирован');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось разблокировать пользователя'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
-  async function handleRemoveRole(login: string, roleName: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.removeRole(login, roleName);
-      message.success('Роль удалена');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось удалить роль'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
-  async function handleAddRole(values: { roleName: string }) {
-    if (!addRoleTarget) {
-      return;
-    }
-
-    setAddRoleSubmitting(true);
-
-    try {
-      await userService.addRole(addRoleTarget, values.roleName);
-      message.success('Роль добавлена');
-      setAddRoleTarget(null);
-      addRoleForm.resetFields();
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось добавить роль'));
-    } finally {
-      setAddRoleSubmitting(false);
-    }
-  }
 
   async function handleCreateStaff(values: StaffUserRegistrationDto) {
     setSubmitting(true);
@@ -153,63 +86,18 @@ export function UsersPage() {
     {
       title: 'Роли',
       dataIndex: 'roles',
-      render: (roles: string[], record) => (
+      render: (roles: string[]) => (
         <Space wrap>
           {roles.map((role) => (
-            <Tag
-              key={role}
-              closable={isSeniorManager}
-              onClose={(e) => {
-                e.preventDefault();
-                handleRemoveRole(record.login.value, role).then((r) => r);
-              }}
-            >
-              {role}
-            </Tag>
+            <Tag key={role}>{role}</Tag>
           ))}
         </Space>
       )
     },
     {
-      title: 'Создан',
-      dataIndex: 'createdAt',
-      render: (value: string) => formatDateTime(value)
-    },
-    {
       title: 'Статус',
       dataIndex: 'blockedAt',
       render: (value: string | null) => (value ? <Tag color="error">Заблокирован</Tag> : <Tag color="success">Активен</Tag>)
-    },
-    {
-      title: '',
-      key: 'actions',
-      align: 'right',
-      render: (_, record) =>
-        isSeniorManager ? (
-          <Space>
-            <Button size="small" onClick={() => setAddRoleTarget(record.login.value)}>
-              Добавить роль
-            </Button>
-            {record.blockedAt ? (
-              <Button
-                size="small"
-                loading={actionLogin === record.login.value}
-                onClick={() => handleUnblock(record.login.value)}
-              >
-                Разблокировать
-              </Button>
-            ) : (
-              <Button
-                size="small"
-                danger
-                loading={actionLogin === record.login.value}
-                onClick={() => handleBlock(record.login.value)}
-              >
-                Заблокировать
-              </Button>
-            )}
-          </Space>
-        ) : null
     }
   ];
 
@@ -247,7 +135,7 @@ export function UsersPage() {
           dataSource={users}
           loading={loading}
           pagination={pagination}
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
         />
       </Card>
 
@@ -285,27 +173,6 @@ export function UsersPage() {
           >
             <Input.Password autoComplete="new-password" />
           </Form.Item>
-          <Form.Item
-            name="roleName"
-            label="Роль"
-            rules={[{ required: true, message: 'Выберите роль' }]}
-          >
-            <Select options={roleOptions} placeholder="Выберите роль" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title={addRoleTarget ? `Добавить роль пользователю ${addRoleTarget}` : 'Добавить роль'}
-        open={Boolean(addRoleTarget)}
-        okText="Добавить"
-        cancelText="Отмена"
-        confirmLoading={addRoleSubmitting}
-        onCancel={() => setAddRoleTarget(null)}
-        onOk={() => addRoleForm.submit()}
-        destroyOnHidden
-      >
-        <Form form={addRoleForm} layout="vertical" onFinish={handleAddRole} preserve={false}>
           <Form.Item
             name="roleName"
             label="Роль"
