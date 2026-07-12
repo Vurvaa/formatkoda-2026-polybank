@@ -126,6 +126,23 @@ public class UserController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('SENIOR_MANAGER')")
+    @PutMapping("/{userLogin}/roles/{roleName}")
+    public ResponseEntity<UserDetailsResponseDto> addUserRole(
+            @AuthenticationPrincipal UserLogin managerLogin,
+            @PathVariable String userLogin,
+            @PathVariable String roleName
+    ) {
+        UserWithRolesView user = userService.addUserRole(
+                managerLogin,
+                new UserLogin(userLogin),
+                roleName
+        );
+
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
     @GetMapping("/{userLogin}/info")
     public ResponseEntity<UserInfoResponseDto> getUserInfo(@PathVariable String userLogin) {
