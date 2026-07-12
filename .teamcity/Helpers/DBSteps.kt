@@ -8,6 +8,7 @@ fun BuildSteps.prepareDatabaseStep() {
     script {
         id = "prepare_database"
         name = "Prepare database"
+        workingDir = "app"
         scriptContent = """
             #!/bin/sh
             set -e
@@ -35,6 +36,7 @@ fun BuildSteps.cleanupDatabaseStep() {
     script {
         name = "Cleanup database"
         executionMode = BuildStep.ExecutionMode.ALWAYS
+        workingDir = "app"
         scriptContent = """
             #!/bin/sh
 

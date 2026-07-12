@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.tsx';
+import { UserAccountsModal } from '../components/UserAccountsModal.tsx';
 import type { StaffUserRegistrationDto, UserDetailsResponseDto } from '../models/user.ts';
 import { userService } from '../services/userService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
@@ -27,7 +28,7 @@ const roleOptions = [
 ];
 
 export function UsersPage() {
-  const { isSeniorManager } = useAuth();
+  const { isManager, isSeniorManager } = useAuth();
   const { message } = AntdApp.useApp();
 
   const [users, setUsers] = useState<UserDetailsResponseDto[]>([]);
@@ -39,6 +40,7 @@ export function UsersPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm<StaffUserRegistrationDto>();
   const [submitting, setSubmitting] = useState(false);
+  const [accountsLogin, setAccountsLogin] = useState<string | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -122,7 +124,11 @@ export function UsersPage() {
     {
       title: 'Логин',
       key: 'login',
-      render: (_, record) => record.login.value
+      render: (_, record) => (
+        <Button type="link" style={{ padding: 0 }} onClick={() => setAccountsLogin(record.login.value)}>
+          {record.login.value}
+        </Button>
+      )
     },
     { title: 'Имя', dataIndex: 'name' },
     { title: 'Фамилия', dataIndex: 'lastName' },
@@ -265,6 +271,13 @@ export function UsersPage() {
           </Form.Item>
         </Form>
       </Modal>
+
+      <UserAccountsModal
+        open={accountsLogin !== null}
+        userLogin={accountsLogin}
+        canManageAccounts={isManager}
+        onClose={() => setAccountsLogin(null)}
+      />
     </Space>
   );
 }

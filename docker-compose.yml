@@ -24,7 +24,7 @@ services:
 
   polybank:
     build:
-      context: .
+      context: ./app
       dockerfile: Dockerfile.local
       args:
         POSTGRES_DB: ${POSTGRES_DB}_codegen
