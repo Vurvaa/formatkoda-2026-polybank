@@ -34,6 +34,11 @@ export const userService = {
     return response.data;
   },
 
+  async addRole(userLogin: string, roleName: string): Promise<UserDetailsResponseDto> {
+    const response = await api.put<UserDetailsResponseDto>(`/user/${userLogin}/roles/${roleName}`);
+    return response.data;
+  },
+
   async createStaffUser(payload: StaffUserRegistrationDto): Promise<UserDetailsResponseDto> {
     const response = await api.post<UserDetailsResponseDto>('/user', payload);
     return response.data;

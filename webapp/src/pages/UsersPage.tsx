@@ -15,11 +15,11 @@ import {
   type TableProps
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
 import type { StaffUserRegistrationDto, UserDetailsResponseDto } from '../models/user.ts';
 import { userService } from '../services/userService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
-import { formatDateTime } from '../utils/format.ts';
 
 const roleOptions = [
   { label: 'MANAGER', value: 'MANAGER' },
@@ -35,7 +35,6 @@ export function UsersPage() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(20);
   const [total, setTotal] = useState(0);
-  const [actionLogin, setActionLogin] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm<StaffUserRegistrationDto>();
   const [submitting, setSubmitting] = useState(false);
@@ -60,48 +59,6 @@ export function UsersPage() {
     loadUsers().then((r) => r);
   }, [loadUsers]);
 
-  async function handleBlock(login: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.block(login);
-      message.success('Пользователь заблокирован');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось заблокировать пользователя'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
-  async function handleUnblock(login: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.unblock(login);
-      message.success('Пользователь разблокирован');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось разблокировать пользователя'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
-  async function handleRemoveRole(login: string, roleName: string) {
-    setActionLogin(login);
-
-    try {
-      await userService.removeRole(login, roleName);
-      message.success('Роль удалена');
-      await loadUsers();
-    } catch (error) {
-      message.error(getApiErrorMessage(error, 'Не удалось удалить роль'));
-    } finally {
-      setActionLogin(null);
-    }
-  }
-
   async function handleCreateStaff(values: StaffUserRegistrationDto) {
     setSubmitting(true);
 
@@ -122,65 +79,25 @@ export function UsersPage() {
     {
       title: 'Логин',
       key: 'login',
-      render: (_, record) => record.login.value
+      render: (_, record) => <Link to={`/users/${record.login.value}`}>{record.login.value}</Link>
     },
     { title: 'Имя', dataIndex: 'name' },
     { title: 'Фамилия', dataIndex: 'lastName' },
     {
       title: 'Роли',
       dataIndex: 'roles',
-      render: (roles: string[], record) => (
+      render: (roles: string[]) => (
         <Space wrap>
           {roles.map((role) => (
-            <Tag
-              key={role}
-              closable={isSeniorManager}
-              onClose={(e) => {
-                e.preventDefault();
-                handleRemoveRole(record.login.value, role).then((r) => r);
-              }}
-            >
-              {role}
-            </Tag>
+            <Tag key={role}>{role}</Tag>
           ))}
         </Space>
       )
     },
     {
-      title: 'Создан',
-      dataIndex: 'createdAt',
-      render: (value: string) => formatDateTime(value)
-    },
-    {
       title: 'Статус',
       dataIndex: 'blockedAt',
       render: (value: string | null) => (value ? <Tag color="error">Заблокирован</Tag> : <Tag color="success">Активен</Tag>)
-    },
-    {
-      title: '',
-      key: 'actions',
-      align: 'right',
-      render: (_, record) =>
-        isSeniorManager ? (
-          record.blockedAt ? (
-            <Button
-              size="small"
-              loading={actionLogin === record.login.value}
-              onClick={() => handleUnblock(record.login.value)}
-            >
-              Разблокировать
-            </Button>
-          ) : (
-            <Button
-              size="small"
-              danger
-              loading={actionLogin === record.login.value}
-              onClick={() => handleBlock(record.login.value)}
-            >
-              Заблокировать
-            </Button>
-          )
-        ) : null
     }
   ];
 
@@ -218,7 +135,7 @@ export function UsersPage() {
           dataSource={users}
           loading={loading}
           pagination={pagination}
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
         />
       </Card>
 
