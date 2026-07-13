@@ -22,6 +22,7 @@ object BuildBuild : BuildType({
         script {
             id = "BUILD_APP"
             name = "Build application"
+            workingDir = "app"
 
             scriptContent = """
                 #!/bin/sh
@@ -48,8 +49,9 @@ object BuildBuild : BuildType({
             name = "Docker Build"
             commandType = build {
                 source = file {
-                    path = "Dockerfile"
+                    path = "app/Dockerfile"
                 }
+                contextDir = "app"
                 namesAndTags = "%docker.registry%/polybank-test:%build.number%"
             }
         }
