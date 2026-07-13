@@ -150,25 +150,25 @@ public class UserController {
 		return ResponseEntity.ok(userMapper.toResponse(user));
 	}
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{userLogin}/info")
-    public ResponseEntity<UserInfoResponseDto> getUserInfo(
-            @AuthenticationPrincipal UserLogin requesterLogin,
-            @PathVariable String userLogin
-    ) {
-        UserLogin login = new UserLogin(userLogin);
-        UserWithRolesView user = userService.findUserWithRolesForRequester(requesterLogin, login);
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{userLogin}/info")
+	public ResponseEntity<UserInfoResponseDto> getUserInfo(
+			@AuthenticationPrincipal UserLogin requesterLogin,
+			@PathVariable String userLogin
+	) {
+		UserLogin login = new UserLogin(userLogin);
+		List<AccountInfo> accounts = accountService.findAllForUser(login)
+				.stream()
+				.map(AccountMapper::toAccountInfo)
+				.toList();
 
-        List<AccountInfo> accounts = accountService.findAllForUser(login)
-                .stream()
-                .map(AccountMapper::toAccountInfo)
-                .toList();
+		UserWithRolesView user = userService.findUserWithRoles(requesterLogin, login);
 
-        return ResponseEntity.ok(
-                userMapper.toResponse(user, accounts)
-        );
-    }
+		return ResponseEntity.ok(
+				userMapper.toResponse(user, accounts)
+		);
+	}
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("hasRole('SENIOR_MANAGER')")
