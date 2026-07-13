@@ -8,6 +8,7 @@ fun BuildSteps.prepareDatabaseStep() {
     script {
         id = "prepare_database"
         name = "Prepare database"
+        workingDir = "app"
         scriptContent = """
             #!/bin/sh
             set -e
