@@ -5,4 +5,5 @@ import ru.formatkoda.polybank.domain.account.AccountEntity;
 
 public record CreateAccountRequestDto(
         @NotNull AccountEntity.Type accountType
-) {}
+) {
+}

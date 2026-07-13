@@ -16,6 +16,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
@@ -50,6 +51,8 @@ class TransactionServiceCancelTest {
 	private AccountService accountService;
 	@Mock
 	private UserService userService;
+	@Mock
+	private TransactionEventPublisher transactionEventPublisher;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -101,6 +104,7 @@ class TransactionServiceCancelTest {
 
 		verify(accountService).topUpAccount(ACCOUNT_NUMBER, AMOUNT);
 		verify(accountService).withdrawFromAccount(TO_ACCOUNT_NUMBER, AMOUNT);
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@Test
@@ -123,7 +127,7 @@ class TransactionServiceCancelTest {
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenReturn(savedRefundTransaction(toAccount.id(), fromAccount.id()));
 
-		transactionService.cancelTransaction(SENIOR_MANAGER_LOGIN, TRANSACTION_ID);
+		var result = transactionService.cancelTransaction(SENIOR_MANAGER_LOGIN, TRANSACTION_ID);
 
 		InOrder inOrder = inOrder(transactionRepository, accountService);
 		inOrder.verify(transactionRepository).changeTransactionStatus(
@@ -136,6 +140,7 @@ class TransactionServiceCancelTest {
 		inOrder.verify(accountService).findAccountOrThrow(toAccount.id());
 		inOrder.verify(accountService).withdrawFromAccount(TO_ACCOUNT_NUMBER, AMOUNT);
 		inOrder.verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@Test
@@ -185,6 +190,7 @@ class TransactionServiceCancelTest {
 		assertThat(transactionCaptor.getValue().toAccountId()).isEqualTo(fromAccount.id());
 		verify(accountService).topUpAccount(ACCOUNT_NUMBER, AMOUNT);
 		verify(accountService, never()).withdrawFromAccount(ArgumentMatchers.any(), ArgumentMatchers.any());
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@Test
@@ -220,6 +226,7 @@ class TransactionServiceCancelTest {
 		assertThat(transactionCaptor.getValue().toAccountId()).isNull();
 		verify(accountService, never()).topUpAccount(ArgumentMatchers.any(), ArgumentMatchers.any());
 		verify(accountService).withdrawFromAccount(ACCOUNT_NUMBER, AMOUNT);
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@Test
