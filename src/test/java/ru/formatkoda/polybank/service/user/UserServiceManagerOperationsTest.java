@@ -13,6 +13,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
@@ -48,6 +49,9 @@ class UserServiceManagerOperationsTest {
 
     @Mock
     UserMapper userMapper;
+
+    @Mock
+    UserEventPublisher userEventPublisher;
 
     @InjectMocks
     UserService userService;
@@ -706,6 +710,7 @@ class UserServiceManagerOperationsTest {
         verify(userRepository, times(1)).createUser(managerToCreate);
         verify(userRepository, times(1)).bindUserWithRole(createdManager.id(), managerRole.id());
         verify(userMapper, times(1)).toUserWithRolesView(createdManager, List.of("MANAGER"));
+        verify(userEventPublisher).publishUserRegistered(createdManager, "MANAGER");
     }
 
     @Test

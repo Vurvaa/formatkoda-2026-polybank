@@ -82,15 +82,15 @@ public class AccountRepository {
 		return ACCOUNT_NUMBER_PREFIX + String.format("%016d", value);
 	}
 
-	private AccountEntity toEntity(Record r) {
+	private AccountEntity toEntity(Record accountRecord) {
 		return new AccountEntity(
-				r.get(ACCOUNTS.ID),
-				new AccountNumber(r.get(ACCOUNTS.NUMBER)),
-				r.get(ACCOUNTS.USER_ID),
-				r.get(ACCOUNTS.BALANCE),
-				AccountEntity.Type.valueOf(r.get(ACCOUNTS.TYPE)),
-				AccountEntity.Status.valueOf(r.get(ACCOUNTS.STATUS)),
-				r.get(ACCOUNTS.CREATED_AT)
+				accountRecord.get(ACCOUNTS.ID),
+				new AccountNumber(accountRecord.get(ACCOUNTS.NUMBER)),
+				accountRecord.get(ACCOUNTS.USER_ID),
+				accountRecord.get(ACCOUNTS.BALANCE),
+				AccountEntity.Type.valueOf(accountRecord.get(ACCOUNTS.TYPE)),
+				AccountEntity.Status.valueOf(accountRecord.get(ACCOUNTS.STATUS)),
+				accountRecord.get(ACCOUNTS.CREATED_AT)
 		);
 	}
 }

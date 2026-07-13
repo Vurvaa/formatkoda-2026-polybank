@@ -1,0 +1,40 @@
+{
+  "name": "application-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "debezium",
+    "database.password": "debezium",
+    "database.dbname": "polybank_db",
+
+    "snapshot.mode": "when_needed",
+
+    "topic.prefix": "bank",
+    "table.include.list": "public.outbox_events",
+
+    "publication.name": "polybank_outbox_publication",
+    "publication.autocreate.mode": "disabled",
+
+    "plugin.name": "pgoutput",
+    "slot.name": "polybank_outbox_slot",
+
+    "transforms": "outbox",
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+
+    "transforms.outbox.route.by.field": "topic",
+    "transforms.outbox.route.topic.replacement": "${routedByValue}",
+
+    "transforms.outbox.table.expand.json.payload": "true",
+
+    "transforms.outbox.table.field.event.id": "id",
+    "transforms.outbox.table.field.event.key": "aggregate_id",
+    "transforms.outbox.table.field.event.payload": "payload",
+    "transforms.outbox.table.fields.additional.placement": "event_type:header,aggregate_type:header,created_at:header",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}
