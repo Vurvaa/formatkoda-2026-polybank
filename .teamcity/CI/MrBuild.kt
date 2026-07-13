@@ -1,3 +1,4 @@
+//Мистер Билд. =)
 package CI
 
 import Helpers.cleanupDatabaseStep
@@ -13,6 +14,7 @@ object MrBuild : BuildType({
     name = "CI - all checks."
 
     val javap = "%java.home%"
+    val pomp = "app/pom.xml"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -25,6 +27,7 @@ object MrBuild : BuildType({
         maven {
             id = "COMPILE"
             name = "Compile"
+            pomLocation = pomp
             goals = "clean compile"
             runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
@@ -33,6 +36,7 @@ object MrBuild : BuildType({
         maven {
             id = "UNIT_TESTS"
             name = "Unit Tests"
+            pomLocation = pomp
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
@@ -41,6 +45,7 @@ object MrBuild : BuildType({
         maven {
             id = "STYLE_CHECK"
             name = "Checkstyle"
+            pomLocation = pomp
             goals = "checkstyle:checkstyle"
             jdkHome = javap
         }
@@ -48,6 +53,7 @@ object MrBuild : BuildType({
         maven {
             id = "SONARQUBE"
             name = "SonarQube Analysis"
+            pomLocation = pomp
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
             runnerArgs = """
                 -Dsonar.host.url=%sonar.host.url%
