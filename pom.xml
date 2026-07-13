@@ -186,12 +186,7 @@
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<version>${liquibase.version}</version>
 				<configuration>
-					<url>${env.POSTGRES_URL}</url>
-					<username>${env.POSTGRES_USER}</username>
-					<password>${env.POSTGRES_PASSWORD}</password>
-
 					<searchPath>${project.basedir}/src/main/resources</searchPath>
-					<changeLogFile>db/changelog/db.changelog-master.xml</changeLogFile>
 				</configuration>
 				<dependencies>
 					<dependency>
