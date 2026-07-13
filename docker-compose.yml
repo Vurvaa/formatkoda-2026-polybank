@@ -58,6 +58,38 @@ services:
     networks:
       - polybank-net
 
+  notifications:
+    build:
+      context: ./notification
+      dockerfile: Dockerfile
+      args:
+        POSTGRES_DB: ${POSTGRES_DB}_codegen
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    image: polybank-notifications-local:latest
+    container_name: polybank-notifications-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      JAVA_OPTS: ${JAVA_OPTS:-}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${APP_PORT:-8081}:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health >/dev/null" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - polybank-net
+
   webapp:
     build:
       context: ./webapp
