@@ -1,12 +1,10 @@
 import { Alert, Space, Typography } from 'antd';
 
 const GRAFANA_BASE_URL = 'http://192.168.130.81:3000';
-const DASHBOARD_UID = 'bank-events-overview21';
-const DASHBOARD_SLUG = 'bank-analytics';
+const PUBLIC_DASHBOARD_UID = 'ffcbe9435344404c9f4f846c5d6bcd56';
 
-const DASHBOARD_EMBED_URL =
-  `${GRAFANA_BASE_URL}/d/${DASHBOARD_UID}/${DASHBOARD_SLUG}` +
-  '?orgId=1&kiosk=tv&theme=light&refresh=5s';
+const DASHBOARD_EMBED_URL =`${GRAFANA_BASE_URL}/public-dashboards/${PUBLIC_DASHBOARD_UID}` +
+    '?theme=light&from=now-24h&to=now&timezone=browser';
 
 export function StatisticsPage() {
   return (
