@@ -114,7 +114,7 @@ class UserServiceTest {
         when(userMapper.toUserWithRolesView(user, roles))
                 .thenReturn(expectedUser);
 
-        UserWithRolesView result = userService.findUserWithRoles(user.login());
+        UserWithRolesView result = userService.findUserWithRoles(user.login(), user.login());
 
         assertNotNull(result);
         verify(userMapper).toUserWithRolesView(user, roles);
@@ -130,7 +130,7 @@ class UserServiceTest {
                 .thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> userService.findUserWithRoles(login));
+                () -> userService.findUserWithRoles(login, login));
 
         assertEquals(expectedMessage, exception.getMessage());
         verify(userMapper, never()).toUserWithRolesView(any(), any());

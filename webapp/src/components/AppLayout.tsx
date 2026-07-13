@@ -1,5 +1,5 @@
-import { BankOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Button, Layout, Space, Typography } from 'antd';
+import { BankOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Layout, Space, Typography, type MenuProps } from 'antd';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
 
@@ -13,6 +13,21 @@ export function AppLayout() {
     logout();
     navigate('/login', { replace: true });
   }
+
+  const profileMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      label: 'Профиль',
+      icon: <UserOutlined />,
+      onClick: () => navigate('/profile')
+    },
+    {
+      key: 'logout',
+      label: <span style={{ color: '#ff4d4f' }}>Выйти</span>,
+      icon: <LogoutOutlined style={{ color: '#ff4d4f' }} />,
+      onClick: handleLogout
+    }
+  ];
 
   return (
     <Layout className="app-layout">
@@ -29,9 +44,9 @@ export function AppLayout() {
           {isManager && <Link to="/users">Пользователи</Link>}
         </Space>
 
-        <Button icon={<LogoutOutlined />} onClick={handleLogout}>
-          Выйти
-        </Button>
+        <Dropdown menu={{ items: profileMenuItems }} trigger={['click', 'hover']} placement="bottomRight">
+          <Button icon={<UserOutlined />}>Профиль</Button>
+        </Dropdown>
       </Header>
 
       <Content className="app-content">
