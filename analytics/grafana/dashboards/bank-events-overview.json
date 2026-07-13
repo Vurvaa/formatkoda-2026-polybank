@@ -1,0 +1,91 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 9, "w": 16, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
+        "tooltip": {"hideZeros": false, "mode": "multi", "sort": "none"}
+      },
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+          "editorType": "sql",
+          "format": 1,
+          "pluginVersion": "4.19.0",
+          "queryType": "timeseries",
+          "rawSql": "SELECT\n    toStartOfMinute(occurred_at) AS time,\n    event_type AS series,\n    count() AS value\nFROM analytics.bank_events_raw\nWHERE $__timeFilter(occurred_at)\nGROUP BY time, series\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Events per minute",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 9, "w": 8, "x": 16, "y": 0},
+      "id": 2,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {"calcs": [], "displayMode": "list", "placement": "right", "showLegend": true},
+        "orientation": "horizontal",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": true},
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+          "editorType": "sql",
+          "format": 1,
+          "pluginVersion": "4.19.0",
+          "queryType": "table",
+          "rawSql": "SELECT\n    event_type,\n    count() AS events\nFROM analytics.bank_events_raw\nWHERE $__timeFilter(occurred_at)\nGROUP BY event_type\nORDER BY events DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Events by type",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 9},
+      "id": 3,
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse"},
+          "editorType": "sql",
+          "format": 1,
+          "pluginVersion": "4.19.0",
+          "queryType": "table",
+          "rawSql": "SELECT\n    occurred_at,\n    event_type,\n    event_id,\n    aggregate_id,\n    payload\nFROM analytics.bank_events_raw\nWHERE $__timeFilter(occurred_at)\nORDER BY occurred_at DESC\nLIMIT 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Latest events",
+      "type": "table"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": ["bank", "clickhouse", "kafka"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Bank events overview",
+  "uid": "bank-events-overview",
+  "version": 1
+}

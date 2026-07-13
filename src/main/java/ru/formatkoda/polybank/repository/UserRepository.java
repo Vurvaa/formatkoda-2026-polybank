@@ -115,15 +115,15 @@ public class UserRepository {
                 .setBlockedAt(user.blockedAt());
     }
 
-    private UserEntity toEntity(Record r) {
+    private UserEntity toEntity(Record userRecord) {
         return new UserEntity(
-                r.get(USERS.ID),
-                new UserLogin(r.get(USERS.LOGIN)),
-                r.get(USERS.NAME),
-                r.get(USERS.LAST_NAME),
-                r.get(USERS.PASSWORD_HASH),
-                r.get(USERS.CREATED_AT),
-                r.get(USERS.BLOCKED_AT)
+                userRecord.get(USERS.ID),
+                new UserLogin(userRecord.get(USERS.LOGIN)),
+                userRecord.get(USERS.NAME),
+                userRecord.get(USERS.LAST_NAME),
+                userRecord.get(USERS.PASSWORD_HASH),
+                userRecord.get(USERS.CREATED_AT),
+                userRecord.get(USERS.BLOCKED_AT)
         );
     }
 }

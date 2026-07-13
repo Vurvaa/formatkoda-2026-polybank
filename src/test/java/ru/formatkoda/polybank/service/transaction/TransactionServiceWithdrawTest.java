@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
@@ -36,6 +37,8 @@ class TransactionServiceWithdrawTest {
 	private TransactionRepository transactionRepository;
 	@Mock
 	private AccountService accountService;
+	@Mock
+	private TransactionEventPublisher transactionEventPublisher;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -83,6 +86,8 @@ class TransactionServiceWithdrawTest {
 				AMOUNT,
 				USER_LOGIN
 		);
+
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@ParameterizedTest

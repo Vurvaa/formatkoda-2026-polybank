@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
@@ -41,6 +42,9 @@ class UserServiceTest {
 
     @Mock
     UserMapper userMapper;
+
+    @Mock
+    UserEventPublisher userEventPublisher;
 
     @InjectMocks
     UserService userService;
@@ -162,19 +166,27 @@ class UserServiceTest {
     void createUserShouldCallingRepositoriesMethods() {
         prepareMocksForCallingCreateUser(user().login());
 
+        when(userRepository.createUserAndReturnId(user())).thenReturn(Optional.of(10L));
+
         userService.createUser(user());
 
         verify(userRepository).findUserByLogin(user().login());
         verify(roleRepository).findRoleEntityByName("CLIENT");
         verify(userRepository).createUserAndReturnId(user());
         verify(userRepository).bindUserWithRole(anyLong(), anyLong());
+        verify(userEventPublisher).publishUserRegistered(user(), "CLIENT");
     }
 
     @Test
     void createUserShouldReturnUserLoginMatchesWithUserEntityLogin() {
         prepareMocksForCallingCreateUser(user().login());
 
+        when(userRepository.createUserAndReturnId(user())).thenReturn(Optional.of(10L));
+
         UserLogin userLogin = userService.createUser(user());
+
+        verify(userEventPublisher).publishUserRegistered(user(), "CLIENT");
+        verify(userRepository).createUserAndReturnId(user());
 
         assertNotNull(userLogin);
         assertEquals(userLogin, user().login());

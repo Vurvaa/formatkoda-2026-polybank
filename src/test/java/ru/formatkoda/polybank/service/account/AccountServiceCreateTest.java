@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.domain.account.AccountEntity.Type;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.AccountEventPublisher;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.UserService;
@@ -35,6 +36,9 @@ class AccountServiceCreateTest {
 
 	@Mock
 	private UserService userService;
+
+	@Mock
+	private AccountEventPublisher accountEventPublisher;
 
 	@InjectMocks
 	private AccountService accountService;
@@ -63,6 +67,7 @@ class AccountServiceCreateTest {
 		Assertions.assertEquals(accountEntity, accountEntityToCheck);
 
 		verify(userService, times(1)).findNotBlockedUserByLogin(USER_LOGIN);
+		verify(accountEventPublisher).publishAccountCreated(accountEntity);
 		verify(accountRepository, times(1)).createAccountForUser(userEntity.id(), accountType);
 
 		verifyNoMoreInteractions(userService, accountRepository);

@@ -89,33 +89,33 @@ public class TransactionRepository {
 	}
 
 	private TransactionWithAccountNumbersView toTransactionWithAccountNumbersView(
-			Record r,
+			Record transactionRecord,
 			Accounts fromAccount,
 			Accounts toAccount
 	) {
-		String fromNumber = r.get(fromAccount.NUMBER);
-		String toNumber = r.get(toAccount.NUMBER);
+		String fromNumber = transactionRecord.get(fromAccount.NUMBER);
+		String toNumber = transactionRecord.get(toAccount.NUMBER);
 
 		return new TransactionWithAccountNumbersView(
-				r.get(TRANSACTIONS.ID),
+				transactionRecord.get(TRANSACTIONS.ID),
 				fromNumber == null ? null : new AccountNumber(fromNumber),
 				toNumber == null ? null : new AccountNumber(toNumber),
-				r.get(TRANSACTIONS.AMOUNT),
-				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
-				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
-				r.get(TRANSACTIONS.CREATED_AT)
+				transactionRecord.get(TRANSACTIONS.AMOUNT),
+				TransactionEntity.Type.valueOf(transactionRecord.get(TRANSACTIONS.TYPE)),
+				TransactionEntity.Status.valueOf(transactionRecord.get(TRANSACTIONS.STATUS)),
+				transactionRecord.get(TRANSACTIONS.CREATED_AT)
 		);
 	}
 
-	private TransactionEntity toEntity(Record r) {
+	private TransactionEntity toEntity(Record transactionRecord) {
 		return new TransactionEntity(
-				r.get(TRANSACTIONS.ID),
-				r.get(TRANSACTIONS.FROM_ACCOUNT_ID),
-				r.get(TRANSACTIONS.TO_ACCOUNT_ID),
-				r.get(TRANSACTIONS.AMOUNT),
-				TransactionEntity.Type.valueOf(r.get(TRANSACTIONS.TYPE)),
-				TransactionEntity.Status.valueOf(r.get(TRANSACTIONS.STATUS)),
-				r.get(TRANSACTIONS.CREATED_AT)
+				transactionRecord.get(TRANSACTIONS.ID),
+				transactionRecord.get(TRANSACTIONS.FROM_ACCOUNT_ID),
+				transactionRecord.get(TRANSACTIONS.TO_ACCOUNT_ID),
+				transactionRecord.get(TRANSACTIONS.AMOUNT),
+				TransactionEntity.Type.valueOf(transactionRecord.get(TRANSACTIONS.TYPE)),
+				TransactionEntity.Status.valueOf(transactionRecord.get(TRANSACTIONS.STATUS)),
+				transactionRecord.get(TRANSACTIONS.CREATED_AT)
 		);
 	}
 }
