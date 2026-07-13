@@ -1,0 +1,10 @@
+ktor:
+  deployment:
+    port: 6060
+  application:
+    modules:
+      - ru.formatkoda.HttpKt.configureHttp
+      - ru.formatkoda.SerializationKt.configureSerialization
+      - ru.formatkoda.ExposedKt.configureExposed
+      - ru.formatkoda.ThymeleafKt.configureThymeleaf
+      - ru.formatkoda.RoutingKt.configureRouting
