@@ -8,6 +8,7 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
@@ -22,9 +23,13 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
+
+    private static final String CLIENT_ROLE = "CLIENT";
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final UserEventPublisher userEventPublisher;
 
     @Transactional
     public UserLogin createUser(@NonNull UserEntity user) {
@@ -32,12 +37,24 @@ public class UserService {
         if (userOptional.isPresent())
             throw new BusinessLogicException("user already exists");
 
-        long roleId = findRoleIdOrThrow("CLIENT");
+        long roleId = findRoleIdOrThrow(CLIENT_ROLE);
 
         Long userId = userRepository.createUserAndReturnId(user)
                 .orElseThrow(() -> new BusinessLogicException("unable to create user"));
 
         userRepository.bindUserWithRole(userId, roleId);
+
+        UserEntity registered = new UserEntity(
+                userId,
+                user.login(),
+                user.name(),
+                user.lastName(),
+                user.passwordHash(),
+                user.createdAt(),
+                user.blockedAt()
+        );
+
+        userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
 
         return user.login();
     }
@@ -201,7 +218,7 @@ public class UserService {
     ) {
         findNotBlockedUserByLogin(managerLogin);
 
-        if (roleName.equals("CLIENT")) {
+        if (roleName.equals(CLIENT_ROLE)) {
             throw new BusinessLogicException("only staff user can be created by manager");
         } else if (userRepository.findUserByLogin(staffUser.login()).isPresent()) {
             throw new BusinessLogicException("user with given login already exists");
@@ -213,6 +230,8 @@ public class UserService {
                 staffUser
         ).orElseThrow(() -> new BusinessLogicException("user not created"));
         userRepository.bindUserWithRole(createdUser.id(), roleId);
+
+        userEventPublisher.publishUserRegistered(createdUser, roleName);
 
         return userMapper.toUserWithRolesView(
                 createdUser,

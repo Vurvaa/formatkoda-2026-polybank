@@ -9,4 +9,5 @@ public record StaffUserRegistrationDto(
         @NotBlank String lastName,
         @NotBlank @Size(min = 8) String password,
         @NotBlank String roleName
-) {}
+) {
+}

@@ -14,4 +14,5 @@
     <include file="db/changelog/migrations/007-account-number-seq.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/008-add-transaction-indexes.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/009-insert-senior-manager.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/010-outbox.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

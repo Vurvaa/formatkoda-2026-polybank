@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
@@ -38,6 +39,8 @@ class TransactionServiceTransferTest {
 	private TransactionRepository transactionRepository;
 	@Mock
 	private AccountService accountService;
+	@Mock
+	private TransactionEventPublisher transactionEventPublisher;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -84,6 +87,7 @@ class TransactionServiceTransferTest {
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
+		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
 	@Test

@@ -28,8 +28,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(APPLICATION_JSON_VALUE);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("message", exception != null ?
-                exception.getMessage() : authException.getCause().toString());
+        data.put("message", exception != null
+                ? exception.getMessage() : authException.getCause().toString());
 
         OutputStream out = response.getOutputStream();
         ObjectMapper mapper = new ObjectMapper();

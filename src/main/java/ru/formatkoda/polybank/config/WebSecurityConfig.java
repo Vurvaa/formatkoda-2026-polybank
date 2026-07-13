@@ -29,70 +29,70 @@ import java.util.List;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-    @Value("#{'${app.cors.allowed-origins}'.split(',')}")
-    private List<String> allowedOrigins;
+	@Value("#{'${app.cors.allowed-origins}'.split(',')}")
+	private List<String> allowedOrigins;
 
-    private final JwtFilter jwtFilter;
+	private final JwtFilter jwtFilter;
 
-    private final AuthUserDetailsService authUserDetailsService;
+	private final AuthUserDetailsService authUserDetailsService;
 
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    private final PasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        final DaoAuthenticationProvider daoAuthenticationProvider =
-                new DaoAuthenticationProvider(authUserDetailsService);
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider() {
+		final DaoAuthenticationProvider daoAuthenticationProvider =
+				new DaoAuthenticationProvider(authUserDetailsService);
 
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
 
-        return daoAuthenticationProvider;
-    }
+		return daoAuthenticationProvider;
+	}
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) {
-        return httpSecurity
-                .getSharedObject(AuthenticationManagerBuilder.class)
-                .authenticationProvider(authenticationProvider())
-                .build();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) {
+		return httpSecurity
+				.getSharedObject(AuthenticationManagerBuilder.class)
+				.authenticationProvider(authenticationProvider())
+				.build();
+	}
 
-    @SuppressWarnings("java:S4502")
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
-        httpSecurity
-                .cors(cors -> {})
-                // csrf is disabled because this stateless api authenticates requests with jwt tokens
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/sign-up", "/user/sign-in").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated())
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception ->
-                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+	@SuppressWarnings("java:S4502")
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
+		httpSecurity
+				.cors(cors -> { })
+				// csrf is disabled because this stateless api authenticates requests with jwt tokens
+				.csrf(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/user/sign-up", "/user/sign-in").permitAll()
+						.requestMatchers("/actuator/**").permitAll()
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/error").permitAll()
+						.anyRequest().authenticated())
+				.sessionManagement(sessionManagement ->
+						sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authenticationProvider(authenticationProvider())
+				.addFilterBefore(jwtFilter,
+						UsernamePasswordAuthenticationFilter.class)
+				.exceptionHandling(exception ->
+						exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
 
 
-        return httpSecurity.build();
-    }
+		return httpSecurity.build();
+	}
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(allowedOrigins);
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		configuration.setAllowedHeaders(List.of("*"));
+		configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }
