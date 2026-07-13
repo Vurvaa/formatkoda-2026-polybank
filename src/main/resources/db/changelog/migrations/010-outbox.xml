@@ -89,6 +89,16 @@
                     ) THEN
                         CREATE PUBLICATION polybank_outbox_publication
                             FOR TABLE public.outbox_events;
+
+                    ELSIF NOT EXISTS (
+                        SELECT 1
+                        FROM pg_publication_tables
+                        WHERE pubname = 'polybank_outbox_publication'
+                          AND schemaname = 'public'
+                          AND tablename = 'outbox_events'
+                    ) THEN
+                        ALTER PUBLICATION polybank_outbox_publication
+                            ADD TABLE public.outbox_events;
                     END IF;
                 END
             $$;

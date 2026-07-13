@@ -15,7 +15,7 @@
     "table.include.list": "public.outbox_events",
 
     "publication.name": "polybank_outbox_publication",
-    "publication.autocreate.mode": "filtered",
+    "publication.autocreate.mode": "disabled",
 
     "plugin.name": "pgoutput",
     "slot.name": "polybank_outbox_slot",
