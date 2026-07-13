@@ -65,17 +65,14 @@ ORDER BY (event_type, event_time, event_id);
 
 CREATE TABLE IF NOT EXISTS analytics.polybank_events_queue
 (
-    eventId UUID,
-    eventTime String,
-    eventType LowCardinality(String),
     payload String
 )
 ENGINE = Kafka
 SETTINGS
-    kafka_broker_list = '192.168.130.82:9092',
+    kafka_broker_list = '192.168.130.82:9092', -- '192.168.130.82:9092' 'kafka:29092'
     kafka_topic_list = 'bank.users,bank.accounts,bank.transactions',
     kafka_group_name = 'clickhouse-analytics',
-    kafka_format = 'JSONEachRow',
+    kafka_format = 'JSONAsString',
     kafka_num_consumers = 1,
     kafka_handle_error_mode = 'stream';
 
@@ -83,31 +80,62 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.polybank_events_queue_users_to_
 TO analytics.polybank_users_raw
 AS
 SELECT
-    eventId AS event_id,
-    parseDateTime64BestEffort(eventTime, 3, 'UTC') AS event_time,
-    eventType AS event_type,
+    toUUID(headers['id']) AS event_id,
+    parseDateTime64BestEffort(headers['created_at'], 3, 'UTC') AS event_time,
+    headers['event_type'] AS event_type,
+
     payload
-FROM analytics.polybank_events_queue
-WHERE eventType = 'UserRegistered';
+FROM
+    (
+        SELECT
+            payload,
+            mapFromArrays(
+                    arrayMap(header -> header.1, _headers),
+                    arrayMap(header -> header.2, _headers)
+            ) AS headers
+        FROM analytics.polybank_events_queue
+        )
+WHERE headers['aggregate_type'] = 'User';
+
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.polybank_events_queue_accounts_to_raw
 TO analytics.polybank_accounts_raw
 AS
 SELECT
-    eventId AS event_id,
-    parseDateTime64BestEffort(eventTime, 3, 'UTC') AS event_time,
-    eventType AS event_type,
+    toUUID(headers['id']) AS event_id,
+    parseDateTime64BestEffort(headers['created_at'], 3, 'UTC') AS event_time,
+    headers['event_type'] AS event_type,
+
     payload
-FROM analytics.polybank_events_queue
-WHERE eventType = 'AccountCreated';
+FROM
+    (
+        SELECT
+            payload,
+            mapFromArrays(
+                    arrayMap(header -> header.1, _headers),
+                    arrayMap(header -> header.2, _headers)
+            ) AS headers
+        FROM analytics.polybank_events_queue
+        )
+WHERE headers['aggregate_type'] = 'Account';
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.polybank_events_queue_transactions_to_raw
 TO analytics.polybank_transactions_raw
 AS
 SELECT
-    eventId AS event_id,
-    parseDateTime64BestEffort(eventTime, 3, 'UTC') AS event_time,
-    eventType AS event_type,
+    toUUID(headers['id']) AS event_id,
+    parseDateTime64BestEffort(headers['created_at'], 3, 'UTC') AS event_time,
+    headers['event_type'] AS event_type,
+
     payload
-FROM analytics.polybank_events_queue
-WHERE eventType = 'TransactionCreated';
+FROM
+    (
+        SELECT
+            payload,
+            mapFromArrays(
+                    arrayMap(header -> header.1, _headers),
+                    arrayMap(header -> header.2, _headers)
+            ) AS headers
+        FROM analytics.polybank_events_queue
+        )
+WHERE headers['aggregate_type'] = 'Transaction';

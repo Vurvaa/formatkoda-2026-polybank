@@ -19,4 +19,4 @@ SELECT
 FROM system.kafka_consumers
 WHERE database = 'analytics';
 
-select count(*) from polybank_accounts_raw
+select count(*) from polybank_accounts_raw;
