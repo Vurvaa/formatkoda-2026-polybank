@@ -17,6 +17,8 @@ interface AuthContextValue {
   token: string | null;
   login_: string | null;
   roles: string[];
+  name: string | null;
+  lastName: string | null;
   isAuthenticated: boolean;
   isManager: boolean;
   isSeniorManager: boolean;
@@ -30,6 +32,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
   const [token, setToken] = useState<string | null>(() => authStorage.getToken());
   const [roles, setRoles] = useState<string[]>([]);
+  const [name, setName] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
   const login_ = useMemo(() => (token ? extractLoginFromToken(token) : null), [token]);
 
   useEffect(() => {
@@ -37,6 +41,8 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
 
     if (!login_) {
       setRoles([]);
+      setName(null);
+      setLastName(null);
       return;
     }
 
@@ -45,11 +51,15 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       .then((info) => {
         if (!cancelled) {
           setRoles(info.roles);
+          setName(info.name);
+          setLastName(info.lastName);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setRoles([]);
+          setName(null);
+          setLastName(null);
         }
       });
 
@@ -74,6 +84,8 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
     authStorage.clearToken();
     setToken(null);
     setRoles([]);
+    setName(null);
+    setLastName(null);
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -81,6 +93,8 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       token,
       login_,
       roles,
+      name,
+      lastName,
       isAuthenticated: Boolean(token),
       isManager: roles.includes('MANAGER') || roles.includes('SENIOR_MANAGER'),
       isSeniorManager: roles.includes('SENIOR_MANAGER'),
@@ -88,7 +102,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       register,
       logout
     }),
-    [login, login_, logout, register, roles, token]
+    [login, login_, logout, register, roles, name, lastName, token]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

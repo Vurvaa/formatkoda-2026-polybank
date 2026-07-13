@@ -151,16 +151,19 @@ public class UserController {
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
-	@PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{userLogin}/info")
-	public ResponseEntity<UserInfoResponseDto> getUserInfo(@PathVariable String userLogin) {
+	public ResponseEntity<UserInfoResponseDto> getUserInfo(
+			@AuthenticationPrincipal UserLogin requesterLogin,
+			@PathVariable String userLogin
+	) {
 		UserLogin login = new UserLogin(userLogin);
 		List<AccountInfo> accounts = accountService.findAllForUser(login)
 				.stream()
 				.map(AccountMapper::toAccountInfo)
 				.toList();
 
-		UserWithRolesView user = userService.findUserWithRoles(login);
+		UserWithRolesView user = userService.findUserWithRoles(requesterLogin, login);
 
 		return ResponseEntity.ok(
 				userMapper.toResponse(user, accounts)

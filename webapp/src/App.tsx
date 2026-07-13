@@ -5,7 +5,9 @@ import { AccountDetailsPage } from './pages/AccountDetailsPage.tsx';
 import { AccountsPage } from './pages/AccountsPage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
 import { RegisterPage } from './pages/RegisterPage.tsx';
+import { UserDetailsPage } from './pages/UserDetailsPage.tsx';
 import { UsersPage } from './pages/UsersPage.tsx';
 
 export function App() {
@@ -19,6 +21,8 @@ export function App() {
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/accounts/:accountNumber" element={<AccountDetailsPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/users/:userLogin" element={<UserDetailsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />

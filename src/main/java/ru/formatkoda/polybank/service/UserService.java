@@ -203,11 +203,25 @@ public class UserService {
         return userRepository.findAllUserRoles(user);
     }
 
-    public UserWithRolesView findUserWithRoles(@NonNull UserLogin login) {
-        UserEntity user = findUserByLogin(login);
-        List<String> roles = findAllUserRoles(user);
+    public UserWithRolesView findUserWithRoles(
+            @NonNull UserLogin requesterLogin,
+            @NonNull UserLogin targetLogin
+    ) {
+        UserEntity targetUser = findUserByLogin(targetLogin);
+        List<String> targetRoles = findAllUserRoles(targetUser);
 
-        return userMapper.toUserWithRolesView(user, roles);
+        if (requesterLogin.equals(targetLogin)) {
+            return userMapper.toUserWithRolesView(targetUser, targetRoles);
+        }
+
+        UserEntity requester = findUserByLogin(requesterLogin);
+        List<String> requesterRoles = findAllUserRoles(requester);
+
+        if (!requesterRoles.contains("MANAGER") && !requesterRoles.contains("SENIOR_MANAGER")) {
+            throw new BusinessLogicException("not allowed to view another user's info");
+        }
+
+        return userMapper.toUserWithRolesView(targetUser, targetRoles);
     }
 
     @Transactional
