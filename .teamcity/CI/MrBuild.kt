@@ -14,6 +14,7 @@ object MrBuild : BuildType({
     name = "CI - all checks."
 
     val javap = "%java.home%"
+    val pomp = "app/pom.xml"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -26,7 +27,7 @@ object MrBuild : BuildType({
         maven {
             id = "COMPILE"
             name = "Compile"
-            workingDir = "app"
+            pomLocation = pomp
             goals = "clean compile"
             runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
@@ -35,7 +36,7 @@ object MrBuild : BuildType({
         maven {
             id = "UNIT_TESTS"
             name = "Unit Tests"
-            workingDir = "app"
+            pomLocation = pomp
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
@@ -44,7 +45,7 @@ object MrBuild : BuildType({
         maven {
             id = "STYLE_CHECK"
             name = "Checkstyle"
-            workingDir = "app"
+            pomLocation = pomp
             goals = "checkstyle:checkstyle"
             jdkHome = javap
         }
@@ -52,7 +53,7 @@ object MrBuild : BuildType({
         maven {
             id = "SONARQUBE"
             name = "SonarQube Analysis"
-            workingDir = "app"
+            pomLocation = pomp
             goals = "org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar"
             runnerArgs = """
                 -Dsonar.host.url=%sonar.host.url%
