@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 
 public record DeliveryEntity(
     Long id,
-    @NonNull Long eventId,
+    Long eventId,
     @NonNull Status status,
     @NonNull OffsetDateTime retryAt,
     @NonNull Short remainingAttempts,

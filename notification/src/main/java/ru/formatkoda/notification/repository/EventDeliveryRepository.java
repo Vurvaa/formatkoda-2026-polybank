@@ -61,7 +61,7 @@ public class EventDeliveryRepository {
         return dsl
                 .update(DELIVERY)
                 .set(DELIVERY.RETRY_AT, retryAt)
-                .where(DELIVERY.EVENT_ID.in(deliveryIds))
+                .where(DELIVERY.ID.in(deliveryIds))
                 .returning()
                 .fetch(this::toEntity);
     }
@@ -94,7 +94,8 @@ public class EventDeliveryRepository {
 
     public List<DeliveryEntity> findActiveByStatusAndRetryAt(
             DeliveryEntity.Status status,
-            OffsetDateTime retryAtLimit
+            OffsetDateTime retryAtLimit,
+            long limit
     ) {
         return dsl
                 .select(DELIVERY)
@@ -105,6 +106,7 @@ public class EventDeliveryRepository {
                                         .le(retryAtLimit)
                         )
                 )
+                .limit(limit)
                 .fetch(this::toEntity);
     }
 

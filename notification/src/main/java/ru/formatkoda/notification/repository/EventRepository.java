@@ -39,6 +39,13 @@ public class EventRepository {
                 .fetch(this::toEntity);
     }
 
+    public Optional<EventEntity> findById(long id) {
+        return dsl
+                .select(EVENTS)
+                .where(EVENTS.ID.eq(id))
+                .fetchOptional(this::toEntity);
+    }
+
     public EventEntity toEntity(Record r) {
         return new EventEntity(
                 r.get(EVENTS.ID),

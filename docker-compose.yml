@@ -180,6 +180,14 @@ services:
           --topic bank.users \
           --partitions 1 \
           --replication-factor 1
+        
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --create \
+          --if-not-exists \
+          --topic bank.notifications \
+          --partitions 1 \
+          --replication-factor 1
 
   connect:
     container_name: polybank-connect
