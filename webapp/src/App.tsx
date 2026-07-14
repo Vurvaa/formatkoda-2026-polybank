@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout.tsx';
+import { ManagerRoute } from './components/ManagerRoute.tsx';
 import { ProtectedRoute } from './components/ProtectedRoute.tsx';
 import { AccountDetailsPage } from './pages/AccountDetailsPage.tsx';
 import { AccountsPage } from './pages/AccountsPage.tsx';
@@ -7,6 +8,7 @@ import { LoginPage } from './pages/LoginPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { RegisterPage } from './pages/RegisterPage.tsx';
+import { StatisticsPage } from './pages/StatisticsPage.tsx';
 import { UserDetailsPage } from './pages/UserDetailsPage.tsx';
 import { UsersPage } from './pages/UsersPage.tsx';
 
@@ -22,6 +24,9 @@ export function App() {
           <Route path="/accounts/:accountNumber" element={<AccountDetailsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/users/:userLogin" element={<UserDetailsPage />} />
+          <Route element={<ManagerRoute />}>
+            <Route path="/statistics" element={<StatisticsPage />} />
+          </Route>
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
