@@ -18,9 +18,9 @@ resources:
     cpu: "750m"
 
 startupProbe:
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 15
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 30
 
 appVars:
   APP_JWT_EXPIRATION_MINUTES:
@@ -63,7 +63,7 @@ webapp:
 
 cnpg:
   enabled: true
-  instances: 2
+  instances: 3
   storageSize: 10Gi
   storageClass: "local-path"
   resources:
@@ -96,6 +96,7 @@ notification:
     periodSeconds: 5
     failureThreshold: 30
   kafka:
+    bootstrapServers: "192.168.130.82:9092"
     bootstrapServers: "kafka:29092"
 
 trafficGenerator:

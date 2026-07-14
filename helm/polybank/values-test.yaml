@@ -13,12 +13,12 @@ resources:
     cpu: "75m"
   limits:
     memory: "768Mi"
-    cpu: "250m"
+    cpu: "750m"
 
 startupProbe:
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 15
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 40
 
 webapp:
   appName: polybank-webapp
@@ -49,10 +49,10 @@ cnpg:
   storageClass: "local-path"
   resources:
     requests:
-      cpu: "25m"
+      cpu: "50m"
       memory: "128Mi"
     limits:
-      cpu: "100m"
+      cpu: "200m"
       memory: "256Mi"
 
 postgresAuth:
@@ -98,4 +98,4 @@ notification:
     periodSeconds: 5
     failureThreshold: 40
   kafka:
-    bootstrapServers: "kafka:29092"
+    bootstrapServers: "192.168.130.82:9092"
