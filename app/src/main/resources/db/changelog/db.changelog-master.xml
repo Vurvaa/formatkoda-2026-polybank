@@ -15,4 +15,6 @@
     <include file="db/changelog/migrations/008-add-transaction-indexes.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/009-insert-senior-manager.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/migrations/010-outbox.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/011-generator-users.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/migrations/012-generator-accounts.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

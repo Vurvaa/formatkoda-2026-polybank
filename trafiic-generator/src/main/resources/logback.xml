@@ -17,6 +17,7 @@
     <logger name="io.ktor.client.plugins.logging" level="DEBUG"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
+    <logger name="Exposed" level="WARN"/>
 
     <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
