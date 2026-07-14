@@ -1,0 +1,107 @@
+{{- if .Values.trafficGenerator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-{{ .Values.trafficGenerator.appName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.trafficGenerator.appName }}
+  replicas: {{ .Values.trafficGenerator.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.trafficGenerator.appName }}
+      annotations:
+        reloader.stakater.com/auto: "true"
+    spec:
+      automountServiceAccountToken: false
+      {{- $pgHost := "" }}
+      {{- $pgPort := 5432 }}
+      {{- if .Values.cnpg.enabled }}
+      {{- $pgHost = printf "%s-pg-rw" .Release.Name }}
+      {{- else }}
+      {{- $pgHost = .Values.externalPostgres.host }}
+      {{- $pgPort = .Values.externalPostgres.port | default 5432 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >-
+              until pg_isready -h {{ $pgHost }} -p {{ $pgPort }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              do echo "waiting for postgres"; sleep 2; done
+          envFrom:
+            - secretRef:
+                name: polybank-backend-secret
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+              ephemeral-storage: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+              ephemeral-storage: "64Mi"
+      containers:
+        - name: {{ .Values.trafficGenerator.appName }}
+          image: {{ .Values.trafficGenerator.image.repository }}:{{ .Values.trafficGenerator.image.tag }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: "{{ .Values.trafficGenerator.resources.requests.memory }}"
+              cpu: "{{ .Values.trafficGenerator.resources.requests.cpu }}"
+              ephemeral-storage: "256Mi"
+            limits:
+              memory: "{{ .Values.trafficGenerator.resources.limits.memory }}"
+              cpu: "{{ .Values.trafficGenerator.resources.limits.cpu }}"
+              ephemeral-storage: "512Mi"
+          envFrom:
+            - secretRef:
+                name: polybank-backend-secret
+          ports:
+            - name: http
+              containerPort: {{ .Values.trafficGenerator.containerPort }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ .Values.trafficGenerator.appName }}
+                topologyKey: kubernetes.io/hostname
+  {{- end }}

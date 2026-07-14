@@ -73,3 +73,22 @@ cnpg:
     limits:
       cpu: "500m"
       memory: "512Mi"
+
+trafficGenerator:
+  enabled: true
+  appName: polybank-traffic-generator
+  image:
+    repository: 192.168.130.81:5000/polybank-traffic-generator
+    tag: latest
+  replicas: 1
+  containerPort: 6060
+  service:
+    type: NodePort
+    nodePort: 30092
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"

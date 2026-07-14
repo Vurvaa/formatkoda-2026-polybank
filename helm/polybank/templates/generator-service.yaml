@@ -1,0 +1,21 @@
+{{- if .Values.trafficGenerator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: polybank-traffic-generator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: polybank
+    app.kubernetes.io/component: traffic-generator
+spec:
+  type: {{ .Values.trafficGenerator.service.type }}
+  selector:
+    app: {{ .Values.trafficGenerator.appName }}
+  ports:
+    - name: http
+      port: {{ .Values.trafficGenerator.containerPort }}
+      targetPort: http
+      {{- if and (eq .Values.trafficGenerator.service.type "NodePort") .Values.trafficGenerator.service.nodePort }}
+      nodePort: {{ .Values.trafficGenerator.service.nodePort }}
+      {{- end }}
+  {{- end }}
