@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: polybank-notification
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: polybank
+    app.kubernetes.io/component: notification
+spec:
+  type: {{ .Values.notification.service.type }}
+  selector:
+    app: {{ .Values.notification.appName }}
+  ports:
+    - name: http
+      port: {{ .Values.notification.appServicePort }}
+      targetPort: http
+      {{- if and (eq .Values.notification.service.type "NodePort") .Values.notification.service.nodePort }}
+      nodePort: {{ .Values.notification.service.nodePort }}
+      {{- end }}

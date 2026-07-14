@@ -37,6 +37,8 @@ object ProdDeployBuild : BuildType({
                 imageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
                 webappImageRepoParam = "%docker.registry%/polybank-webapp",
                 webappImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
+                notificationImageRepoParam = "%docker.registry%/polybank-notification",
+                notificationImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
                 trafficGenImageRepoParam = "%docker.registry%/polybank-traffic-generator",
                 trafficGenImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
                 pgUserParam = "POSTGRES_USER",

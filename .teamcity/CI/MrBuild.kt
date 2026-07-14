@@ -15,6 +15,7 @@ object MrBuild : BuildType({
 
     val javap = "%java.home%"
     val pomp = "app/pom.xml"
+    val notificationPomp = "notification/pom.xml"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -22,14 +23,14 @@ object MrBuild : BuildType({
     }
 
     steps {
-        prepareDatabaseStep()
+        prepareDatabaseStep(extraLiquibaseDirs = listOf("notification"))
 
         maven {
             id = "COMPILE"
             name = "Compile"
             pomLocation = pomp
             goals = "clean compile"
-            runnerArgs = "-B -Pdb-codegen"
+            runnerArgs = "-B -Pdb-codegen -Denv.POSTGRES_URL=%env.POSTGRES_URL%"
             jdkHome = javap
         }
 
@@ -65,6 +66,15 @@ object MrBuild : BuildType({
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                 -Dsonar.qualitygate.wait=true
             """.trimIndent().replace("\n", " ")
+            jdkHome = javap
+        }
+
+        maven {
+            id = "NOTIFICATION_COMPILE"
+            name = "Notification Compile"
+            pomLocation = notificationPomp
+            goals = "clean compile"
+            runnerArgs = "-B -Pdb-codegen -Denv.POSTGRES_URL=%env.POSTGRES_URL%"
             jdkHome = javap
         }
 

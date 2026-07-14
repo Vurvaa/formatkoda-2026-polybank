@@ -17,7 +17,7 @@ object BuildBuild : BuildType({
     }
 
     steps {
-        prepareDatabaseStep()
+        prepareDatabaseStep(extraLiquibaseDirs = listOf("notification"))
 
         script {
             id = "BUILD_APP"
@@ -33,6 +33,18 @@ object BuildBuild : BuildType({
         }
 
         dockerCommand {
+            id = "DOCKER_BUILD"
+            name = "Docker Build"
+            commandType = build {
+                source = file {
+                    path = "app/Dockerfile"
+                }
+                contextDir = "app"
+                namesAndTags = "%docker.registry%/polybank-test:%build.number%"
+            }
+        }
+
+        dockerCommand {
             id = "DOCKER_BUILD_WEBAPP"
             name = "Docker Build Webapp"
             commandType = build {
@@ -44,15 +56,31 @@ object BuildBuild : BuildType({
             }
         }
 
+        script {
+            id = "BUILD_NOTIFICATION"
+            name = "Build notification application"
+            workingDir = "notification"
+
+            scriptContent = """
+                #!/bin/sh
+                set -e
+
+                ./mvnw clean package -DskipTests -B -Pdb-codegen \
+                    -Denv.POSTGRES_URL=%env.POSTGRES_URL% \
+                    -Denv.POSTGRES_USER=%env.POSTGRES_USER% \
+                    -Denv.POSTGRES_PASSWORD=%env.POSTGRES_PASSWORD%
+            """.trimIndent()
+        }
+
         dockerCommand {
-            id = "DOCKER_BUILD"
-            name = "Docker Build"
+            id = "DOCKER_BUILD_NOTIFICATION"
+            name = "Docker Build Notification"
             commandType = build {
                 source = file {
-                    path = "app/Dockerfile"
+                    path = "notification/Dockerfile"
                 }
-                contextDir = "app"
-                namesAndTags = "%docker.registry%/polybank-test:%build.number%"
+                contextDir = "notification"
+                namesAndTags = "%docker.registry%/polybank-notification-test:%build.number%"
             }
         }
 
@@ -89,6 +117,14 @@ object BuildBuild : BuildType({
             name = "Docker Push Traffic Generator"
             commandType = push {
                 namesAndTags = "%docker.registry%/polybank-traffic-generator-test:%build.number%"
+            }
+        }
+
+        dockerCommand {
+            id = "DOCKER_PUSH_NOTIFICATION"
+            name = "Docker Push Notification"
+            commandType = push {
+                namesAndTags = "%docker.registry%/polybank-notification-test:%build.number%"
             }
         }
 

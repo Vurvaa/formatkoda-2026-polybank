@@ -74,6 +74,30 @@ cnpg:
       cpu: "500m"
       memory: "512Mi"
 
+notification:
+  appName: polybank-notification
+  image:
+    repository: 192.168.130.81:5000/polybank-notification
+    tag: latest
+  replicas: 1
+  appServicePort: 8080
+  service:
+    type: NodePort
+    nodePort: 30092
+  resources:
+    requests:
+      memory: "192Mi"
+      cpu: "75m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  startupProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  kafka:
+    bootstrapServers: "kafka:29092"
+
 trafficGenerator:
   enabled: true
   appName: polybank-traffic-generator

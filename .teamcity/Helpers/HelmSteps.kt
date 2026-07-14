@@ -10,6 +10,8 @@ data class HelmDeployParams(
     val imageTagParam: String,
     val webappImageRepoParam: String,
     val webappImageTagParam: String,
+    val notificationImageRepoParam: String,
+    val notificationImageTagParam: String,
     val trafficGenImageRepoParam: String,
     val trafficGenImageTagParam: String,
     val pgUserParam: String,
@@ -69,6 +71,8 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string image.tag=${p.imageTagParam} \
                 --set-string webapp.image.repository=${p.webappImageRepoParam} \
                 --set-string webapp.image.tag=${p.webappImageTagParam} \
+                --set-string notification.image.repository=${p.notificationImageRepoParam} \
+                --set-string notification.image.tag=${p.notificationImageTagParam} \
                 --set-string trafficGenerator.image.repository=${p.trafficGenImageRepoParam} \
                 --set-string trafficGenerator.image.tag=${p.trafficGenImageTagParam} \
                 --set-string postgresAuth.username="${'$'}(printenv ${p.pgUserParam})" \
