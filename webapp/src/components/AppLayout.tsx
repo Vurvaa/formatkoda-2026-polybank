@@ -42,6 +42,7 @@ export function AppLayout() {
             <Button type="primary">Счета</Button>
           </Link>
           {isManager && <Link to="/users">Пользователи</Link>}
+          {isManager && <Link to="/statistics">Статистика</Link>}
         </Space>
 
         <Dropdown menu={{ items: profileMenuItems }} trigger={['click', 'hover']} placement="bottomRight">
