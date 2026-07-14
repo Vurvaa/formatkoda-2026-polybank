@@ -65,10 +65,7 @@ object BuildBuild : BuildType({
                 #!/bin/sh
                 set -e
 
-                ./mvnw clean package -DskipTests -B -Pdb-codegen \
-                    -Denv.POSTGRES_URL=%env.POSTGRES_URL% \
-                    -Denv.POSTGRES_USER=%env.POSTGRES_USER% \
-                    -Denv.POSTGRES_PASSWORD=%env.POSTGRES_PASSWORD%
+                ./mvnw clean package -DskipTests -B -Pdb-codegen
             """.trimIndent()
         }
 

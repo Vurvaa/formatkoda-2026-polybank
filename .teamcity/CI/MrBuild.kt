@@ -30,7 +30,7 @@ object MrBuild : BuildType({
             name = "Compile"
             pomLocation = pomp
             goals = "clean compile"
-            runnerArgs = "-B -Pdb-codegen -Denv.POSTGRES_URL=%env.POSTGRES_URL%"
+            runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
         }
 
@@ -74,7 +74,7 @@ object MrBuild : BuildType({
             name = "Notification Compile"
             pomLocation = notificationPomp
             goals = "clean compile"
-            runnerArgs = "-B -Pdb-codegen -Denv.POSTGRES_URL=%env.POSTGRES_URL%"
+            runnerArgs = "-B -Pdb-codegen"
             jdkHome = javap
         }
 
