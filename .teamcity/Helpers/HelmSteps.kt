@@ -17,9 +17,9 @@ data class HelmDeployParams(
     val pgUserParam: String,
     val pgPasswordParam: String,
     val pgDatabaseParam: String,
-    val kafkaBootstrapServers: String = "192.168.130.82:9092",
-    val mailHost: String = "192.168.130.81",
-    val mailPort: String = "1025",
+    val kafkaBootstrapServers: String = "%kafka.bootstrap.servers%",
+    val mailHost: String = "%mail.host%",
+    val mailPort: String = "%mail.port%",
     val extraSetArgs: String = "",
 )
 

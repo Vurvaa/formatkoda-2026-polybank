@@ -50,6 +50,10 @@ project {
         param("sonar.host.url", "http://192.168.130.84:9000")
         password("env.SONAR_TOKEN", "credentialsJSON:17fe68f4-ab0c-4290-b334-0b78b080d20b")
 
+        param("kafka.bootstrap.servers", "192.168.130.82:9092")
+        param("mail.host", "192.168.130.81")
+        param("mail.port", "1025")
+
         appEnvVars.forEach { v ->
             if (v.secret) password("env.${v.name}", v.value) else param("env.${v.name}", v.value)
         }

@@ -11,16 +11,29 @@ service:
   nodePort: 30090
 resources:
   requests:
-    memory: "192Mi"
-    cpu: "75m"
+    memory: "384Mi"
+    cpu: "300m"
   limits:
     memory: "768Mi"
     cpu: "750m"
 
 startupProbe:
-  initialDelaySeconds: 10
-  periodSeconds: 5
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 5
   failureThreshold: 30
+
+readinessProbe:
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 5
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
 
 appVars:
   APP_JWT_EXPIRATION_MINUTES:
@@ -105,15 +118,26 @@ notification:
     nodePort: 30092
   resources:
     requests:
-      memory: "192Mi"
-      cpu: "75m"
+      memory: "256Mi"
+      cpu: "200m"
     limits:
       memory: "512Mi"
       cpu: "500m"
   startupProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 5
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 5
     failureThreshold: 30
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
   kafka:
     bootstrapServers: "192.168.130.82:9092"
   mail:
