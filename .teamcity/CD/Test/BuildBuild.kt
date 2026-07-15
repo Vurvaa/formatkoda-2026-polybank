@@ -61,9 +61,9 @@ object BuildBuild : BuildType({
             name = "Docker Build Traffic Generator"
             commandType = build {
                 source = file {
-                    path = "trafiic-generator/Dockerfile"
+                    path = "traffic-generator/Dockerfile"
                 }
-                contextDir = "trafiic-generator"
+                contextDir = "traffic-generator"
                 namesAndTags = "%docker.registry%/polybank-traffic-generator-test:%build.number%"
             }
         }
