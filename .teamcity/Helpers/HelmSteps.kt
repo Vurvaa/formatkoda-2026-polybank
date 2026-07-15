@@ -17,6 +17,9 @@ data class HelmDeployParams(
     val pgUserParam: String,
     val pgPasswordParam: String,
     val pgDatabaseParam: String,
+    val kafkaBootstrapServers: String = "192.168.130.82:9092",
+    val mailHost: String = "192.168.130.81",
+    val mailPort: String = "1025",
     val extraSetArgs: String = "",
 )
 
@@ -85,6 +88,9 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string global.postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string global.postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string postgresAuth.database="${'$'}(printenv ${p.pgDatabaseParam})" \
+                --set-string notification.kafka.bootstrapServers="${p.kafkaBootstrapServers}" \
+                --set-string notification.mail.host="${p.mailHost}" \
+                --set-string notification.mail.port="${p.mailPort}" \
                 ${'$'}HELM_APP_VAR_ARGS \
                 ${p.extraSetArgs} \
                 --debug

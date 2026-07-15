@@ -77,6 +77,7 @@ trafficGenerator:
     limits:
       memory: "256Mi"
       cpu: "200m"
+
 notification:
   appName: polybank-notification
   replicas: 1
@@ -99,3 +100,6 @@ notification:
     failureThreshold: 40
   kafka:
     bootstrapServers: "192.168.130.82:9092"
+  mail:
+    host: "192.168.130.81"
+    port: 1025

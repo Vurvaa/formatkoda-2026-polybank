@@ -74,6 +74,25 @@ cnpg:
       cpu: "500m"
       memory: "512Mi"
 
+trafficGenerator:
+  enabled: true
+  appName: polybank-traffic-generator
+  image:
+    repository: 192.168.130.81:5000/polybank-traffic-generator
+    tag: latest
+  replicas: 1
+  containerPort: 6060
+  service:
+    type: NodePort
+    nodePort: 30093
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
 notification:
   appName: polybank-notification
   image:
@@ -97,23 +116,6 @@ notification:
     failureThreshold: 30
   kafka:
     bootstrapServers: "192.168.130.82:9092"
-    bootstrapServers: "kafka:29092"
-
-trafficGenerator:
-  enabled: true
-  appName: polybank-traffic-generator
-  image:
-    repository: 192.168.130.81:5000/polybank-traffic-generator
-    tag: latest
-  replicas: 1
-  containerPort: 6060
-  service:
-    type: NodePort
-    nodePort: 30093
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "50m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
+  mail:
+    host: "192.168.130.81"
+    port: 1025

@@ -8,4 +8,6 @@ data:
   SERVER_PORT: {{ .Values.notification.appServicePort | quote }}
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ .Values.notification.kafka.bootstrapServers | quote }}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ required "Set .Values.notification.kafka.bootstrapServers" .Values.notification.kafka.bootstrapServers | quote }}
+  SPRING_MAIL_HOST: {{ .Values.notification.mail.host | default "192.168.130.81" | quote }}
+  SPRING_MAIL_PORT: {{ .Values.notification.mail.port | default 1025 | quote }}
