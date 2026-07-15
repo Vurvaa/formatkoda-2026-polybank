@@ -62,6 +62,18 @@ object ProdBuild : BuildType({
         }
 
         dockerCommand {
+            id = "DOCKER_BUILD_TRAFFIC_GENERATOR"
+            name = "Docker Build Traffic Generator"
+            commandType = build {
+                source = file {
+                    path = "traffic-generator/Dockerfile"
+                }
+                contextDir = "traffic-generator"
+                namesAndTags = "%docker.registry%/polybank-traffic-generator:%env.RELEASE_VERSION%"
+            }
+        }
+
+        dockerCommand {
             id = "DOCKER_PUSH"
             name = "Docker Push"
             commandType = push {
@@ -74,6 +86,14 @@ object ProdBuild : BuildType({
             name = "Docker Push Webapp"
             commandType = push {
                 namesAndTags = "%docker.registry%/polybank-webapp:%env.RELEASE_VERSION%"
+            }
+        }
+
+        dockerCommand {
+            id = "DOCKER_PUSH_TRAFFIC_GENERATOR"
+            name = "Docker Push Traffic Generator"
+            commandType = push {
+                namesAndTags = "%docker.registry%/polybank-traffic-generator:%env.RELEASE_VERSION%"
             }
         }
 
