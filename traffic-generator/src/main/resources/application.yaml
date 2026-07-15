@@ -1,0 +1,14 @@
+ktor:
+  deployment:
+    port: 6060
+  application:
+    modules:
+      - ru.formatkoda.trafficgenerator.MainKt.module
+
+database:
+  url: $POSTGRES_URL
+  user: $POSTGRES_USER
+  password: $POSTGRES_PASSWORD
+
+polybank:
+  url: "http://192.168.130.82:30190"
