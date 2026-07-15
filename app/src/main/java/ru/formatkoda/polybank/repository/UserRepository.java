@@ -37,6 +37,14 @@ public class UserRepository {
                 .fetchOptional(this::toEntity);
     }
 
+    public boolean existsUserByEmail(UserEmail email) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(USERS)
+                        .where(USERS.EMAIL.eq(email.value()))
+        );
+    }
+
     public Optional<UserEntity> changeUserEmail(UserLogin userLogin, UserEmail email) {
         return dsl.update(USERS)
                 .set(USERS.EMAIL, email.value())
@@ -123,6 +131,7 @@ public class UserRepository {
     private UsersRecord toRecord(UserEntity user) {
         return dsl.newRecord(USERS)
                 .setLogin(user.login().value())
+                .setEmail(user.email().value())
                 .setName(user.name())
                 .setLastName(user.lastName())
                 .setPasswordHash(user.passwordHash())

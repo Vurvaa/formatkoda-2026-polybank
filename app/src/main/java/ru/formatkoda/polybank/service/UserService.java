@@ -35,8 +35,12 @@ public class UserService {
     @Transactional
     public UserLogin createUser(@NonNull UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findUserByLogin(user.login());
-        if (userOptional.isPresent())
+
+        boolean emailExists = userRepository.existsUserByEmail(user.email());
+
+        if (userOptional.isPresent() || emailExists)
             throw new BusinessLogicException("user already exists");
+
 
         long roleId = findRoleIdOrThrow(CLIENT_ROLE);
 

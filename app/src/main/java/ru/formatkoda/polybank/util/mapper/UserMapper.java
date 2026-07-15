@@ -33,7 +33,7 @@ public class UserMapper {
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
-                new UserEmail(null),
+                new UserEmail(user.email()),
                 user.name(),
                 user.lastName(),
                 passwordHash,
