@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolyBank® Traffic Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+    <h1>PolyBank® Traffic Generator</h1>
+
+    <section>
+        <h2>Управление</h2>
+
+        <button onclick="startGenerator()">Start</button>
+        <button onclick="stopGenerator()">Stop</button>
+        <button onclick="getStatus()">Status</button>
+        <button onclick="getMetrics()">Metrics</button>
+    </section>
+
+    <section>
+        <h2>Конфигурация</h2>
+
+        <button onclick="setConfig('growth')">Growth</button>
+        <button onclick="setConfig('default')">Default</button>
+        <button onclick="setConfig('crisis')">Crisis</button>
+    </section>
+
+    <section>
+        <h2>Ответ</h2>
+        <pre id="response">Здесь появится ответ сервера</pre>
+    </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

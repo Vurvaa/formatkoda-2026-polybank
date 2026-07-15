@@ -28,6 +28,8 @@ object DeployBuild : BuildType({
                 imageTagParam = "%dep.${BuildBuild.id}.build.number%",
                 webappImageRepoParam = "%docker.registry%/polybank-webapp-test",
                 webappImageTagParam = "%dep.${BuildBuild.id}.build.number%",
+                trafficGenImageRepoParam = "%docker.registry%/polybank-traffic-generator-test",
+                trafficGenImageTagParam = "%dep.${BuildBuild.id}.build.number%",
                 pgUserParam = "POSTGRES_USER_TEST",
                 pgPasswordParam = "POSTGRES_PASSWORD_TEST",
                 pgDatabaseParam = "POSTGRES_DB_TEST",
