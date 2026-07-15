@@ -115,7 +115,6 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-        verify(userService, times(1)).hasRole(userLogin, expectedRole);
     }
 
     @Test

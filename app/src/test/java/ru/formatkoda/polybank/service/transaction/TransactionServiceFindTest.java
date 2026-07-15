@@ -1,6 +1,5 @@
 package ru.formatkoda.polybank.service.transaction;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,6 +13,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
+import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -24,11 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static ru.formatkoda.polybank.testutil.TestData.ACCOUNT_NUMBER;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
@@ -40,6 +36,8 @@ class TransactionServiceFindTest {
 	private TransactionRepository transactionRepository;
 	@Mock
 	private AccountService accountService;
+	@Mock
+	private UserService userService;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -61,6 +59,7 @@ class TransactionServiceFindTest {
 		when(accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN)).thenReturn(account);
 		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(transactions);
 		when(transactionRepository.countAll(account.id())).thenReturn(size);
+		when(userService.hasRole(USER_LOGIN, "SENIOR_MANAGER")).thenReturn(false);
 
 		PageResult<TransactionWithAccountNumbersView> actualResult = transactionService.findByAccountNumber(
 				ACCOUNT_NUMBER,
