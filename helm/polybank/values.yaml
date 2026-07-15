@@ -63,7 +63,7 @@ webapp:
 
 cnpg:
   enabled: true
-  instances: 3
+  instances: 2
   storageSize: 10Gi
   storageClass: "local-path"
   resources:
