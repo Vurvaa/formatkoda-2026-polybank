@@ -43,6 +43,12 @@ public class AccountService {
 		return accountRepository.findAllByUserId(user.id());
 	}
 
+	public AccountEntity findAccountByAccountNumber(
+			@NonNull AccountNumber accountNumber
+	) {
+		return findAccountOrThrow(accountNumber);
+	}
+
 	public AccountEntity findOwnedAccount(@NonNull AccountNumber accountNumber, @NonNull UserLogin userLogin) {
 		UserEntity user = userService.findUserByLogin(userLogin);
 		AccountEntity account = findAccountOrThrow(accountNumber);

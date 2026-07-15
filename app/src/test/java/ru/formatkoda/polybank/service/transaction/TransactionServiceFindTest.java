@@ -1,5 +1,6 @@
 package ru.formatkoda.polybank.service.transaction;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,7 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static ru.formatkoda.polybank.testutil.TestData.ACCOUNT_NUMBER;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
@@ -68,6 +73,68 @@ class TransactionServiceFindTest {
 		verify(accountService).findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN);
 		verify(transactionRepository).findViewsByAccountId(account.id(), pageRequest);
 		verify(transactionRepository).countAll(account.id());
+	}
+
+
+	@Test
+	void findByAccountNumberShouldReturnEmptyPageWhenTransactionsNotFound() {
+		AccountEntity account = account();
+		PageRequest pageRequest = new PageRequest(0, 20);
+		PageResult<TransactionWithAccountNumbersView> expected = new PageResult<>(
+				List.of(),
+				pageRequest.page(),
+				pageRequest.size(),
+				0L
+		);
+
+		when(accountService.findAccountByAccountNumber(ACCOUNT_NUMBER))
+				.thenReturn(account);
+		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest))
+				.thenReturn(List.of());
+		when(transactionRepository.countAll(account.id()))
+				.thenReturn(0L);
+
+		PageResult<TransactionWithAccountNumbersView> result =
+				transactionService.findByAccountNumber(
+						ACCOUNT_NUMBER,
+						pageRequest
+				);
+
+		assertEquals(expected, result);
+
+
+		verify(accountService)
+				.findAccountByAccountNumber(ACCOUNT_NUMBER);
+		verify(transactionRepository)
+				.findViewsByAccountId(account.id(), pageRequest);
+		verify(transactionRepository)
+				.countAll(account.id());
+
+		verifyNoMoreInteractions(accountService, transactionRepository);
+	}
+
+	@Test
+	void findByAccountNumberShouldPropagateExceptionWhenAccountNotFound() {
+		PageRequest pageRequest = new PageRequest(0, 10);
+		RuntimeException exception = new RuntimeException("Account not found");
+
+		when(accountService.findAccountByAccountNumber(ACCOUNT_NUMBER))
+				.thenThrow(exception);
+
+		RuntimeException actualException = assertThrows(
+				RuntimeException.class,
+				() -> transactionService.findByAccountNumber(
+						ACCOUNT_NUMBER,
+						pageRequest
+				)
+		);
+
+		assertSame(exception, actualException);
+
+		verify(accountService)
+				.findAccountByAccountNumber(ACCOUNT_NUMBER);
+
+		verifyNoMoreInteractions(accountService);
 	}
 
 	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(Long size) {

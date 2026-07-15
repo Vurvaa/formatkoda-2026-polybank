@@ -51,6 +51,24 @@ public class TransactionService {
 		);
 	}
 
+    public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
+            @NonNull AccountNumber accountNumber,
+            @NonNull PageRequest pageRequest
+    ) {
+        AccountEntity account = accountService.findAccountByAccountNumber(accountNumber);
+        List<TransactionWithAccountNumbersView> transaction  = transactionRepository
+                .findViewsByAccountId(account.id(), pageRequest);
+
+        Long total = transactionRepository.countAll(account.id());
+
+        return new PageResult<>(
+                transaction,
+                pageRequest.page(),
+                pageRequest.size(),
+                total
+        );
+    }
+
 	@Transactional
 	public TransactionWithAccountNumbersView topUp(
 			@NonNull AccountNumber accountNumber,

@@ -64,6 +64,33 @@ public class TransactionController {
 	}
 
 	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("hasRole('SENIOR_MANAGER')")
+	@GetMapping("/{accountNumber}/info")
+	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumberForManger(
+			@PathVariable String accountNumber,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size
+	) {
+		AccountNumber number = new AccountNumber(accountNumber);
+		PageRequest pageRequest = new PageRequest(page, size);
+
+		PageResult<TransactionWithAccountNumbersView> result = transactionService
+				.findByAccountNumber(number, pageRequest);
+
+		return ResponseEntity.ok(
+				new PageResponse<>(
+						result.items()
+								.stream()
+								.map(TransactionMapper::toResponse)
+								.toList(),
+						result.page(),
+						result.size(),
+						result.total()
+				)
+		);
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/top-up")
 	public ResponseEntity<TransactionResponseDto> topUpAccount(
