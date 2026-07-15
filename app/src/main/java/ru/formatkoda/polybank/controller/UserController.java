@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
+import ru.formatkoda.polybank.domain.user.UserEmail;
+import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.dto.user.UserEmailDto;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
@@ -148,6 +151,19 @@ public class UserController {
 		);
 
 		return ResponseEntity.ok(userMapper.toResponse(user));
+	}
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/mail")
+	public ResponseEntity<UserEmailDto> addUserEmail(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@RequestBody @Valid UserEmailDto userEmail
+	) {
+		UserEmail email = new UserEmail(userEmail.value());
+		UserEntity user = userService.addUserEmail(userLogin, email);
+
+		return ResponseEntity.ok(new UserEmailDto(user.email().value()));
 	}
 
 	@SecurityRequirement(name = "bearerAuth")

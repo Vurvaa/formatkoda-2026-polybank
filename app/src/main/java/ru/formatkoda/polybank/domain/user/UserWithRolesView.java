@@ -8,6 +8,7 @@ import java.util.List;
 public record UserWithRolesView(
         Long id,
         @NonNull UserLogin login,
+        @NonNull UserEmail email,
         @NonNull String name,
         @NonNull String lastName,
         @NonNull List<String> roles,

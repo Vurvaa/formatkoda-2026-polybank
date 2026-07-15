@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -47,6 +48,7 @@ public class UserService {
         UserEntity registered = new UserEntity(
                 userId,
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 user.passwordHash(),
@@ -65,6 +67,8 @@ public class UserService {
 
         return roles.contains(roleName);
     }
+
+
 
     public UserEntity findUserByLogin(@NonNull UserLogin login) {
         return userRepository.findUserByLogin(login)
@@ -160,6 +164,20 @@ public class UserService {
         List<String> updatedRoles = findAllUserRoles(updatedUser);
 
         return userMapper.toUserWithRolesView(updatedUser, updatedRoles);
+    }
+
+    @Transactional
+    public UserEntity addUserEmail(
+            @NonNull UserLogin userLogin,
+            @NonNull UserEmail userEmail) {
+        Optional<UserEntity> userOptional = userRepository.findUserByEmail(userEmail);
+        if (userOptional.isEmpty())
+            throw new BusinessLogicException("this email already exist");
+
+        userOptional = userRepository.changeUserEmail(userLogin, userEmail);
+        return userOptional.orElseThrow(
+                () -> new BusinessLogicException("email not changed")
+        );
     }
 
     @Transactional

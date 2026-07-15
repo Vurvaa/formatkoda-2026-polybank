@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -32,6 +33,7 @@ public class UserMapper {
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
+                new UserEmail(null),
                 user.name(),
                 user.lastName(),
                 passwordHash,
@@ -44,6 +46,7 @@ public class UserMapper {
         return  new UserEntity(
                 null,
                 new UserLogin(user.login()),
+                new UserEmail(null),
                 "",
                 "",
                 user.password(),
@@ -61,6 +64,7 @@ public class UserMapper {
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
+                new UserEmail(null),
                 user.name(),
                 user.lastName(),
                 passwordHash,
@@ -72,6 +76,7 @@ public class UserMapper {
     public UserDetailsResponseDto toResponse(UserWithRolesView user) {
         return new UserDetailsResponseDto(
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 user.roles(),
@@ -96,6 +101,7 @@ public class UserMapper {
         return new UserWithRolesView(
                 user.id(),
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 roles,
