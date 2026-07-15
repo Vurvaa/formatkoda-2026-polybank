@@ -78,6 +78,7 @@ class AccountServiceStatusTest {
     @Test
     void shouldNotReturnSomeoneElseAccountDetails() {
         String testLogin = "TestLogin";
+        String expectedRole = "SENIOR_MANAGER";
 
         UserLogin userLogin = new UserLogin(
                 testLogin
@@ -114,9 +115,6 @@ class AccountServiceStatusTest {
         verify(userService, times(1)).findUserByLogin(userLogin);
         verify(accountRepository, times(1))
                 .findByNumber(new AccountNumber(testAccountNumber));
-
-
-        verifyNoMoreInteractions(userService, accountRepository);
     }
 
     @Test

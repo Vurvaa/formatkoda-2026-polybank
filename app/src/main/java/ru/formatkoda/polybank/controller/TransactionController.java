@@ -32,14 +32,13 @@ import java.math.BigDecimal;
 @RequestMapping("/transaction")
 @RequiredArgsConstructor
 public class TransactionController {
-
 	private final TransactionService transactionService;
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}")
 	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumber(
-			@AuthenticationPrincipal UserLogin login,
+			@AuthenticationPrincipal UserLogin userLogin,
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size
@@ -48,7 +47,7 @@ public class TransactionController {
 		PageRequest pageRequest = new PageRequest(page, size);
 
 		PageResult<TransactionWithAccountNumbersView> result = transactionService
-				.findByAccountNumber(number, login, pageRequest);
+				.findByAccountNumber(number, userLogin, pageRequest);
 
 		return ResponseEntity.ok(
 				new PageResponse<>(

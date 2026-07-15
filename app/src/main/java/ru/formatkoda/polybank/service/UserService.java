@@ -59,6 +59,13 @@ public class UserService {
         return user.login();
     }
 
+    public boolean hasRole(UserLogin login, String roleName) {
+        UserEntity user = findUserByLogin(login);
+        List<String> roles = findAllUserRoles(user);
+
+        return roles.contains(roleName);
+    }
+
     public UserEntity findUserByLogin(@NonNull UserLogin login) {
         return userRepository.findUserByLogin(login)
                 .orElseThrow(() -> new ResourceNotFoundException("not found user with this login"));

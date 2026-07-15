@@ -71,7 +71,7 @@ public class AccountRepository {
 
 	public Optional<AccountEntity> findAccountById(long id) {
 		return dsl
-				.select(ACCOUNTS)
+				.selectFrom(ACCOUNTS)
 				.where(ACCOUNTS.ID.eq(id))
 				.fetchOptional(this::toEntity);
 	}
