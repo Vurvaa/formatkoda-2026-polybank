@@ -27,6 +27,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TransactionService {
+	private static final String SENIOR_MANAGER = "SENIOR_MANAGER";
+
 	private final TransactionRepository transactionRepository;
 	private final AccountService accountService;
 	private final UserService userService;
@@ -37,7 +39,11 @@ public class TransactionService {
 			@NonNull UserLogin userLogin,
 			@NonNull PageRequest pageRequest
 	) {
-		AccountEntity account = accountService.findOwnedAccount(accountNumber, userLogin);
+		AccountEntity account;
+		if (!userService.hasRole(userLogin, SENIOR_MANAGER))
+			account = accountService.findOwnedAccount(accountNumber, userLogin);
+		else
+			 account = accountService.findAccountByAccountNumber(accountNumber);
 
 		List<TransactionWithAccountNumbersView> transactions = transactionRepository
 				.findViewsByAccountId(account.id(), pageRequest);
@@ -50,24 +56,6 @@ public class TransactionService {
 				total
 		);
 	}
-
-    public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
-            @NonNull AccountNumber accountNumber,
-            @NonNull PageRequest pageRequest
-    ) {
-        AccountEntity account = accountService.findAccountByAccountNumber(accountNumber);
-        List<TransactionWithAccountNumbersView> transaction  = transactionRepository
-                .findViewsByAccountId(account.id(), pageRequest);
-
-        Long total = transactionRepository.countAll(account.id());
-
-        return new PageResult<>(
-                transaction,
-                pageRequest.page(),
-                pageRequest.size(),
-                total
-        );
-    }
 
 	@Transactional
 	public TransactionWithAccountNumbersView topUp(

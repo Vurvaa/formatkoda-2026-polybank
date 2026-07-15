@@ -75,68 +75,6 @@ class TransactionServiceFindTest {
 		verify(transactionRepository).countAll(account.id());
 	}
 
-
-	@Test
-	void findByAccountNumberShouldReturnEmptyPageWhenTransactionsNotFound() {
-		AccountEntity account = account();
-		PageRequest pageRequest = new PageRequest(0, 20);
-		PageResult<TransactionWithAccountNumbersView> expected = new PageResult<>(
-				List.of(),
-				pageRequest.page(),
-				pageRequest.size(),
-				0L
-		);
-
-		when(accountService.findAccountByAccountNumber(ACCOUNT_NUMBER))
-				.thenReturn(account);
-		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest))
-				.thenReturn(List.of());
-		when(transactionRepository.countAll(account.id()))
-				.thenReturn(0L);
-
-		PageResult<TransactionWithAccountNumbersView> result =
-				transactionService.findByAccountNumber(
-						ACCOUNT_NUMBER,
-						pageRequest
-				);
-
-		assertEquals(expected, result);
-
-
-		verify(accountService)
-				.findAccountByAccountNumber(ACCOUNT_NUMBER);
-		verify(transactionRepository)
-				.findViewsByAccountId(account.id(), pageRequest);
-		verify(transactionRepository)
-				.countAll(account.id());
-
-		verifyNoMoreInteractions(accountService, transactionRepository);
-	}
-
-	@Test
-	void findByAccountNumberShouldPropagateExceptionWhenAccountNotFound() {
-		PageRequest pageRequest = new PageRequest(0, 10);
-		RuntimeException exception = new RuntimeException("Account not found");
-
-		when(accountService.findAccountByAccountNumber(ACCOUNT_NUMBER))
-				.thenThrow(exception);
-
-		RuntimeException actualException = assertThrows(
-				RuntimeException.class,
-				() -> transactionService.findByAccountNumber(
-						ACCOUNT_NUMBER,
-						pageRequest
-				)
-		);
-
-		assertSame(exception, actualException);
-
-		verify(accountService)
-				.findAccountByAccountNumber(ACCOUNT_NUMBER);
-
-		verifyNoMoreInteractions(accountService);
-	}
-
 	private List<TransactionWithAccountNumbersView> buildTransactionWithAccountNumbersViews(Long size) {
 		List<TransactionWithAccountNumbersView> transactions = new ArrayList<>();
 
