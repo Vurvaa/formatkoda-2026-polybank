@@ -84,7 +84,7 @@ trafficGenerator:
   containerPort: 6060
   service:
     type: NodePort
-    nodePort: 30092
+    nodePort: 30093
   resources:
     requests:
       memory: "128Mi"
