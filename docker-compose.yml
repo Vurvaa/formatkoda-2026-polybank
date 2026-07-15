@@ -203,6 +203,8 @@ services:
       STATUS_STORAGE_TOPIC: debezium-connect-status
     ports:
       - "8083:8083"
+    networks:
+      - polybank-net
 
 volumes:
   postgres-data:

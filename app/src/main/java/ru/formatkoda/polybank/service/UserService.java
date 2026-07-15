@@ -63,7 +63,7 @@ public class UserService {
         );
 
         userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
-        userNotificationEventPublisher.publishUserNotificationEvent(registered, "EMAIL", "USER_REGISTERED");
+        userNotificationEventPublisher.publishUserNotificationEvent(registered, List.of("EMAIL"), "USER_REGISTERED");
 
         return user.login();
     }

@@ -1,3 +1,35 @@
+FROM maven:3.9-eclipse-temurin-25-alpine AS builder
+WORKDIR /build
+
+RUN apk add --no-cache postgresql16 postgresql16-client su-exec \
+    && mkdir -p /var/lib/postgresql/data /run/postgresql \
+    && chown -R postgres:postgres /var/lib/postgresql /run/postgresql
+
+ARG POSTGRES_DB=
+ARG POSTGRES_USER=
+ARG POSTGRES_PASSWORD=
+
+ENV PGDATA=/var/lib/postgresql/data
+
+COPY pom.xml .
+COPY src ./src
+
+RUN --mount=type=cache,target=/root/.m2 \
+    su-exec postgres initdb -D "$PGDATA" -U "$POSTGRES_USER" -A trust >/dev/null \
+    && su-exec postgres pg_ctl -D "$PGDATA" -o "-c listen_addresses=127.0.0.1" -w start \
+    && psql -h 127.0.0.1 -U "$POSTGRES_USER" -d postgres -c "CREATE DATABASE \"$POSTGRES_DB\";" \
+    && mvn process-resources liquibase:update -B \
+        -Dliquibase.url="jdbc:postgresql://127.0.0.1:5432/$POSTGRES_DB" \
+        -Dliquibase.username="$POSTGRES_USER" \
+        -Dliquibase.password="$POSTGRES_PASSWORD" \
+        -Dliquibase.changeLogFile=db/changelog/db.changelog-master.xml \
+        -Dliquibase.searchPath=src/main/resources \
+    && mvn package -DskipTests -B -Pdb-codegen \
+        -Denv.POSTGRES_URL="jdbc:postgresql://127.0.0.1:5432/$POSTGRES_DB" \
+        -Denv.POSTGRES_USER="$POSTGRES_USER" \
+        -Denv.POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+    && su-exec postgres pg_ctl -D "$PGDATA" -m fast stop
+
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
@@ -5,7 +37,7 @@ RUN apk add --no-cache curl \
     && addgroup -S spring \
     && adduser -S spring -G spring
 
-COPY target/notification.jar notification.jar
+COPY --from=builder /build/target/notification.jar notification.jar
 
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 

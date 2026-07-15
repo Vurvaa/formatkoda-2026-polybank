@@ -7,6 +7,8 @@ import ru.formatkoda.polybank.messaging.event.UserNotificationEvent;
 import ru.formatkoda.polybank.messaging.outbox.infrastructure.OutboxWriter;
 import ru.formatkoda.polybank.messaging.publisher.UserNotificationEventPublisher;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class UserNotificationOutboxPublisher implements UserNotificationEventPublisher {
@@ -18,12 +20,12 @@ public class UserNotificationOutboxPublisher implements UserNotificationEventPub
     @Override
     public void publishUserNotificationEvent(
             UserEntity user,
-            String notificationTypeName,
+            List<String> notificationTypeNames,
             String notificationTemplateName
     ) {
         UserNotificationEvent payload = new UserNotificationEvent(
                 user.id(),
-                notificationTypeName,
+                notificationTypeNames,
                 notificationTemplateName,
                 user
         );

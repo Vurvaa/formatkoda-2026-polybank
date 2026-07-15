@@ -13,6 +13,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.UserNotificationEventPublisher;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
@@ -45,6 +46,9 @@ class UserServiceTest {
 
     @Mock
     UserEventPublisher userEventPublisher;
+
+    @Mock
+    UserNotificationEventPublisher userNotificationEventPublisher;
 
     @InjectMocks
     UserService userService;
@@ -175,6 +179,8 @@ class UserServiceTest {
         verify(userRepository).createUserAndReturnId(user());
         verify(userRepository).bindUserWithRole(anyLong(), anyLong());
         verify(userEventPublisher).publishUserRegistered(user(), "CLIENT");
+        verify(userNotificationEventPublisher)
+                .publishUserNotificationEvent(user(), List.of("EMAIL"), "USER_REGISTERED");
     }
 
     @Test
@@ -186,6 +192,8 @@ class UserServiceTest {
         UserLogin userLogin = userService.createUser(user());
 
         verify(userEventPublisher).publishUserRegistered(user(), "CLIENT");
+        verify(userNotificationEventPublisher)
+                .publishUserNotificationEvent(user(), List.of("EMAIL"), "USER_REGISTERED");
         verify(userRepository).createUserAndReturnId(user());
 
         assertNotNull(userLogin);

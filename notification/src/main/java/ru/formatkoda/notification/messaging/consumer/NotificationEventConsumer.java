@@ -15,7 +15,10 @@ public class NotificationEventConsumer {
 
     @KafkaListener(topics = "bank.notifications")
     public void consume(String message) {
-        NotificationEventDto notificationEventDto = objectMapper.readValue(message, NotificationEventDto.class);
+        NotificationEventDto notificationEventDto = objectMapper.readValue(
+                message,
+                NotificationEventDto.class
+        );
 
         notificationService.processNotification(notificationEventDto);
     }

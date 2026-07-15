@@ -30,6 +30,50 @@ public class EventDeliveryRepository {
                 .fetchOptional(this::toEntity);
     }
 
+    public Optional<DeliveryEntity> updateStatus(
+            long id,
+            DeliveryEntity.Status status
+    ) {
+        return dsl
+                .update(DELIVERY)
+                .set(DELIVERY.STATUS, status.name())
+                .where(DELIVERY.ID.eq(id))
+                .returning()
+                .fetchOptional(this::toEntity);
+    }
+
+    public Optional<DeliveryEntity> updateStatusRetryAtAndRemainingAttempts(
+            long id,
+            DeliveryEntity.Status status,
+            OffsetDateTime retryAt,
+            short remainingAttempts
+    ) {
+        return dsl
+                .update(DELIVERY)
+                .set(DELIVERY.STATUS, status.name())
+                .set(DELIVERY.RETRY_AT, retryAt)
+                .set(DELIVERY.REMAINING_ATTEMPTS, remainingAttempts)
+                .where(DELIVERY.ID.eq(id))
+                .returning()
+                .fetchOptional(this::toEntity);
+
+    }
+
+    public Optional<DeliveryEntity> updateStatusAndRemainingAttempts(
+            long id,
+            DeliveryEntity.Status status,
+            short remainingAttempts
+    ) {
+        return dsl
+                .update(DELIVERY)
+                .set(DELIVERY.STATUS, status.name())
+                .set(DELIVERY.REMAINING_ATTEMPTS, remainingAttempts)
+                .where(DELIVERY.ID.eq(id))
+                .returning()
+                .fetchOptional(this::toEntity);
+
+    }
+
     public List<DeliveryEntity> save(List<DeliveryEntity> deliveries) {
         return dsl
                 .insertInto(DELIVERY,
@@ -98,7 +142,7 @@ public class EventDeliveryRepository {
             long limit
     ) {
         return dsl
-                .select(DELIVERY)
+                .selectFrom(DELIVERY)
                 .where(DELIVERY.STATUS
                         .eq(status.name())
                         .and(

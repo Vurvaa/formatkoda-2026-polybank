@@ -3,23 +3,21 @@ package ru.formatkoda.notification.service;
 import lombok.RequiredArgsConstructor;
 import org.jooq.JSONB;
 import org.springframework.stereotype.Service;
-import ru.formatkoda.notification.domain.DeliveryEntity;
+import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.notification.domain.EventEntity;
 import ru.formatkoda.notification.messaging.dto.NotificationEventDto;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.time.Duration;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NotificationService {
     private final ObjectMapper objectMapper;
 
     private final EventService eventService;
     private final DeliveryPlanningService deliveryPlanningService;
 
+    @Transactional
     public void processNotification(NotificationEventDto notificationEventDto) {
         EventEntity event = new EventEntity(
                 null,
@@ -29,11 +27,15 @@ public class NotificationService {
         );
         EventEntity createdEvent = eventService.createEventOrThrow(event);
 
-        deliveryPlanningService.initializeDeliveryByEventOrThrow(createdEvent, notificationEventDto.notificationTypeName());
-
-        /*
-        String message = NotificationTemplate.renderTemplate(notificationEventDto.notificationTemplateName(), notificationEventDto.entity());
-        System.out.println(message);
-         */
+        notificationEventDto
+                .notificationTypeNames()
+                .forEach(
+                        notificationTypeName ->
+                                deliveryPlanningService
+                                        .initializeDeliveryByEventOrThrow(
+                                                createdEvent,
+                                                notificationTypeName
+                                        )
+                );
     }
 }
