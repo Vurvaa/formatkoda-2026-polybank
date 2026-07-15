@@ -70,7 +70,7 @@ public class TransactionRepository {
 
 	public Optional<TransactionEntity> findById(long id) {
 		return dsl
-				.select(TRANSACTIONS)
+				.selectFrom(TRANSACTIONS)
 				.where(TRANSACTIONS.ID.eq(id))
 				.fetchOptional(this::toEntity);
 	}
