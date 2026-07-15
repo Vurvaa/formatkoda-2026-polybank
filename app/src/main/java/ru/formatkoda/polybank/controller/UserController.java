@@ -154,7 +154,7 @@ public class UserController {
 
 	@SecurityRequirement(name = "bearerAuth")
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/mail")
+	@PutMapping("/mail")
 	public ResponseEntity<Void> addUserEmail(
 			@AuthenticationPrincipal UserLogin userLogin,
 			@RequestBody @Valid UserEmailDto userEmail
