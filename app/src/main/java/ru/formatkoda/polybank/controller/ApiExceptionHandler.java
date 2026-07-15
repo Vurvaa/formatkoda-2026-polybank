@@ -3,6 +3,8 @@ package ru.formatkoda.polybank.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -57,6 +59,30 @@ class ApiExceptionHandler {
 				"Authentication error",
 				Map.of(
 						"code", "UNAUTHORIZED"
+				)
+		);
+	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	ProblemDetail handleAccessDeniedException(AccessDeniedException ex) {
+		return buildProblem(
+				ex,
+				HttpStatus.FORBIDDEN,
+				"No access rights",
+				Map.of(
+						"code", "FORBIDDEN"
+				)
+		);
+	}
+
+	@ExceptionHandler(LockedException.class)
+	ProblemDetail handleLockedException(LockedException ex) {
+		return buildProblem(
+				ex,
+				HttpStatus.LOCKED,
+				"User has been blocked",
+				Map.of(
+						"code", "LOCKED"
 				)
 		);
 	}
