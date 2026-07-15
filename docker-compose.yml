@@ -74,11 +74,18 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     environment:
       JAVA_OPTS: ${JAVA_OPTS:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
     ports:
       - "${APP_PORT:-8081}:8080"
     healthcheck:
@@ -188,6 +195,16 @@ services:
           --topic bank.notifications \
           --partitions 1 \
           --replication-factor 1
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: polybank-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - polybank-net
 
   connect:
     container_name: polybank-connect

@@ -26,8 +26,7 @@ public class DeliveryPlanningService {
             EventEntity createdEvent,
             String notificationTypeName
     ) {
-        /*
-        JsonNode payloadEntity =  objectMapper.readTree(createdEvent.payload().data());
+        JsonNode payloadEntity =  objectMapper.readTree(createdEvent.payload().data()).get("entity");
         if (payloadEntity.get(notificationTypeName.toLowerCase()) == null) {
             DeliveryEntity delivery = new DeliveryEntity(
                     null,
@@ -35,14 +34,12 @@ public class DeliveryPlanningService {
                     DeliveryEntity.Status.FAILED,
                     createdEvent.receivedAt(),
                     (short) 0,
-                    DeliveryEntity.Type.valueOf(notificationTypeName)
+                    DeliveryEntity.Type.fromName(notificationTypeName)
             );
             eventDeliveryService.createDeliveryOrThrow(delivery);
 
             return;
         }
-
-         */
 
         DeliveryEntity delivery = new DeliveryEntity(
                 null,
@@ -50,7 +47,7 @@ public class DeliveryPlanningService {
                 DeliveryEntity.Status.PENDING,
                 createdEvent.receivedAt().plus(RETRY_TIME_DELTA),
                 TOTAL_ATTEMPTS_TO_DELIVER,
-                DeliveryEntity.Type.valueOf(notificationTypeName)
+                DeliveryEntity.Type.fromName(notificationTypeName)
         );
         eventDeliveryService.createDeliveryOrThrow(delivery);
     }

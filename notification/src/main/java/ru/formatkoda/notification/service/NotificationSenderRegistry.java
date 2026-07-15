@@ -2,6 +2,7 @@ package ru.formatkoda.notification.service;
 
 import org.springframework.stereotype.Component;
 import ru.formatkoda.notification.domain.DeliveryEntity;
+import ru.formatkoda.notification.exception.ResourceNotFoundException;
 import ru.formatkoda.notification.sender.NotificationSender;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class NotificationSenderRegistry {
     public NotificationSender getNotificationSender(DeliveryEntity.Type notificationType) {
         NotificationSender sender = notificationSenders.get(notificationType);
         if (sender == null) {
-            throw new RuntimeException("unknown notification type");
+            throw new ResourceNotFoundException("unknown notification type");
         }
 
         return sender;

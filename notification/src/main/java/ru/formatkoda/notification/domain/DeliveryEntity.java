@@ -1,6 +1,7 @@
 package ru.formatkoda.notification.domain;
 
 import lombok.NonNull;
+import ru.formatkoda.notification.exception.ResourceNotFoundException;
 
 import java.time.OffsetDateTime;
 
@@ -20,6 +21,14 @@ public record DeliveryEntity(
     }
 
     public enum Type {
-        EMAIL
+        EMAIL;
+
+        public static Type fromName(String typeName) {
+            try {
+                return Type.valueOf(typeName);
+            } catch (IllegalArgumentException _) {
+                throw new ResourceNotFoundException("type not found");
+            }
+        }
     }
 }

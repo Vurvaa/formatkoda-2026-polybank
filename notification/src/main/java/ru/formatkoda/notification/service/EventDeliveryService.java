@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.notification.domain.DeliveryEntity;
+import ru.formatkoda.notification.exception.BusinessLogicException;
 import ru.formatkoda.notification.repository.EventDeliveryRepository;
 
 import java.time.OffsetDateTime;
@@ -19,7 +20,7 @@ public class EventDeliveryService {
     public void createDeliveryOrThrow(DeliveryEntity deliveryEntity) {
         eventDeliveryRepository
                 .save(deliveryEntity)
-                .orElseThrow(() -> new RuntimeException("delivery not created"));
+                .orElseThrow(() -> new BusinessLogicException("delivery not created"));
     }
 
     @Transactional
@@ -30,7 +31,7 @@ public class EventDeliveryService {
         return eventDeliveryRepository.updateStatus(
                 id,
                 status
-        ).orElseThrow(() -> new RuntimeException("delivery not created"));
+        ).orElseThrow(() -> new BusinessLogicException("delivery not created"));
     }
 
     public List<DeliveryEntity> findDeliveriesWithStatusRetryAtAndLimit(
@@ -57,7 +58,7 @@ public class EventDeliveryService {
                 status,
                 retryAt,
                 remainingAttempts
-        ).orElseThrow(() -> new RuntimeException("delivery not updated"));
+        ).orElseThrow(() -> new BusinessLogicException("delivery not updated"));
     }
 
     @Transactional
@@ -70,6 +71,6 @@ public class EventDeliveryService {
                 id,
                 status,
                 remainingAttempts
-        ).orElseThrow(() -> new RuntimeException("delivery not updated"));
+        ).orElseThrow(() -> new BusinessLogicException("delivery not updated"));
     }
 }

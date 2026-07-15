@@ -31,7 +31,7 @@ public class DeliveryDispatchService {
     private static final long NUMBER_DELIVERIES_TO_DISPATCH = 20L;
 
     @Scheduled(
-            initialDelayString = "${notificaton.delivery.initial-delay-ms:10000}",
+            initialDelayString = "${notification.delivery.initial-delay-ms:10000}",
             fixedDelayString = "${notification.delivery.fixed-delay-ms:5000}"
     )
     @Transactional
@@ -64,15 +64,12 @@ public class DeliveryDispatchService {
                         payload.get("notificationTemplateName").asString(),
                         payloadEntity
                 ),
-                /*
                 payloadEntity.get(
                         delivery
                                 .notificationType()
                                 .name()
                                 .toLowerCase()
                 ).asString()
-                 */
-                "notifications@polybank.ru"
         );
 
         if (!result) {

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.notification.domain.EventEntity;
+import ru.formatkoda.notification.exception.BusinessLogicException;
+import ru.formatkoda.notification.exception.ResourceNotFoundException;
 import ru.formatkoda.notification.repository.EventRepository;
 
 @Service
@@ -16,12 +18,12 @@ public class EventService {
     public EventEntity createEventOrThrow(EventEntity eventEntity) {
         return eventRepository
                 .save(eventEntity)
-                .orElseThrow(() -> new RuntimeException("event not created"));
+                .orElseThrow(() -> new BusinessLogicException("event not created"));
     }
 
     public EventEntity findEventByIdOrThrow(Long id) {
         return eventRepository
                 .findById(id)
-                .orElseThrow(() -> new RuntimeException("event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("event not found"));
     }
 }

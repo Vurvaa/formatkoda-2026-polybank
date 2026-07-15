@@ -2,24 +2,33 @@ package ru.formatkoda.polybank.messaging.outbox.publisher;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.formatkoda.polybank.domain.user.UserEntity;
+import ru.formatkoda.polybank.messaging.dto.UserNotificationEventDto;
 import ru.formatkoda.polybank.messaging.event.UserNotificationEvent;
 import ru.formatkoda.polybank.messaging.outbox.infrastructure.OutboxWriter;
-import ru.formatkoda.polybank.messaging.publisher.UserNotificationEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class UserNotificationOutboxPublisher implements UserNotificationEventPublisher {
+public class NotificationOutboxPublisher implements NotificationEventPublisher {
     private static final String TOPIC = "bank.notifications";
-    private static final String AGGREGATE_TYPE = "User";
+    private static final String AGGREGATE_TYPE_USER = "User";
 
     private final OutboxWriter outboxWriter;
 
+    private static final Map<String, String> notificationEventTypeRegistry = Map.of(
+            "USER_REGISTERED", "UserRegistered"
+    );
+
+    private static String getUserNotificationEventType(String key) {
+        return notificationEventTypeRegistry.get(key);
+    }
+
     @Override
     public void publishUserNotificationEvent(
-            UserEntity user,
+            UserNotificationEventDto user,
             List<String> notificationTypeNames,
             String notificationTemplateName
     ) {
@@ -32,9 +41,9 @@ public class UserNotificationOutboxPublisher implements UserNotificationEventPub
 
         outboxWriter.append(
                 TOPIC,
-                AGGREGATE_TYPE,
+                AGGREGATE_TYPE_USER,
                 user.id().toString(),
-                UserNotificationEvent.getUserNotificationEventType(notificationTemplateName),
+                getUserNotificationEventType(notificationTemplateName),
                 payload
         );
     }

@@ -10,7 +10,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
-import ru.formatkoda.polybank.messaging.publisher.UserNotificationEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
@@ -32,7 +32,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final UserEventPublisher userEventPublisher;
-    private final UserNotificationEventPublisher userNotificationEventPublisher;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     @Transactional
     public UserLogin createUser(@NonNull UserEntity user) {
@@ -63,7 +63,10 @@ public class UserService {
         );
 
         userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
-        userNotificationEventPublisher.publishUserNotificationEvent(registered, List.of("EMAIL"), "USER_REGISTERED");
+        notificationEventPublisher.publishUserNotificationEvent(
+                userMapper.toNotificationDto(registered),
+                List.of("EMAIL"),
+                "USER_REGISTERED");
 
         return user.login();
     }

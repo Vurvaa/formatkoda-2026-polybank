@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.JSONB;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.formatkoda.notification.domain.DeliveryEntity;
 import ru.formatkoda.notification.domain.EventEntity;
 import ru.formatkoda.notification.messaging.dto.NotificationEventDto;
 import tools.jackson.databind.ObjectMapper;
@@ -19,6 +20,8 @@ public class NotificationService {
 
     @Transactional
     public void processNotification(NotificationEventDto notificationEventDto) {
+        validateDto(notificationEventDto);
+
         EventEntity event = new EventEntity(
                 null,
                 notificationEventDto.userId(),
@@ -37,5 +40,11 @@ public class NotificationService {
                                                 notificationTypeName
                                         )
                 );
+    }
+
+    private void validateDto(NotificationEventDto notificationEventDto) {
+        NotificationTemplate.fromName(notificationEventDto.notificationTemplateName());
+
+        notificationEventDto.notificationTypeNames().forEach(DeliveryEntity.Type::fromName);
     }
 }
