@@ -171,7 +171,7 @@ public class UserService {
             @NonNull UserLogin userLogin,
             @NonNull UserEmail userEmail) {
         Optional<UserEntity> userOptional = userRepository.findUserByEmail(userEmail);
-        if (userOptional.isEmpty())
+        if (userOptional.isPresent())
             throw new BusinessLogicException("this email already exist");
 
         userOptional = userRepository.changeUserEmail(userLogin, userEmail);

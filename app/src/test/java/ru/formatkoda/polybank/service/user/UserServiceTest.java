@@ -229,6 +229,58 @@ class UserServiceTest {
         verify(userRepository).findUserByLogin(user.login());
     }
 
+    @Test
+    void addUserEmailShouldChangeEmailAndReturnUser() {
+        when(userRepository.findUserByEmail(USER_EMAIL))
+                .thenReturn(Optional.empty());
+        when(userRepository.changeUserEmail(USER_LOGIN, USER_EMAIL))
+                .thenReturn(Optional.of(user()));
+
+        UserEntity result = userService.addUserEmail(USER_LOGIN, USER_EMAIL);
+
+        assertEquals(user(), result);
+
+        verify(userRepository).findUserByEmail(USER_EMAIL);
+        verify(userRepository).changeUserEmail(USER_LOGIN, USER_EMAIL);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void addUserEmailShouldThrowExceptionWhenEmailAlreadyExists() {
+        when(userRepository.findUserByEmail(USER_EMAIL))
+                .thenReturn(Optional.of(user()));
+
+        BusinessLogicException exception = assertThrows(
+                BusinessLogicException.class,
+                () -> userService.addUserEmail(USER_LOGIN, USER_EMAIL)
+        );
+
+        assertEquals("this email already exist", exception.getMessage());
+
+        verify(userRepository).findUserByEmail(USER_EMAIL);
+        verify(userRepository, never()).changeUserEmail(any(), any());
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void addUserEmailShouldThrowExceptionWhenEmailWasNotChanged() {
+        when(userRepository.findUserByEmail(USER_EMAIL))
+                .thenReturn(Optional.empty());
+        when(userRepository.changeUserEmail(USER_LOGIN, USER_EMAIL))
+                .thenReturn(Optional.empty());
+
+        BusinessLogicException exception = assertThrows(
+                BusinessLogicException.class,
+                () -> userService.addUserEmail(USER_LOGIN, USER_EMAIL)
+        );
+
+        assertEquals("email not changed", exception.getMessage());
+
+        verify(userRepository).findUserByEmail(USER_EMAIL);
+        verify(userRepository).changeUserEmail(USER_LOGIN, USER_EMAIL);
+        verifyNoMoreInteractions(userRepository);
+    }
+
     private void prepareMocksForCallingCreateUser(UserLogin expectedLogin) {
         when(userRepository.findUserByLogin(expectedLogin))
                 .thenReturn(Optional.empty());
