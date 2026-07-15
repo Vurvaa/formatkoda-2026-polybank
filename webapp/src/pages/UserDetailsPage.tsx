@@ -73,7 +73,7 @@ export function UserDetailsPage() {
       setTransactionsLoading(true);
 
       try {
-        const data = await accountService.getTransactionsForManager(accountNumber, page, size);
+        const data = await accountService.getTransactions(accountNumber, page, size);
         setTransactions(data.items);
         setTransactionsPage(data.page);
         setTransactionsSize(data.size);

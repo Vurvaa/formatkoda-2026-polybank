@@ -73,11 +73,5 @@ export const accountService = {
     const response = await api.get<PageResponse<TransactionResponseDto>>(
       `/transaction/${accountNumber}`, { params: { page, size } });
     return response.data;
-  },
-
-  async getTransactionsForManager(accountNumber: string, page: number, size: number): Promise<PageResponse<TransactionResponseDto>> {
-    const response = await api.get<PageResponse<TransactionResponseDto>>(
-      `/transaction/${accountNumber}/info`, { params: { page, size } });
-    return response.data;
   }
 };
