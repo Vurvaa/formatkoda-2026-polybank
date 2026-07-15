@@ -15,8 +15,10 @@ import {
 } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { TransactionsTable } from '../components/TransactionsTable.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 import type { AccountInfoDto, UserInfoResponseDto } from '../models/user.ts';
+import type { TransactionResponseDto } from '../models/transaction.ts';
 import { accountService } from '../services/accountService.ts';
 import { userService } from '../services/userService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
@@ -37,6 +39,12 @@ export function UserDetailsPage() {
   const [addRoleOpen, setAddRoleOpen] = useState(false);
   const [addRoleForm] = Form.useForm<{ roleName: string }>();
   const [addRoleSubmitting, setAddRoleSubmitting] = useState(false);
+  const [expandedAccount, setExpandedAccount] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<TransactionResponseDto[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [transactionsPage, setTransactionsPage] = useState(0);
+  const [transactionsSize, setTransactionsSize] = useState(20);
+  const [transactionsTotal, setTransactionsTotal] = useState(0);
   const { message } = AntdApp.useApp();
 
   const loadUser = useCallback(async () => {
@@ -59,6 +67,59 @@ export function UserDetailsPage() {
   useEffect(() => {
     loadUser().then((r) => r);
   }, [loadUser]);
+
+  const loadTransactions = useCallback(
+    async (accountNumber: string, page: number, size: number) => {
+      setTransactionsLoading(true);
+
+      try {
+        const data = await accountService.getTransactionsForManager(accountNumber, page, size);
+        setTransactions(data.items);
+        setTransactionsPage(data.page);
+        setTransactionsSize(data.size);
+        setTransactionsTotal(data.total);
+      } catch (error) {
+        message.error(getApiErrorMessage(error, 'Не удалось загрузить транзакции'));
+      } finally {
+        setTransactionsLoading(false);
+      }
+    },
+    [message]
+  );
+
+  function handleToggleAccountTransactions(accountNumber: string) {
+    if (expandedAccount === accountNumber) {
+      setExpandedAccount(null);
+      setTransactions([]);
+      return;
+    }
+
+    setExpandedAccount(accountNumber);
+    setTransactionsPage(0);
+    loadTransactions(accountNumber, 0, transactionsSize).then((r) => r);
+  }
+
+  function handleTransactionsPageChange(nextPage: number, nextSize: number) {
+    if (!expandedAccount) {
+      return;
+    }
+
+    loadTransactions(expandedAccount, nextPage, nextSize).then((r) => r);
+  }
+
+  async function handleCancelTransaction(transactionId: number) {
+    if (!expandedAccount) {
+      return;
+    }
+
+    try {
+      await accountService.cancelTransaction(transactionId);
+      message.success('Транзакция отменена');
+      await loadTransactions(expandedAccount, transactionsPage, transactionsSize);
+    } catch (error) {
+      message.error(getApiErrorMessage(error, 'Не удалось отменить транзакцию'));
+    }
+  }
 
   async function handleBlockUser() {
     if (!userLogin) {
@@ -166,7 +227,14 @@ export function UserDetailsPage() {
     {
       title: 'Счет',
       key: 'number',
-      render: (_, record) => record.number.value
+      render: (_, record) =>
+        isSeniorManager ? (
+          <Typography.Link onClick={() => handleToggleAccountTransactions(record.number.value)}>
+            {record.number.value}
+          </Typography.Link>
+        ) : (
+          record.number.value
+        )
     },
     { title: 'Тип', dataIndex: 'type' },
     {
@@ -190,25 +258,25 @@ export function UserDetailsPage() {
 
         if (record.status === 'BLOCKED') {
           return (
-              <Button
-                  size="small"
-                  loading={accountActionNumber === record.number.value}
-                  onClick={() => handleUnblockAccount(record.number.value)}
-              >
-                Разблокировать
-              </Button>
+            <Button
+              size="small"
+              loading={accountActionNumber === record.number.value}
+              onClick={() => handleUnblockAccount(record.number.value)}
+            >
+              Разблокировать
+            </Button>
           );
         }
 
         return (
-            <Button
-                size="small"
-                danger
-                loading={accountActionNumber === record.number.value}
-                onClick={() => handleBlockAccount(record.number.value)}
-            >
-              Заблокировать
-            </Button>
+          <Button
+            size="small"
+            danger
+            loading={accountActionNumber === record.number.value}
+            onClick={() => handleBlockAccount(record.number.value)}
+          >
+            Заблокировать
+          </Button>
         );
       }
     }
@@ -283,8 +351,26 @@ export function UserDetailsPage() {
           loading={loading}
           pagination={false}
           scroll={{ x: 760 }}
+          rowClassName={(record) =>
+            expandedAccount === record.number.value ? 'ant-table-row-selected' : ''
+          }
         />
       </Card>
+
+      {expandedAccount && (
+        <Card title={`Транзакции по счету ${expandedAccount}`}>
+          <TransactionsTable
+            transactions={transactions}
+            loading={transactionsLoading}
+            page={transactionsPage}
+            size={transactionsSize}
+            total={transactionsTotal}
+            onPageChange={handleTransactionsPageChange}
+            canCancel={isSeniorManager}
+            onCancel={handleCancelTransaction}
+          />
+        </Card>
+      )}
 
       <Modal
         title={`Добавить роль пользователю ${userLogin}`}

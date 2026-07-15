@@ -13,6 +13,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
+import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
@@ -35,6 +36,8 @@ class TransactionServiceFindTest {
 	private TransactionRepository transactionRepository;
 	@Mock
 	private AccountService accountService;
+	@Mock
+	private UserService userService;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -56,6 +59,7 @@ class TransactionServiceFindTest {
 		when(accountService.findOwnedAccount(ACCOUNT_NUMBER, USER_LOGIN)).thenReturn(account);
 		when(transactionRepository.findViewsByAccountId(account.id(), pageRequest)).thenReturn(transactions);
 		when(transactionRepository.countAll(account.id())).thenReturn(size);
+		when(userService.hasRole(USER_LOGIN, "SENIOR_MANAGER")).thenReturn(false);
 
 		PageResult<TransactionWithAccountNumbersView> actualResult = transactionService.findByAccountNumber(
 				ACCOUNT_NUMBER,
