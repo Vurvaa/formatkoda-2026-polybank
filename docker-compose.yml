@@ -60,6 +60,8 @@ services:
 
   notifications:
     build:
+      context: ./notification
+      dockerfile: Dockerfile.local
       context: .
       dockerfile: notification/Dockerfile
       args:
