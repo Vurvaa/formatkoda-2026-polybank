@@ -20,6 +20,11 @@ data class HelmDeployParams(
     val kafkaBootstrapServers: String = "%kafka.bootstrap.servers%",
     val mailHost: String = "%mail.host%",
     val mailPort: String = "%mail.port%",
+    val postgresHost: String,
+    val postgresPort: String = "5432",
+    val appJwtExpirationMinutesParam: String = "APP_JWT_EXPIRATION_MINUTES",
+    val appCorsAllowedOriginParam: String = "APP_CORS_ALLOWED_ORIGIN",
+    val appJwtSecretParam: String = "APP_JWT_SECRET",
     val extraSetArgs: String = "",
 )
 
@@ -33,32 +38,6 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
 
             export KUBECONFIG=%k8s.kubeconfig%
             kubectl get nodes
-
-            NEEDS_RECREATE=0
-            if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
-                -o jsonpath='{.metadata.labels.app\.kubernetes\.io/managed-by}' 2>/dev/null \
-                | grep -q "Helm"; then
-                NEEDS_RECREATE=1
-            fi
-
-            if kubectl get secret polybank-backend-secret -n ${p.namespaceParam} >/dev/null 2>&1; then
-                if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
-                    -o jsonpath='{.data.replication-password}' 2>/dev/null | grep -q .; then
-                    NEEDS_RECREATE=1
-                fi
-            fi
-
-            if [ "${'$'}NEEDS_RECREATE" = "1" ]; then
-                kubectl delete secret polybank-backend-secret -n ${p.namespaceParam} --ignore-not-found=true
-            fi
-
-            helm dependency build %helm.chart.path%/polybank/
-
-            HELM_APP_VAR_ARGS=""
-            for name in ${'$'}(echo "%env.app.vars.names%" | tr ',' ' '); do
-                val="${'$'}(printenv "${'$'}name" || true)"
-                HELM_APP_VAR_ARGS="${'$'}HELM_APP_VAR_ARGS --set-string appVars.${'$'}{name}.value=${'$'}val"
-            done
 
             helm upgrade polybank \
                 -n ${p.namespaceParam} \
@@ -81,17 +60,15 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string postgresAuth.username="${'$'}(printenv ${p.pgUserParam})" \
                 --set-string postgresAuth.password="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string postgresAuth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
                 --set-string postgresAuth.database="${'$'}(printenv ${p.pgDatabaseParam})" \
                 --set-string notification.kafka.bootstrapServers="${p.kafkaBootstrapServers}" \
                 --set-string notification.mail.host="${p.mailHost}" \
                 --set-string notification.mail.port="${p.mailPort}" \
-                ${'$'}HELM_APP_VAR_ARGS \
+                --set-string postgresql.host="${p.postgresHost}" \
+                --set-string postgresql.port="${p.postgresPort}" \
+                --set-string appVars.appJwtExpirationMinutes="${'$'}(printenv ${p.appJwtExpirationMinutesParam})" \
+                --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv ${p.appCorsAllowedOriginParam})" \
+                --set-string appVars.appJwtSecret="${'$'}(printenv ${p.appJwtSecretParam})" \
                 ${p.extraSetArgs} \
                 --debug
 

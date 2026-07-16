@@ -9,8 +9,5 @@ data:
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
 
-  {{- range $key, $var := .Values.appVars }}
-  {{- if not $var.secret }}
-  {{ $key }}: {{ required (printf "Set .Values.appVars.%s.value" $key) $var.value | quote }}
-  {{- end }}
-  {{- end }}
+  APP_JWT_EXPIRATION_MINUTES: {{ .Values.appVars.appJwtExpirationMinutes | quote }}
+  APP_CORS_ALLOWED_ORIGIN: {{ .Values.appVars.appCorsAllowedOrigin | quote }}

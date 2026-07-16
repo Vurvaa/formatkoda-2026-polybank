@@ -51,12 +51,13 @@ webapp:
       cpu: "50m"
 
 appVars:
-  APP_CORS_ALLOWED_ORIGIN:
-    secret: false
-    value: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
+  appCorsAllowedOrigin: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
+
+postgresql:
+  host: polybank-pg-rw
+  port: 5432
 
 cnpg:
-  enabled: true
   instances: 1
   storageSize: 2Gi
   storageClass: "local-path"
@@ -68,12 +69,18 @@ cnpg:
       cpu: "200m"
       memory: "1Gi"
 
+resourceQuota:
+  maxPods: "25"
+  requestsCpu: "2"
+  requestsMemory: "4Gi"
+  limitsCpu: "5"
+  limitsMemory: "8Gi"
+
 postgresAuth:
   username: polybank_test_user
   database: polybank_test_db
 
 trafficGenerator:
-  enabled: true
   appName: polybank-traffic-generator
   image:
     repository: 192.168.130.81:5000/polybank-traffic-generator

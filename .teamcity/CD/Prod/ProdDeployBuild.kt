@@ -44,6 +44,7 @@ object ProdDeployBuild : BuildType({
                 pgUserParam = "POSTGRES_USER",
                 pgPasswordParam = "POSTGRES_PASSWORD",
                 pgDatabaseParam = "POSTGRES_DB",
+                postgresHost = "polybank-pg-rw",
             )
         )
     }

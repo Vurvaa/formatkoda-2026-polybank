@@ -8,6 +8,12 @@ spec:
     matchLabels:
       app: {{ .Values.notification.appName }}
   replicas: {{ .Values.notification.replicas }}
+  progressDeadlineSeconds: {{ .Values.notification.progressDeadlineSeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -16,14 +22,6 @@ spec:
         reloader.stakater.com/auto: "true"
     spec:
       automountServiceAccountToken: false
-      {{- $pgHost := "" }}
-      {{- $pgPort := 5432 }}
-      {{- if .Values.cnpg.enabled }}
-      {{- $pgHost = printf "%s-pg-rw" .Release.Name }}
-      {{- else }}
-      {{- $pgHost = .Values.externalPostgres.host }}
-      {{- $pgPort = .Values.externalPostgres.port | default 5432 }}
-      {{- end }}
       initContainers:
         - name: wait-for-postgres
           image: postgres:16-alpine
@@ -32,7 +30,7 @@ spec:
             - sh
             - -c
             - >-
-              until pg_isready -h {{ $pgHost }} -p {{ $pgPort }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              until pg_isready -h {{ .Values.postgresql.host }} -p {{ .Values.postgresql.port }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
               do echo "waiting for postgres"; sleep 2; done
           envFrom:
             - secretRef:
@@ -51,31 +49,31 @@ spec:
           image: {{ .Values.notification.image.repository }}:{{ .Values.notification.image.tag }}
           startupProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: {{ .Values.notification.startupProbe.initialDelaySeconds | default 10 }}
-            periodSeconds: {{ .Values.notification.startupProbe.periodSeconds | default 5 }}
-            timeoutSeconds: {{ .Values.notification.startupProbe.timeoutSeconds | default 3 }}
+            initialDelaySeconds: {{ .Values.notification.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.startupProbe.timeoutSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.notification.startupProbe.failureThreshold | default 30 }}
+            failureThreshold: {{ .Values.notification.startupProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: {{ .Values.notification.readinessProbe.initialDelaySeconds | default 10 }}
-            periodSeconds: {{ .Values.notification.readinessProbe.periodSeconds | default 10 }}
-            timeoutSeconds: {{ .Values.notification.readinessProbe.timeoutSeconds | default 3 }}
+            initialDelaySeconds: {{ .Values.notification.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.readinessProbe.timeoutSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.notification.readinessProbe.failureThreshold | default 3 }}
+            failureThreshold: {{ .Values.notification.readinessProbe.failureThreshold }}
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: http
-            initialDelaySeconds: {{ .Values.notification.livenessProbe.initialDelaySeconds | default 10 }}
-            periodSeconds: {{ .Values.notification.livenessProbe.periodSeconds | default 10 }}
-            timeoutSeconds: {{ .Values.notification.livenessProbe.timeoutSeconds | default 3 }}
+            initialDelaySeconds: {{ .Values.notification.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.livenessProbe.timeoutSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.notification.livenessProbe.failureThreshold | default 5 }}
+            failureThreshold: {{ .Values.notification.livenessProbe.failureThreshold }}
           resources:
             requests:
               memory: "{{ .Values.notification.resources.requests.memory }}"

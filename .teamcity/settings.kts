@@ -7,21 +7,6 @@ import jetbrains.buildServer.configs.kotlin.*
 
 version = "2026.1"
 
-data class AppEnvVar(
-    val name: String,
-    val value: String,
-    val secret: Boolean = false,
-)
-
-val appEnvVars = listOf(
-    AppEnvVar(name = "APP_JWT_EXPIRATION_MINUTES", value = "60"),
-    AppEnvVar(
-        name = "APP_JWT_SECRET",
-        value = "credentialsJSON:12db1afd-9baf-4d3e-873b-07ae63f3bd22",
-        secret = true,
-    ),
-)
-
 project {
     description = "Polybank"
 
@@ -54,10 +39,9 @@ project {
         param("mail.host", "192.168.130.81")
         param("mail.port", "1025")
 
-        appEnvVars.forEach { v ->
-            if (v.secret) password("env.${v.name}", v.value) else param("env.${v.name}", v.value)
-        }
-        param("env.app.vars.names", appEnvVars.joinToString(",") { it.name })
+        param("env.APP_JWT_EXPIRATION_MINUTES", "60")
+        password("env.APP_JWT_SECRET", "credentialsJSON:12db1afd-9baf-4d3e-873b-07ae63f3bd22")
+        param("env.APP_CORS_ALLOWED_ORIGIN", "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091")
     }
 
     buildType(MrBuild)

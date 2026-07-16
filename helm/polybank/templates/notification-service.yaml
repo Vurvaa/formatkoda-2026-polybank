@@ -14,6 +14,4 @@ spec:
     - name: http
       port: {{ .Values.notification.appServicePort }}
       targetPort: http
-      {{- if and (eq .Values.notification.service.type "NodePort") .Values.notification.service.nodePort }}
       nodePort: {{ .Values.notification.service.nodePort }}
-      {{- end }}

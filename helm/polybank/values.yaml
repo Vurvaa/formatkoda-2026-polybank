@@ -4,6 +4,7 @@ image:
   repository: 192.168.130.81:5000/polybank
   tag: latest
 replicas: 2
+progressDeadlineSeconds: 300
 appServicePort: 8080
 metricsContainerPort: 5300
 service:
@@ -36,15 +37,9 @@ livenessProbe:
   failureThreshold: 6
 
 appVars:
-  APP_JWT_EXPIRATION_MINUTES:
-    secret: false
-    value: "60"
-  APP_CORS_ALLOWED_ORIGIN:
-    secret: false
-    value: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
-  APP_JWT_SECRET:
-    secret: true
-    value: ""
+  appJwtExpirationMinutes: "60"
+  appCorsAllowedOrigin: "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091"
+  appJwtSecret: ""
 
 postgresAuth:
   username: polybank_user
@@ -52,8 +47,8 @@ postgresAuth:
   postgresPassword: ""
   database: polybank_db
 
-externalPostgres:
-  host: ""
+postgresql:
+  host: polybank-pg-rw
   port: 5432
 
 webapp:
@@ -62,6 +57,7 @@ webapp:
     repository: 192.168.130.81:5000/polybank-webapp
     tag: latest
   replicas: 1
+  progressDeadlineSeconds: 180
   containerPort: 80
   service:
     type: NodePort
@@ -75,7 +71,6 @@ webapp:
       cpu: "200m"
 
 cnpg:
-  enabled: true
   instances: 3
   storageSize: 10Gi
   storageClass: "local-path"
@@ -87,13 +82,20 @@ cnpg:
       cpu: "500m"
       memory: "512Mi"
 
+resourceQuota:
+  maxPods: "40"
+  requestsCpu: "3"
+  requestsMemory: "6Gi"
+  limitsCpu: "8"
+  limitsMemory: "12Gi"
+
 trafficGenerator:
-  enabled: true
   appName: polybank-traffic-generator
   image:
     repository: 192.168.130.81:5000/polybank-traffic-generator
     tag: latest
   replicas: 1
+  progressDeadlineSeconds: 180
   containerPort: 6060
   service:
     type: NodePort
@@ -112,6 +114,7 @@ notification:
     repository: 192.168.130.81:5000/polybank-notification
     tag: latest
   replicas: 1
+  progressDeadlineSeconds: 300
   appServicePort: 8080
   service:
     type: NodePort

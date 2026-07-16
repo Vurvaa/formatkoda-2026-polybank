@@ -35,6 +35,7 @@ object DeployBuild : BuildType({
                 pgUserParam = "POSTGRES_USER_TEST",
                 pgPasswordParam = "POSTGRES_PASSWORD_TEST",
                 pgDatabaseParam = "POSTGRES_DB_TEST",
+                postgresHost = "polybank-pg-rw",
             )
         )
     }
