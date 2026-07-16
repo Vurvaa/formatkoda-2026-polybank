@@ -2,7 +2,7 @@ import { Card, Descriptions, Space, Tag, Typography } from 'antd';
 import { useAuth } from '../hooks/useAuth.tsx';
 
 export function ProfilePage() {
-  const { login_, name, lastName, roles } = useAuth();
+  const { login_, email, name, lastName, roles } = useAuth();
 
   return (
     <Space direction="vertical" size="large" className="page-stack">
@@ -13,6 +13,11 @@ export function ProfilePage() {
       <Card>
         <Descriptions column={1} bordered>
           <Descriptions.Item label="Логин">{login_}</Descriptions.Item>
+            {email && (
+                <Descriptions.Item label="Email">
+                    {email}
+                </Descriptions.Item>
+            )}
           <Descriptions.Item label="Имя">{name}</Descriptions.Item>
           <Descriptions.Item label="Фамилия">{lastName}</Descriptions.Item>
           <Descriptions.Item label="Роль">

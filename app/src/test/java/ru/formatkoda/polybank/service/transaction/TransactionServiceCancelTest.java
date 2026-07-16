@@ -37,6 +37,7 @@ import static ru.formatkoda.polybank.testutil.TestData.ACCOUNT_NUMBER;
 import static ru.formatkoda.polybank.testutil.TestData.AMOUNT;
 import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
 import static ru.formatkoda.polybank.testutil.TestData.SENIOR_MANAGER_LOGIN;
+import static ru.formatkoda.polybank.testutil.TestData.USER_EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.account;
 import static ru.formatkoda.polybank.testutil.TestData.userManager;
 
@@ -461,6 +462,7 @@ class TransactionServiceCancelTest {
 		return new UserEntity(
 				25L,
 				SENIOR_MANAGER_LOGIN,
+				USER_EMAIL,
 				"User",
 				"Test",
 				"password-hash",
