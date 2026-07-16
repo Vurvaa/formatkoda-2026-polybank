@@ -17,7 +17,7 @@ object BuildBuild : BuildType({
     }
 
     steps {
-        prepareDatabaseStep(extraLiquibaseDirs = listOf("notification"))
+        prepareDatabaseStep()
 
         script {
             id = "BUILD_APP"

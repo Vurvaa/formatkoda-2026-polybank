@@ -23,7 +23,7 @@ object MrBuild : BuildType({
     }
 
     steps {
-        prepareDatabaseStep(extraLiquibaseDirs = listOf("notification"))
+        prepareDatabaseStep()
 
         maven {
             id = "COMPILE"
