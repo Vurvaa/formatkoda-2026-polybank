@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.formatkoda.polybank.testutil.TestData.USER_EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +54,7 @@ class AccountServiceCreateTest {
 		UserEntity userEntity = mock(UserEntity.class);
 		when(userEntity.id()).thenReturn(1L);
 		when(userEntity.name()).thenReturn("User");
+		when(userEntity.email()).thenReturn(USER_EMAIL);
 
 		when(userService.findNotBlockedUserByLogin(USER_LOGIN)).thenReturn(userEntity);
 

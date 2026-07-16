@@ -40,7 +40,7 @@ public class AccountService {
 				AccountMapper.toNotificationDto(
 						account,
 						user.name(),
-						"stub@polybank.ru"
+						user.email().value()
 				),
 				List.of("EMAIL"),
 				"ACCOUNT_CREATED"

@@ -89,7 +89,7 @@ public class TransactionService {
 						null,
 						user.id(),
 						user.name(),
-						"stub@polybank.ru"
+						user.email().value()
 				),
 				List.of("EMAIL"),
 				"TRANSACTION_TOP_UP"
@@ -129,7 +129,7 @@ public class TransactionService {
 						user.id(),
 						null,
 						user.name(),
-						"stub@polybank.ru"
+						user.email().value()
 				),
 				List.of("EMAIL"),
 				"TRANSACTION_WITHDRAW"
@@ -177,7 +177,7 @@ public class TransactionService {
 							userFrom.id(),
 							userTo.id(),
 							personName,
-							"stub1@polybank.ru"
+							userFrom.email().value()
 					),
 					List.of("EMAIL"),
 					"TRANSACTION_BETWEEN_PERSON_ACCOUNTS"
@@ -189,7 +189,7 @@ public class TransactionService {
 							userFrom.id(),
 							userTo.id(),
 							userFrom.name(),
-							"stub1@polybank.ru"
+							userFrom.email().value()
 					),
 					List.of("EMAIL"),
 					"TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS"
@@ -201,7 +201,7 @@ public class TransactionService {
 							userFrom.id(),
 							userTo.id(),
 							userTo.name(),
-							"stub2@polybank.ru"
+							userTo.email().value()
 					),
 					List.of("EMAIL"),
 					"TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS"

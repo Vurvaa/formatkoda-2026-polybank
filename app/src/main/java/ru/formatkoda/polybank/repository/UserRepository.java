@@ -8,6 +8,7 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 
 import static ru.formatkoda.polybank.jooq.generated.Tables.ROLES;
 import static ru.formatkoda.polybank.jooq.generated.Tables.USERS;

@@ -118,7 +118,7 @@ public class UserMapper {
                 user.login().value(),
                 user.name(),
                 user.lastName(),
-                "stub@polybank.ru",
+                user.email().value(),
                 user.createdAt(),
                 user.blockedAt()
         );
