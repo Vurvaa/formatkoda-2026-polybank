@@ -53,13 +53,13 @@ class GeneratorService(
             if (runJob?.isActive == true)
                 return@withLock false
 
-            mutableStatus.update { GeneratorStatus.STARTING }
+            updateStatus(GeneratorStatus.STARTING)
 
             runJob = scope.launch {
                 try {
                     warmUp()
 
-                    mutableStatus.update { GeneratorStatus.RUNNING }
+                    updateStatus(GeneratorStatus.RUNNING)
 
                     coroutineScope {
                         launch { runWorkers() }
@@ -68,7 +68,7 @@ class GeneratorService(
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {
-                    mutableStatus.update { GeneratorStatus.FAILED }
+                    updateStatus(GeneratorStatus.FAILED)
                     logger.error("failed to start generator", error)
                 } finally {
                     lifecycleMutex.withLock {
@@ -77,7 +77,7 @@ class GeneratorService(
                     }
 
                     if (mutableStatus.value != GeneratorStatus.FAILED)
-                        mutableStatus.update { GeneratorStatus.STOPPED }
+                        updateStatus(GeneratorStatus.STOPPED)
                 }
             }
 
@@ -91,12 +91,12 @@ class GeneratorService(
             if (job?.isActive != true)
                 return false
 
-            mutableStatus.update { GeneratorStatus.STOPPING }
+            updateStatus(GeneratorStatus.STOPPING)
 
             job.cancelAndJoin()
             runJob = null
 
-            mutableStatus.update { GeneratorStatus.STOPPED }
+            updateStatus(GeneratorStatus.STOPPED)
             true
         }
 
@@ -187,5 +187,10 @@ class GeneratorService(
                 snapshot.failedTicks
             )
         }
+    }
+
+    private fun updateStatus(newStatus: GeneratorStatus) {
+        mutableStatus.update { newStatus }
+        metrics.statusChanged(newStatus)
     }
 }
