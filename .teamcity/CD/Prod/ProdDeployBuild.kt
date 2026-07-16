@@ -31,20 +31,9 @@ object ProdDeployBuild : BuildType({
     steps {
         helmDeployStep(
             HelmDeployParams(
-                namespaceParam = "%k8s.namespace%",
+                namespace = "%k8s.namespace%",
                 valuesFiles = listOf("values.yaml"),
-                imageRepoParam = "%docker.registry%/polybank",
-                imageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
-                webappImageRepoParam = "%docker.registry%/polybank-webapp",
-                webappImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
-                notificationImageRepoParam = "%docker.registry%/polybank-notification",
-                notificationImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
-                trafficGenImageRepoParam = "%docker.registry%/polybank-traffic-generator",
-                trafficGenImageTagParam = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
-                pgUserParam = "POSTGRES_USER",
-                pgPasswordParam = "POSTGRES_PASSWORD",
-                pgDatabaseParam = "POSTGRES_DB",
-                postgresHost = "polybank-pg-rw",
+                imageTag = "%dep.${ProdBuild.id}.env.RELEASE_VERSION%",
             )
         )
     }

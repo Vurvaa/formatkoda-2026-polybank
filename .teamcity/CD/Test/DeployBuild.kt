@@ -22,20 +22,11 @@ object DeployBuild : BuildType({
     steps {
         helmDeployStep(
             HelmDeployParams(
-                namespaceParam = "%k8s.namespace.test%",
+                namespace = "%k8s.namespace.test%",
                 valuesFiles = listOf("values.yaml", "values-test.yaml"),
-                imageRepoParam = "%docker.registry%/polybank-test",
-                imageTagParam = "%dep.${BuildBuild.id}.build.number%",
-                webappImageRepoParam = "%docker.registry%/polybank-webapp-test",
-                webappImageTagParam = "%dep.${BuildBuild.id}.build.number%",
-                notificationImageRepoParam = "%docker.registry%/polybank-notification-test",
-                notificationImageTagParam = "%dep.${BuildBuild.id}.build.number%",
-                trafficGenImageRepoParam = "%docker.registry%/polybank-traffic-generator-test",
-                trafficGenImageTagParam = "%dep.${BuildBuild.id}.build.number%",
-                pgUserParam = "POSTGRES_USER_TEST",
-                pgPasswordParam = "POSTGRES_PASSWORD_TEST",
-                pgDatabaseParam = "POSTGRES_DB_TEST",
-                postgresHost = "polybank-pg-rw",
+                imageEnvSuffix = "-test",
+                imageTag = "%dep.${BuildBuild.id}.build.number%",
+                envSuffix = "_TEST",
             )
         )
     }
