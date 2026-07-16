@@ -2,6 +2,7 @@ package ru.formatkoda.polybank.testutil;
 
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -14,8 +15,10 @@ import java.util.List;
 public final class TestData {
 	public static final AccountNumber ACCOUNT_NUMBER = new AccountNumber("12345678901234567890");
 	public static final UserLogin USER_LOGIN = new UserLogin("user");
+	public static final UserEmail USER_EMAIL = new UserEmail("test.email@email.com");
 	public static final BigDecimal AMOUNT = new BigDecimal("100.00");
 	public static final OffsetDateTime CREATED_AT = OffsetDateTime.of(2026, 1, 1, 1, 0, 0, 0, ZoneOffset.UTC);
+
 
 	public static final UserLogin SENIOR_MANAGER_LOGIN = new UserLogin("senior_manager");
 
@@ -42,6 +45,7 @@ public final class TestData {
 		return new UserEntity(
 				10L,
 				USER_LOGIN,
+				USER_EMAIL,
 				"User",
 				"Test",
 				"password-hash",
@@ -54,6 +58,7 @@ public final class TestData {
 		return new UserEntity(
 				25L,
 				SENIOR_MANAGER_LOGIN,
+				USER_EMAIL,
 				"User",
 				"Test",
 				"password-hash",
@@ -66,6 +71,7 @@ public final class TestData {
 		return new UserWithRolesView(
 				25L,
 				USER_LOGIN,
+				USER_EMAIL,
 				"User",
 				"Test",
 				List.of("CLIENT"),

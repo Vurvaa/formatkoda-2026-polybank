@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.stereotype.Repository;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
@@ -27,6 +28,28 @@ public class UserRepository {
     public Optional<UserEntity> findUserByLogin(UserLogin login) {
         return dsl.selectFrom(USERS)
                 .where(USERS.LOGIN.eq(login.value()))
+                .fetchOptional(this::toEntity);
+    }
+
+    public Optional<UserEntity> findUserByEmail(UserEmail email) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.EMAIL.eq(email.value()))
+                .fetchOptional(this::toEntity);
+    }
+
+    public boolean existsUserByEmail(UserEmail email) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(USERS)
+                        .where(USERS.EMAIL.eq(email.value()))
+        );
+    }
+
+    public Optional<UserEntity> changeUserEmail(UserLogin userLogin, UserEmail email) {
+        return dsl.update(USERS)
+                .set(USERS.EMAIL, email.value())
+                .where(USERS.LOGIN.eq(userLogin.value()))
+                .returning()
                 .fetchOptional(this::toEntity);
     }
 
@@ -108,6 +131,7 @@ public class UserRepository {
     private UsersRecord toRecord(UserEntity user) {
         return dsl.newRecord(USERS)
                 .setLogin(user.login().value())
+                .setEmail(user.email().value())
                 .setName(user.name())
                 .setLastName(user.lastName())
                 .setPasswordHash(user.passwordHash())
@@ -119,6 +143,7 @@ public class UserRepository {
         return new UserEntity(
                 userRecord.get(USERS.ID),
                 new UserLogin(userRecord.get(USERS.LOGIN)),
+                new UserEmail(userRecord.get(USERS.EMAIL)),
                 userRecord.get(USERS.NAME),
                 userRecord.get(USERS.LAST_NAME),
                 userRecord.get(USERS.PASSWORD_HASH),

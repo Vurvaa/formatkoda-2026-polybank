@@ -16,6 +16,7 @@ import { extractLoginFromToken } from '../utils/jwt.ts';
 interface AuthContextValue {
   token: string | null;
   login_: string | null;
+  email: string | null;
   roles: string[];
   name: string | null;
   lastName: string | null;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
   const [roles, setRoles] = useState<string[]>([]);
   const [name, setName] = useState<string | null>(null);
   const [lastName, setLastName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const login_ = useMemo(() => (token ? extractLoginFromToken(token) : null), [token]);
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       .then((info) => {
         if (!cancelled) {
           setRoles(info.roles);
+          setEmail(info.email);
           setName(info.name);
           setLastName(info.lastName);
         }
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       .catch(() => {
         if (!cancelled) {
           setRoles([]);
+          setEmail(null);
           setName(null);
           setLastName(null);
         }
@@ -92,6 +96,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
     () => ({
       token,
       login_,
+      email,
       roles,
       name,
       lastName,
@@ -102,7 +107,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       register,
       logout
     }),
-    [login, login_, logout, register, roles, name, lastName, token]
+    [login, login_, email, logout, register, roles, name, lastName, token]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

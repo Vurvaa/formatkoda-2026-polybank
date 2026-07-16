@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.polybank.domain.user.RoleEntity;
+import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
 import static ru.formatkoda.polybank.testutil.TestData.SENIOR_MANAGER_LOGIN;
+import static ru.formatkoda.polybank.testutil.TestData.USER_EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.user;
 import static ru.formatkoda.polybank.testutil.TestData.userManager;
 
@@ -238,6 +240,7 @@ class UserServiceManagerOperationsTest {
         UserWithRolesView updatedUserWithRoles = new UserWithRolesView(
                 user.id(),
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 List.of("CLIENT"),
@@ -285,6 +288,7 @@ class UserServiceManagerOperationsTest {
         UserWithRolesView updatedUserWithRoles = new UserWithRolesView(
                 user.id(),
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 List.of("MANAGER"),
@@ -359,6 +363,7 @@ class UserServiceManagerOperationsTest {
         UserWithRolesView expectedResult = new UserWithRolesView(
                 user.id(),
                 user.login(),
+                user.email(),
                 user.name(),
                 user.lastName(),
                 updatedRoles,
@@ -521,6 +526,7 @@ class UserServiceManagerOperationsTest {
         UserEntity blockedManager = new UserEntity(
                 25L,
                 SENIOR_MANAGER_LOGIN,
+                USER_EMAIL,
                 "User",
                 "Test",
                 "password-hash",
@@ -676,6 +682,7 @@ class UserServiceManagerOperationsTest {
         UserWithRolesView createdManagerWithRoles = new UserWithRolesView(
                 createdManager.id(),
                 createdManager.login(),
+                createdManager.email(),
                 createdManager.name(),
                 createdManager.lastName(),
                 List.of("MANAGER"),
@@ -732,6 +739,7 @@ class UserServiceManagerOperationsTest {
         UserEntity blockedSeniorManager = new UserEntity(
                 25L,
                 SENIOR_MANAGER_LOGIN,
+                USER_EMAIL,
                 "User",
                 "Test",
                 "password-hash",
@@ -889,6 +897,7 @@ class UserServiceManagerOperationsTest {
         return new UserEntity(
                 null,
                 new UserLogin("new_manager"),
+                new UserEmail(null),
                 "Manager",
                 "Test",
                 "password-hash",
@@ -901,6 +910,7 @@ class UserServiceManagerOperationsTest {
         return new UserEntity(
                 30L,
                 new UserLogin("new_manager"),
+                new UserEmail(null),
                 "Manager",
                 "Test",
                 "password-hash",
