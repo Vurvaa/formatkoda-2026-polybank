@@ -76,7 +76,7 @@ public class UserMapper {
     public UserDetailsResponseDto toResponse(UserWithRolesView user) {
         return new UserDetailsResponseDto(
                 user.login(),
-                user.email(),
+                user.email().value(),
                 user.name(),
                 user.lastName(),
                 user.roles(),
