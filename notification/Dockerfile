@@ -11,8 +11,9 @@ ARG POSTGRES_PASSWORD=
 
 ENV PGDATA=/var/lib/postgresql/data
 
-COPY pom.xml .
-COPY src ./src
+COPY notification/pom.xml .
+COPY notification/src ./src
+COPY app/src/main/resources/db/changelog/migrations/014-notifications.xml ./src/main/resources/db/changelog/migrations/014-notifications.xml
 
 RUN --mount=type=cache,target=/root/.m2 \
     su-exec postgres initdb -D "$PGDATA" -U "$POSTGRES_USER" -A trust >/dev/null \
@@ -22,8 +23,7 @@ RUN --mount=type=cache,target=/root/.m2 \
         -Dliquibase.url="jdbc:postgresql://127.0.0.1:5432/$POSTGRES_DB" \
         -Dliquibase.username="$POSTGRES_USER" \
         -Dliquibase.password="$POSTGRES_PASSWORD" \
-        -Dliquibase.changeLogFile=db/changelog/db.changelog-master.xml \
-        -Dliquibase.searchPath=src/main/resources \
+        -Dliquibase.changeLogFile=db/changelog/migrations/014-notifications.xml \
     && mvn package -DskipTests -B -Pdb-codegen \
         -Denv.POSTGRES_URL="jdbc:postgresql://127.0.0.1:5432/$POSTGRES_DB" \
         -Denv.POSTGRES_USER="$POSTGRES_USER" \
@@ -40,6 +40,7 @@ RUN apk add --no-cache curl \
 COPY --from=builder /build/target/notification.jar notification.jar
 
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+ENV SPRING_LIQUIBASE_ENABLED=false
 
 EXPOSE 8080
 USER spring

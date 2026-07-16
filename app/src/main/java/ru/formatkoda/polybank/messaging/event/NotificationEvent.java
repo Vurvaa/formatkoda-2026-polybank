@@ -2,8 +2,7 @@ package ru.formatkoda.polybank.messaging.event;
 
 import java.util.List;
 
-public record UserNotificationEvent(
-        Long userId,
+public record NotificationEvent(
         List<String> notificationTypeNames,
         String notificationTemplateName,
         Object entity

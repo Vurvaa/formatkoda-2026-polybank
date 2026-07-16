@@ -115,7 +115,7 @@ public class UserMapper {
     public UserNotificationEventDto toNotificationDto(UserEntity user) {
         return new UserNotificationEventDto(
                 user.id(),
-                user.login(),
+                user.login().value(),
                 user.name(),
                 user.lastName(),
                 "stub@polybank.ru",

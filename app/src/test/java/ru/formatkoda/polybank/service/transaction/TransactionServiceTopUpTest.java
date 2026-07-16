@@ -12,10 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
+import ru.formatkoda.polybank.service.UserService;
 
 import java.math.BigDecimal;
 
@@ -30,6 +32,7 @@ import static ru.formatkoda.polybank.testutil.TestData.AMOUNT;
 import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
 import static ru.formatkoda.polybank.testutil.TestData.account;
+import static ru.formatkoda.polybank.testutil.TestData.user;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTopUpTest {
@@ -38,12 +41,17 @@ class TransactionServiceTopUpTest {
 	@Mock
 	private AccountService accountService;
 	@Mock
+	private UserService userService;
+	@Mock
 	private TransactionEventPublisher transactionEventPublisher;
+	@Mock
+	private NotificationEventPublisher notificationEventPublisher;
 	@InjectMocks
 	private TransactionService transactionService;
 
 	@Test
 	void topUpShouldIncreaseBalanceCreateDepositTransactionAndReturnView() {
+		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(user());
 		when(accountService.topUpOwnedAccount(
 				ACCOUNT_NUMBER,
 				AMOUNT,
@@ -94,6 +102,7 @@ class TransactionServiceTopUpTest {
 	void topUpShouldPropagateAccountServiceExceptionAndNotCreateTransaction(String amountValue) {
 		BigDecimal amount = new BigDecimal(amountValue);
 
+		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(user());
 		when(accountService.topUpOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN))
 				.thenThrow(new BusinessLogicException("amount must be greater than 0"));
 
@@ -101,12 +110,14 @@ class TransactionServiceTopUpTest {
 				.isInstanceOf(BusinessLogicException.class)
 				.hasMessage("amount must be greater than 0");
 
+		verify(userService).findUserByLogin(USER_LOGIN);
 		verify(accountService).topUpOwnedAccount(ACCOUNT_NUMBER, amount, USER_LOGIN);
 		verifyNoInteractions(transactionRepository);
 	}
 
 	@Test
 	void topUpShouldPropagateAccountServiceExceptionWhenAccountCannotBeChanged() {
+		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(user());
 		when(accountService.topUpOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN))
 				.thenThrow(new BusinessLogicException("account is inactive"));
 
@@ -114,12 +125,14 @@ class TransactionServiceTopUpTest {
 				.isInstanceOf(BusinessLogicException.class)
 				.hasMessage("account is inactive");
 
+		verify(userService).findUserByLogin(USER_LOGIN);
 		verify(accountService).topUpOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(transactionRepository, never()).save(ArgumentMatchers.any());
 	}
 
 	@Test
 	void topUpShouldPropagateExceptionWhenTransactionCreationFails() {
+		when(userService.findUserByLogin(USER_LOGIN)).thenReturn(user());
 		when(accountService.topUpOwnedAccount(
 				ACCOUNT_NUMBER,
 				AMOUNT,
@@ -138,6 +151,7 @@ class TransactionServiceTopUpTest {
 				AMOUNT,
 				USER_LOGIN
 		);
+		verify(userService).findUserByLogin(USER_LOGIN);
 		verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
 	}
 

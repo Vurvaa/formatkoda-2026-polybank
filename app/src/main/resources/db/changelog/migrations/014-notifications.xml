@@ -4,13 +4,10 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="001-notifications" author="admin">
+    <changeSet id="001-notifications" author="yaroslav">
         <createTable tableName="events">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="bigint">
-                <constraints nullable="false"/>
             </column>
             <column name="payload" type="jsonb">
                 <constraints nullable="false"/>
@@ -19,6 +16,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <createTable tableName="delivery">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>

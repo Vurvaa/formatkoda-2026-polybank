@@ -306,6 +306,12 @@ public class UserService {
         );
     }
 
+    public UserEntity findUserById(@NonNull Long userId) {
+        return userRepository
+                .findUserById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+    }
+
     private long findRoleIdOrThrow(@NonNull String roleName) {
         return roleRepository
                 .findRoleEntityByName(roleName)

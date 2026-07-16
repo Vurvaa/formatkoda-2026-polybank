@@ -6,6 +6,7 @@ import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersVi
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionStatus;
 import ru.formatkoda.polybank.dto.transaction.TransactionType;
+import ru.formatkoda.polybank.messaging.dto.TransactionNotificationEventDto;
 
 public class TransactionMapper {
 	private TransactionMapper() {
@@ -35,6 +36,28 @@ public class TransactionMapper {
 				transaction.amount(),
 				transaction.type(),
 				transaction.status(),
+				transaction.createdAt()
+		);
+	}
+
+	public static TransactionNotificationEventDto toNotificationDto(
+			TransactionWithAccountNumbersView transaction,
+			Long fromUserId,
+			Long toUserId,
+			String name,
+			String email
+	) {
+		return new TransactionNotificationEventDto(
+				transaction.id(),
+				transaction.fromAccountNumber()  == null ? null : transaction.fromAccountNumber().value(),
+				transaction.toAccountNumber()   == null ? null : transaction.toAccountNumber().value(),
+				fromUserId,
+				toUserId,
+				name,
+				email,
+				transaction.amount().toPlainString(),
+				transaction.type().name(),
+				transaction.status().name(),
 				transaction.createdAt()
 		);
 	}

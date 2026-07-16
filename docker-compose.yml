@@ -60,8 +60,8 @@ services:
 
   notifications:
     build:
-      context: ./notification
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification/Dockerfile
       args:
         POSTGRES_DB: ${POSTGRES_DB}_codegen
         POSTGRES_USER: ${POSTGRES_USER}
@@ -74,10 +74,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      polybank:
+        condition: service_healthy
       mailhog:
         condition: service_started
     environment:
       JAVA_OPTS: ${JAVA_OPTS:-}
+      SPRING_LIQUIBASE_ENABLED: "false"
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

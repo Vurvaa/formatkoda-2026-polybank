@@ -24,7 +24,6 @@ public class NotificationService {
 
         EventEntity event = new EventEntity(
                 null,
-                notificationEventDto.userId(),
                 JSONB.jsonb(objectMapper.writeValueAsString(notificationEventDto)),
                 null
         );

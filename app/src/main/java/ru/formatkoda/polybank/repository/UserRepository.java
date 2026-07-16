@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.stereotype.Repository;
-import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.jooq.generated.tables.records.UsersRecord;
@@ -28,6 +27,12 @@ public class UserRepository {
     public Optional<UserEntity> findUserByLogin(UserLogin login) {
         return dsl.selectFrom(USERS)
                 .where(USERS.LOGIN.eq(login.value()))
+                .fetchOptional(this::toEntity);
+    }
+
+    public Optional<UserEntity> findUserById(long userId) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.ID.eq(userId))
                 .fetchOptional(this::toEntity);
     }
 

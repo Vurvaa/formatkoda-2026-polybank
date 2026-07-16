@@ -12,16 +12,19 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionEntity;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.TransactionService;
+import ru.formatkoda.polybank.service.UserService;
 
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -30,6 +33,7 @@ import static ru.formatkoda.polybank.testutil.TestData.AMOUNT;
 import static ru.formatkoda.polybank.testutil.TestData.CREATED_AT;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
 import static ru.formatkoda.polybank.testutil.TestData.account;
+import static ru.formatkoda.polybank.testutil.TestData.user;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTransferTest {
@@ -40,7 +44,11 @@ class TransactionServiceTransferTest {
 	@Mock
 	private AccountService accountService;
 	@Mock
+	private UserService userService;
+	@Mock
 	private TransactionEventPublisher transactionEventPublisher;
+	@Mock
+	private NotificationEventPublisher notificationEventPublisher;
 	@InjectMocks
 	private TransactionService transactionService;
 
@@ -53,6 +61,7 @@ class TransactionServiceTransferTest {
 				.thenReturn(fromAccount);
 		when(accountService.topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT))
 				.thenReturn(toAccount);
+		when(userService.findUserById(fromAccount.userId())).thenReturn(user());
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenReturn(savedTransferTransaction());
 
@@ -87,6 +96,7 @@ class TransactionServiceTransferTest {
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
+		verify(userService, times(2)).findUserById(fromAccount.userId());
 		verify(transactionEventPublisher).publishTransactionCreated(result);
 	}
 
@@ -151,6 +161,7 @@ class TransactionServiceTransferTest {
 				.thenReturn(account());
 		when(accountService.topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT))
 				.thenReturn(toAccount());
+		when(userService.findUserById(account().userId())).thenReturn(user());
 		when(transactionRepository.save(ArgumentMatchers.any(TransactionEntity.class)))
 				.thenThrow(new RuntimeException("transaction insert failed"));
 
@@ -165,6 +176,7 @@ class TransactionServiceTransferTest {
 
 		verify(accountService).withdrawFromOwnedAccount(ACCOUNT_NUMBER, AMOUNT, USER_LOGIN);
 		verify(accountService).topUpAccount(TO_ACCOUNT_NUMBER, AMOUNT);
+		verify(userService, times(2)).findUserById(account().userId());
 		verify(transactionRepository).save(ArgumentMatchers.any(TransactionEntity.class));
 	}
 
