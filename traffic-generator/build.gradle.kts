@@ -44,6 +44,9 @@ dependencies {
 
     implementation(libs.logback.classic)
 
+    implementation(libs.ktor.server.metrics.micrometer)
+    implementation(libs.micrometer.registry.prometheus)
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }
