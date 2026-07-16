@@ -6,6 +6,8 @@ import ru.formatkoda.trafficgenerator.config.GeneratorRuntimeConfig
 import ru.formatkoda.trafficgenerator.config.defaultConfig
 import ru.formatkoda.trafficgenerator.plugins.configureDatabase
 import ru.formatkoda.trafficgenerator.plugins.configureGenerator
+import ru.formatkoda.trafficgenerator.plugins.configureMetrics
+import ru.formatkoda.trafficgenerator.plugins.configurePrometheus
 import ru.formatkoda.trafficgenerator.plugins.configureRouting
 import ru.formatkoda.trafficgenerator.plugins.configureSerialization
 import ru.formatkoda.trafficgenerator.repository.PostgresGeneratorRepository
@@ -20,9 +22,13 @@ fun Application.module() {
     val url = environment.config.property("polybank.url").getString()
 
     configureSerialization()
+
+    val registry = configureMetrics()
+    configurePrometheus(registry)
+
     val database = configureDatabase()
     val repository = PostgresGeneratorRepository(database)
-    val metrics = GeneratorMetrics()
+    val metrics = GeneratorMetrics(registry)
     val bankClient = BankClient(url, metrics)
     val engine = GeneratorEngine(bankClient, repository)
     val runtimeConfig = GeneratorRuntimeConfig()
