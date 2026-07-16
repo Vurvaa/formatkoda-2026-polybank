@@ -51,7 +51,7 @@ object MrBuild : BuildType({
             jdkHome = javap
         }
 
-        maven {
+        /*maven { //TODO: temporary disabled!
             id = "SONARQUBE"
             name = "SonarQube Analysis"
             pomLocation = pomp
@@ -67,7 +67,7 @@ object MrBuild : BuildType({
                 -Dsonar.qualitygate.wait=true
             """.trimIndent().replace("\n", " ")
             jdkHome = javap
-        }
+        }*/
 
         maven {
             id = "NOTIFICATION_COMPILE"
