@@ -6,6 +6,7 @@ export interface UserLoginRef {
 
 export interface UserDetailsResponseDto {
   login: UserLoginRef;
+  email: string;
   name: string;
   lastName: string;
   roles: string[];

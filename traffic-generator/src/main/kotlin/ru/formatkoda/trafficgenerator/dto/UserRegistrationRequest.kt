@@ -6,7 +6,8 @@ import kotlin.random.Random
 @Serializable
 data class UserRegistrationRequest(
     val login: String = "login_${System.currentTimeMillis()}_${Random.nextInt(10_000)}",
-    val name: String = "John",
-    val lastName: String = "Doe",
+    val email: String = "email_${System.currentTimeMillis()}_${Random.nextInt(10_000)}@example.com",
+    val name: String = "John_${Random.nextInt(10_000)}",
+    val lastName: String = "Doe_${Random.nextInt(10_000)}",
     val password: String = "password1234"
 )

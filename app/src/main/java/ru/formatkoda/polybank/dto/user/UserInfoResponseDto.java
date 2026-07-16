@@ -9,6 +9,7 @@ import java.util.List;
 
 public record UserInfoResponseDto(
         @NonNull UserLogin login,
+        String email,
         @NonNull String name,
         @NonNull String lastName,
         @NonNull List<String> roles,

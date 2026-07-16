@@ -9,6 +9,7 @@ export interface LoginRequestDto {
 
 export interface UserRegistrationDto {
   login: string;
+  email: string;
   name: string;
   lastName: string;
   password: string;
