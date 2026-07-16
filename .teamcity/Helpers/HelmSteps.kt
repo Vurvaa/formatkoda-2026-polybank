@@ -67,7 +67,7 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string postgresql.host="${p.postgresHost}" \
                 --set-string postgresql.port="${p.postgresPort}" \
                 --set-string appVars.appJwtExpirationMinutes="${'$'}(printenv ${p.appJwtExpirationMinutesParam})" \
-                --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv ${p.appCorsAllowedOriginParam})" \
+                --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv ${p.appCorsAllowedOriginParam} | sed 's/,/\\,/g')" \
                 --set-string appVars.appJwtSecret="${'$'}(printenv ${p.appJwtSecretParam})" \
                 ${p.extraSetArgs} \
                 --debug
