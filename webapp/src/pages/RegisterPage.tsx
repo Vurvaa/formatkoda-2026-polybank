@@ -34,6 +34,10 @@ export function RegisterPage() {
             <Input autoComplete="username" />
           </Form.Item>
 
+          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Введите email' }]}>
+            <Input autoComplete="email" />
+          </Form.Item>
+
           <Form.Item name="name" label="Имя" rules={[{ required: true, message: 'Введите имя' }]}>
             <Input autoComplete="given-name" />
           </Form.Item>

@@ -81,6 +81,7 @@ export function UsersPage() {
       key: 'login',
       render: (_, record) => <Link to={`/users/${record.login.value}`}>{record.login.value}</Link>
     },
+    { title: 'Email', dataIndex: 'email' },
     { title: 'Имя', dataIndex: 'name' },
     { title: 'Фамилия', dataIndex: 'lastName' },
     {

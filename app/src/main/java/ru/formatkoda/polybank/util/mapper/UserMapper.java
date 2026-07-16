@@ -88,6 +88,7 @@ public class UserMapper {
     public UserInfoResponseDto toResponse(UserWithRolesView user, List<AccountInfo> accounts) {
         return new UserInfoResponseDto(
                 user.login(),
+                user.email().value(),
                 user.name(),
                 user.lastName(),
                 user.roles(),
