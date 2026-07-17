@@ -1,8 +1,11 @@
-import { Card, Descriptions, Space, Tag, Typography } from 'antd';
+import { Button, Card, Descriptions, Space, Tag, Typography } from 'antd';
+import { useState } from 'react';
+import { ChangePasswordModal } from '../components/ChangePasswordModal.tsx';
 import { useAuth } from '../hooks/useAuth.tsx';
 
 export function ProfilePage() {
   const { login_, email, name, lastName, roles } = useAuth();
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
   return (
     <Space direction="vertical" size="large" className="page-stack">
@@ -29,6 +32,21 @@ export function ProfilePage() {
           </Descriptions.Item>
         </Descriptions>
       </Card>
+
+      <Card title="Безопасность">
+        <Space direction="vertical">
+          <Button onClick={() => setPasswordModalOpen(true)}>Сменить пароль</Button>
+        </Space>
+      </Card>
+
+      {login_ && (
+        <ChangePasswordModal
+          open={passwordModalOpen}
+          login={login_}
+          onCancel={() => setPasswordModalOpen(false)}
+          onSuccess={() => setPasswordModalOpen(false)}
+        />
+      )}
     </Space>
   );
 }

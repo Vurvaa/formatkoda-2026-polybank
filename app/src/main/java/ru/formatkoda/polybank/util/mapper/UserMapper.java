@@ -7,7 +7,9 @@ import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserPasswordChangedView;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
+import ru.formatkoda.polybank.dto.user.ChangedUserPasswordDto;
 import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
@@ -26,25 +28,20 @@ public class UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     public UserEntity toEntity(UserRegistrationDto user) {
-        String passwordHash = Objects.requireNonNull(
-                passwordEncoder.encode(user.password()),
-                "encoded password must not be null"
-        );
-
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
                 new UserEmail(user.email()),
                 user.name(),
                 user.lastName(),
-                passwordHash,
+                getPasswordHash(user.password()),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
     }
 
     public UserEntity toEntity(UserLoginDto user) {
-        return  new UserEntity(
+        return new UserEntity(
                 null,
                 new UserLogin(user.login()),
                 new UserEmail(null),
@@ -57,18 +54,13 @@ public class UserMapper {
     }
 
     public UserEntity toEntity(StaffUserRegistrationDto user) {
-        String passwordHash = Objects.requireNonNull(
-                passwordEncoder.encode(user.password()),
-                "encoded password must not be null"
-        );
-
         return new UserEntity(
                 null,
                 new UserLogin(user.login()),
                 new UserEmail(null),
                 user.name(),
                 user.lastName(),
-                passwordHash,
+                getPasswordHash(user.password()),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
@@ -112,6 +104,14 @@ public class UserMapper {
         );
     }
 
+    public UserPasswordChangedView toUserPasswordChangedView(ChangedUserPasswordDto changeUserPassword) {
+        return new UserPasswordChangedView(
+                new UserLogin(changeUserPassword.login()),
+                changeUserPassword.oldPassword(),
+                getPasswordHash(changeUserPassword.newPassword())
+        );
+    }
+
     public UserNotificationEventDto toNotificationDto(UserEntity user) {
         return new UserNotificationEventDto(
                 user.id(),
@@ -121,6 +121,13 @@ public class UserMapper {
                 user.email().value(),
                 user.createdAt(),
                 user.blockedAt()
+        );
+    }
+
+    private String getPasswordHash(String password) {
+        return Objects.requireNonNull(
+                passwordEncoder.encode(password),
+                "encoded password must not be null"
         );
     }
 }
