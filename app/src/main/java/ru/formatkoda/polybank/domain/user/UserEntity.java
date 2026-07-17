@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 public record UserEntity(
         Long id,
         @NonNull UserLogin login,
-        @NonNull UserEmail email,
+        UserEmail email,
         @NonNull String name,
         @NonNull String lastName,
         @NonNull String passwordHash,
