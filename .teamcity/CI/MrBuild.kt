@@ -53,6 +53,7 @@ object MrBuild : BuildType({
             goals = "test"
             runnerArgs = "-Dsurefire.failIfNoSpecifiedTests=false"
             jdkHome = javap
+
             conditions {
                 equals(buildApp, "true")
             }
@@ -64,6 +65,7 @@ object MrBuild : BuildType({
             pomLocation = pomp
             goals = "checkstyle:checkstyle"
             jdkHome = javap
+
             conditions {
                 equals(buildApp, "true")
             }
@@ -143,23 +145,6 @@ object MrBuild : BuildType({
         }
 
         script {
-            id = "TRAFFIC_GENERATOR_TESTS"
-            name = "Traffic Generator Unit Tests"
-            workingDir = "traffic-generator"
-
-            scriptContent = """
-                #!/bin/sh
-                set -e
-
-                ./gradlew test --no-daemon
-            """.trimIndent()
-
-            conditions {
-                equals(buildTra, "true")
-            }
-        }
-
-        script {
             id = "TRAFFIC_GENERATOR_BUILD"
             name = "Traffic Generator Build"
             workingDir = "traffic-generator"
@@ -207,7 +192,7 @@ object MrBuild : BuildType({
                 -Dsonar.host.url=%sonar.host.url%
                 -Dsonar.token=%env.SONAR_TOKEN%
                 -Dsonar.projectKey=polybank-notification
-                -Dsonar.projectName=Polybank Notification
+                -Dsonar.projectName=Polybank-Notification
                 -Dsonar.projectVersion=%teamcity.build.branch%-%build.number%
                 -Dsonar.java.binaries=target/classes
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
@@ -231,7 +216,7 @@ object MrBuild : BuildType({
                   -Dsonar.host.url=%sonar.host.url% \
                   -Dsonar.token=%env.SONAR_TOKEN% \
                   -Dsonar.projectKey=polybank-webapp \
-                  -Dsonar.projectName=Polybank Webapp \
+                  -Dsonar.projectName=Polybank-Webapp \
                   -Dsonar.projectVersion=%teamcity.build.branch%-%build.number% \
                   -Dsonar.sources=src \
                   -Dsonar.qualitygate.wait=true
@@ -253,7 +238,7 @@ object MrBuild : BuildType({
                   -Dsonar.host.url=%sonar.host.url% \
                   -Dsonar.token=%env.SONAR_TOKEN% \
                   -Dsonar.projectKey=polybank-traffic \
-                  -Dsonar.projectName=Polybank Traffic Generator \
+                  -Dsonar.projectName=Polybank-Traffic-Generator \
                   -Dsonar.projectVersion=%teamcity.build.branch%-%build.number% \
                   -Dsonar.qualitygate.wait=true
             """.trimIndent()
