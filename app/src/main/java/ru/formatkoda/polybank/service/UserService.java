@@ -17,6 +17,7 @@ import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,8 @@ public class UserService {
         notificationEventPublisher.publishUserNotificationEvent(
                 userMapper.toNotificationDto(registered),
                 List.of(EMAIL.name()),
-                "USER_REGISTERED");
+                NotificationTemplate.USER_REGISTERED
+        );
 
         return user.login();
     }

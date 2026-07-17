@@ -18,6 +18,7 @@ import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -94,7 +95,7 @@ public class TransactionService {
 						user.email().value()
 				),
 				List.of(EMAIL.name()),
-				"TRANSACTION_TOP_UP"
+				NotificationTemplate.TRANSACTION_TOP_UP
 		);
 
 
@@ -134,7 +135,7 @@ public class TransactionService {
 						user.email().value()
 				),
 				List.of(EMAIL.name()),
-				"TRANSACTION_WITHDRAW"
+				NotificationTemplate.TRANSACTION_WITHDRAW
 		);
 
 		return transactionView;
@@ -182,7 +183,7 @@ public class TransactionService {
 							userFrom.email().value()
 					),
 					List.of(EMAIL.name()),
-					"TRANSACTION_BETWEEN_PERSON_ACCOUNTS"
+					NotificationTemplate.TRANSACTION_BETWEEN_PERSON_ACCOUNTS
 			);
 		} else {
 			notificationEventPublisher.publishTransactionNotificationEvent(
@@ -194,7 +195,7 @@ public class TransactionService {
 							userFrom.email().value()
 					),
 					List.of(EMAIL.name()),
-					"TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS"
+					NotificationTemplate.TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS
 			);
 
 			notificationEventPublisher.publishTransactionNotificationEvent(
@@ -206,7 +207,7 @@ public class TransactionService {
 							userTo.email().value()
 					),
 					List.of(EMAIL.name()),
-					"TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS"
+					NotificationTemplate.TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS
 			);
 		}
 		return transactionView;

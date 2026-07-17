@@ -14,6 +14,7 @@ import ru.formatkoda.polybank.messaging.publisher.AccountEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
 
 import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
 
@@ -45,7 +46,7 @@ public class AccountService {
 						user.email().value()
 				),
 				List.of(EMAIL.name()),
-				"ACCOUNT_CREATED"
+				NotificationTemplate.ACCOUNT_CREATED
 		);
 
 		return account;

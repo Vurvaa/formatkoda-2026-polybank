@@ -184,7 +184,7 @@ class UserServiceTest {
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
                         List.of(EMAIL.name()),
-                        "USER_REGISTERED"
+                        NotificationEventPublisher.NotificationTemplate.USER_REGISTERED
                 );
     }
 
@@ -201,7 +201,7 @@ class UserServiceTest {
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
                         List.of(EMAIL.name()),
-                        "USER_REGISTERED"
+                        NotificationEventPublisher.NotificationTemplate.USER_REGISTERED
                 );
         verify(userRepository).createUserAndReturnId(user());
 
