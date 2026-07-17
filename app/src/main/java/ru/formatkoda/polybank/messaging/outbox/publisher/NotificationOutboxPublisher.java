@@ -22,10 +22,6 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
 
     private final OutboxWriter outboxWriter;
 
-    public enum AvailableNotificationMethods {
-        EMAIL
-    }
-
     @Override
     public void publishUserNotificationEvent(
             UserNotificationEventDto user,

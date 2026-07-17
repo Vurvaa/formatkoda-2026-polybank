@@ -24,6 +24,10 @@ public interface NotificationEventPublisher {
         private final String eventType;
     }
 
+    enum AvailableNotificationMethods {
+        EMAIL
+    }
+
     void publishUserNotificationEvent(
             UserNotificationEventDto user,
             List<String> notificationTypeNames,

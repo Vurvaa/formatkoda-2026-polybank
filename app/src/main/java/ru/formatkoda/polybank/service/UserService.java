@@ -18,11 +18,10 @@ import ru.formatkoda.polybank.util.mapper.UserMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.AvailableNotificationMethods;
 
 import java.util.List;
 import java.util.Optional;
-
-import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
 
 @Service
 @Transactional(readOnly = true)
@@ -68,7 +67,7 @@ public class UserService {
         userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
         notificationEventPublisher.publishUserNotificationEvent(
                 userMapper.toNotificationDto(registered),
-                List.of(EMAIL.name()),
+                List.of(AvailableNotificationMethods.EMAIL.name()),
                 NotificationTemplate.USER_REGISTERED
         );
 

@@ -14,6 +14,7 @@ import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.AvailableNotificationMethods;
 import ru.formatkoda.polybank.repository.RoleRepository;
 import ru.formatkoda.polybank.repository.UserRepository;
 import ru.formatkoda.polybank.service.UserService;
@@ -31,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -183,7 +183,7 @@ class UserServiceTest {
         verify(userNotificationEventPublisher)
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
-                        List.of(EMAIL.name()),
+                        List.of(AvailableNotificationMethods.EMAIL.name()),
                         NotificationEventPublisher.NotificationTemplate.USER_REGISTERED
                 );
     }
@@ -200,7 +200,7 @@ class UserServiceTest {
         verify(userNotificationEventPublisher)
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
-                        List.of(EMAIL.name()),
+                        List.of(AvailableNotificationMethods.EMAIL.name()),
                         NotificationEventPublisher.NotificationTemplate.USER_REGISTERED
                 );
         verify(userRepository).createUserAndReturnId(user());

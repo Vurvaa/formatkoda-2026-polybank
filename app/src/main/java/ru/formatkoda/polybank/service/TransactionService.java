@@ -19,13 +19,12 @@ import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.AvailableNotificationMethods;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-
-import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
 
 @Service
 @Transactional(readOnly = true)
@@ -94,7 +93,7 @@ public class TransactionService {
 						user.name(),
 						user.email().value()
 				),
-				List.of(EMAIL.name()),
+				List.of(AvailableNotificationMethods.EMAIL.name()),
 				NotificationTemplate.TRANSACTION_TOP_UP
 		);
 
@@ -134,7 +133,7 @@ public class TransactionService {
 						user.name(),
 						user.email().value()
 				),
-				List.of(EMAIL.name()),
+				List.of(AvailableNotificationMethods.EMAIL.name()),
 				NotificationTemplate.TRANSACTION_WITHDRAW
 		);
 
@@ -182,7 +181,7 @@ public class TransactionService {
 							personName,
 							userFrom.email().value()
 					),
-					List.of(EMAIL.name()),
+					List.of(AvailableNotificationMethods.EMAIL.name()),
 					NotificationTemplate.TRANSACTION_BETWEEN_PERSON_ACCOUNTS
 			);
 		} else {
@@ -194,7 +193,7 @@ public class TransactionService {
 							userFrom.name(),
 							userFrom.email().value()
 					),
-					List.of(EMAIL.name()),
+					List.of(AvailableNotificationMethods.EMAIL.name()),
 					NotificationTemplate.TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS
 			);
 
@@ -206,7 +205,7 @@ public class TransactionService {
 							userTo.name(),
 							userTo.email().value()
 					),
-					List.of(EMAIL.name()),
+					List.of(AvailableNotificationMethods.EMAIL.name()),
 					NotificationTemplate.TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS
 			);
 		}
