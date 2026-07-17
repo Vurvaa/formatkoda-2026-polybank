@@ -1,4 +1,3 @@
-{{- if .Values.trafficGenerator.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,6 +8,12 @@ spec:
     matchLabels:
       app: {{ .Values.trafficGenerator.appName }}
   replicas: {{ .Values.trafficGenerator.replicas }}
+  progressDeadlineSeconds: {{ .Values.trafficGenerator.progressDeadlineSeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -17,14 +22,6 @@ spec:
         reloader.stakater.com/auto: "true"
     spec:
       automountServiceAccountToken: false
-      {{- $pgHost := "" }}
-      {{- $pgPort := 5432 }}
-      {{- if .Values.cnpg.enabled }}
-      {{- $pgHost = printf "%s-pg-rw" .Release.Name }}
-      {{- else }}
-      {{- $pgHost = .Values.externalPostgres.host }}
-      {{- $pgPort = .Values.externalPostgres.port | default 5432 }}
-      {{- end }}
       initContainers:
         - name: wait-for-postgres
           image: postgres:16-alpine
@@ -33,7 +30,7 @@ spec:
             - sh
             - -c
             - >-
-              until pg_isready -h {{ $pgHost }} -p {{ $pgPort }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              until pg_isready -h {{ .Values.postgresql.host }} -p {{ .Values.postgresql.port }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
               do echo "waiting for postgres"; sleep 2; done
           envFrom:
             - secretRef:
@@ -104,4 +101,3 @@ spec:
                       values:
                         - {{ .Values.trafficGenerator.appName }}
                 topologyKey: kubernetes.io/hostname
-  {{- end }}

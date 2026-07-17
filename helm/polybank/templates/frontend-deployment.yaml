@@ -8,6 +8,12 @@ spec:
     matchLabels:
       app: {{ .Values.webapp.appName }}
   replicas: {{ .Values.webapp.replicas }}
+  progressDeadlineSeconds: {{ .Values.webapp.progressDeadlineSeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:

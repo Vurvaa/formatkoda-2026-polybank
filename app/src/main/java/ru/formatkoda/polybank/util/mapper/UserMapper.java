@@ -13,6 +13,7 @@ import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
 import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
+import ru.formatkoda.polybank.messaging.dto.UserNotificationEventDto;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -106,6 +107,18 @@ public class UserMapper {
                 user.name(),
                 user.lastName(),
                 roles,
+                user.createdAt(),
+                user.blockedAt()
+        );
+    }
+
+    public UserNotificationEventDto toNotificationDto(UserEntity user) {
+        return new UserNotificationEventDto(
+                user.id(),
+                user.login().value(),
+                user.name(),
+                user.lastName(),
+                user.email().value(),
                 user.createdAt(),
                 user.blockedAt()
         );
