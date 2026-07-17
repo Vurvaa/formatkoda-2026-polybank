@@ -59,6 +59,14 @@ public class UserRepository {
                 .fetchOptional(this::toEntity);
     }
 
+    public Optional<UserEntity> changeUserPassword(UserLogin userLogin, String newPasswordHash) {
+        return dsl.update(USERS)
+                .set(USERS.PASSWORD_HASH, newPasswordHash)
+                .where(USERS.LOGIN.eq(userLogin.value()))
+                .returning()
+                .fetchOptional(this::toEntity);
+    }
+
     public List<UserEntity> findAllUsers(PageRequest pageRequest) {
         return dsl
                 .selectFrom(USERS)

@@ -36,3 +36,9 @@ export interface StaffUserRegistrationDto {
   password: string;
   roleName: string;
 }
+
+export interface ChangedUserPasswordDto {
+  login: string;
+  oldPassword: string;
+  newPassword: string;
+}

@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import ru.formatkoda.polybank.domain.user.RoleEntity;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 
+import ru.formatkoda.polybank.domain.user.UserPasswordChangedView;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
@@ -78,6 +80,142 @@ class UserServiceTest {
 
         verify(userRepository).findAllUsers(pageRequest);
         verify(userRepository).countAll();
+    }
+
+    @Test
+    void changeUserPasswordShouldChangePasswordAndReturnUpdatedUser() {
+        String oldPassword = "oldPassword123";
+        String newPasswordHash = "new-password-hash";
+
+        String currentPasswordHash = BCrypt.hashpw(
+                oldPassword,
+                BCrypt.gensalt()
+        );
+
+        UserEntity currentUser = mock(UserEntity.class);
+        UserEntity updatedUser = mock(UserEntity.class);
+
+        UserPasswordChangedView request = new UserPasswordChangedView(
+                USER_LOGIN,
+                oldPassword,
+                newPasswordHash
+        );
+
+        when(currentUser.passwordHash()).thenReturn(currentPasswordHash);
+        when(userRepository.findUserByLogin(USER_LOGIN))
+                .thenReturn(Optional.of(currentUser));
+        when(userRepository.changeUserPassword(USER_LOGIN, newPasswordHash))
+                .thenReturn(Optional.of(updatedUser));
+
+        UserEntity result = userService.changeUserPassword(request);
+
+        assertSame(updatedUser, result);
+
+        verify(userRepository).findUserByLogin(USER_LOGIN);
+        verify(userRepository).changeUserPassword(
+                USER_LOGIN,
+                newPasswordHash
+        );
+    }
+
+    @Test
+    void changeUserPasswordShouldThrowExceptionWhenOldPasswordIsInvalid() {
+        String oldPassword = "oldPassword123";
+        String newPasswordHash = "new-password-hash";
+
+        String currentPasswordHash = BCrypt.hashpw(
+                oldPassword,
+                BCrypt.gensalt()
+        );
+
+        UserEntity currentUser = mock(UserEntity.class);
+
+        UserPasswordChangedView request = new UserPasswordChangedView(
+                USER_LOGIN,
+                "incorrectPassword",
+                newPasswordHash
+        );
+
+        when(currentUser.passwordHash()).thenReturn(currentPasswordHash);
+        when(userRepository.findUserByLogin(USER_LOGIN))
+                .thenReturn(Optional.of(currentUser));
+
+        BusinessLogicException exception = assertThrows(
+                BusinessLogicException.class,
+                () -> userService.changeUserPassword(request)
+        );
+
+        assertEquals("invalid old password provided", exception.getMessage());
+
+        verify(userRepository).findUserByLogin(USER_LOGIN);
+        verify(userRepository, never()).changeUserPassword(
+                any(UserLogin.class),
+                anyString()
+        );
+    }
+
+    @Test
+    void changeUserPasswordShouldThrowExceptionWhenRepositoryDoesNotChangePassword() {
+        String oldPassword = "oldPassword123";
+        String newPasswordHash = "new-password-hash";
+
+        String currentPasswordHash = BCrypt.hashpw(
+                oldPassword,
+                BCrypt.gensalt()
+        );
+
+        UserEntity currentUser = mock(UserEntity.class);
+
+        UserPasswordChangedView request = new UserPasswordChangedView(
+                USER_LOGIN,
+                oldPassword,
+                newPasswordHash
+        );
+
+        when(currentUser.passwordHash()).thenReturn(currentPasswordHash);
+        when(userRepository.findUserByLogin(USER_LOGIN))
+                .thenReturn(Optional.of(currentUser));
+        when(userRepository.changeUserPassword(USER_LOGIN, newPasswordHash))
+                .thenReturn(Optional.empty());
+
+        BusinessLogicException exception = assertThrows(
+                BusinessLogicException.class,
+                () -> userService.changeUserPassword(request)
+        );
+
+        assertEquals("password not changed", exception.getMessage());
+
+        verify(userRepository).findUserByLogin(USER_LOGIN);
+        verify(userRepository).changeUserPassword(
+                USER_LOGIN,
+                newPasswordHash
+        );
+    }
+
+    @Test
+    void changeUserPasswordShouldThrowExceptionWhenUserNotFound() {
+        String oldPassword = "oldPassword123";
+        String newPasswordHash = "new-password-hash";
+
+        UserPasswordChangedView request = new UserPasswordChangedView(
+                USER_LOGIN,
+                oldPassword,
+                newPasswordHash
+        );
+
+        when(userRepository.findUserByLogin(USER_LOGIN))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> userService.changeUserPassword(request)
+        );
+
+        verify(userRepository).findUserByLogin(USER_LOGIN);
+        verify(userRepository, never()).changeUserPassword(
+                any(UserLogin.class),
+                anyString()
+        );
     }
 
     @Test
@@ -246,13 +384,13 @@ class UserServiceTest {
     }
 
     @Test
-    void addUserEmailShouldChangeEmailAndReturnUser() {
+    void changeUserEmailShouldChangeEmailAndReturnUser() {
         when(userRepository.findUserByEmail(USER_EMAIL))
                 .thenReturn(Optional.empty());
         when(userRepository.changeUserEmail(USER_LOGIN, USER_EMAIL))
                 .thenReturn(Optional.of(user()));
 
-        UserEntity result = userService.addUserEmail(USER_LOGIN, USER_EMAIL);
+        UserEntity result = userService.changeUserEmail(USER_LOGIN, USER_EMAIL);
 
         assertEquals(user(), result);
 
@@ -262,13 +400,13 @@ class UserServiceTest {
     }
 
     @Test
-    void addUserEmailShouldThrowExceptionWhenEmailAlreadyExists() {
+    void changeUserEmailShouldThrowExceptionWhenEmailAlreadyExists() {
         when(userRepository.findUserByEmail(USER_EMAIL))
                 .thenReturn(Optional.of(user()));
 
         BusinessLogicException exception = assertThrows(
                 BusinessLogicException.class,
-                () -> userService.addUserEmail(USER_LOGIN, USER_EMAIL)
+                () -> userService.changeUserEmail(USER_LOGIN, USER_EMAIL)
         );
 
         assertEquals("this email already exist", exception.getMessage());
@@ -279,7 +417,7 @@ class UserServiceTest {
     }
 
     @Test
-    void addUserEmailShouldThrowExceptionWhenEmailWasNotChanged() {
+    void changeUserEmailShouldThrowExceptionWhenEmailWasNotChanged() {
         when(userRepository.findUserByEmail(USER_EMAIL))
                 .thenReturn(Optional.empty());
         when(userRepository.changeUserEmail(USER_LOGIN, USER_EMAIL))
@@ -287,7 +425,7 @@ class UserServiceTest {
 
         BusinessLogicException exception = assertThrows(
                 BusinessLogicException.class,
-                () -> userService.addUserEmail(USER_LOGIN, USER_EMAIL)
+                () -> userService.changeUserEmail(USER_LOGIN, USER_EMAIL)
         );
 
         assertEquals("email not changed", exception.getMessage());
