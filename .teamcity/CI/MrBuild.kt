@@ -153,7 +153,7 @@ object MrBuild : BuildType({
                 #!/bin/sh
                 set -e
 
-                ./gradlew build -x test --no-daemon
+                ./gradlew build -x test
             """.trimIndent()
 
             conditions {
