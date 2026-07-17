@@ -2,11 +2,13 @@ package ru.formatkoda.polybank.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
+import ru.formatkoda.polybank.domain.user.UserPasswordChangedView;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.UserEventPublisher;
@@ -79,7 +81,6 @@ public class UserService {
     }
 
 
-
     public UserEntity findUserByLogin(@NonNull UserLogin login) {
         return userRepository.findUserByLogin(login)
                 .orElseThrow(() -> new ResourceNotFoundException("not found user with this login"));
@@ -113,8 +114,8 @@ public class UserService {
 
         return userMapper.toUserWithRolesView(
                 userRepository
-                .blockUserById(user.id())
-                .orElseThrow(() -> new BusinessLogicException("user not blocked")),
+                        .blockUserById(user.id())
+                        .orElseThrow(() -> new BusinessLogicException("user not blocked")),
                 roles
         );
     }
@@ -177,7 +178,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity addUserEmail(
+    public UserEntity changeUserEmail(
             @NonNull UserLogin userLogin,
             @NonNull UserEmail userEmail) {
         Optional<UserEntity> userOptional = userRepository.findUserByEmail(userEmail);
@@ -199,7 +200,7 @@ public class UserService {
         UserEntity manager = findNotBlockedUserByLogin(managerLogin);
         UserEntity user = findUserByLogin(userLogin);
 
-        if  (user.id().equals(manager.id())) {
+        if (user.id().equals(manager.id())) {
             throw new BusinessLogicException("user can not remove himself");
         }
         List<String> userRoles = findAllUserRoles(user);
@@ -257,6 +258,27 @@ public class UserService {
         }
 
         return userMapper.toUserWithRolesView(targetUser, targetRoles);
+    }
+
+    @Transactional
+    public UserEntity changeUserPassword(
+            @NonNull UserPasswordChangedView updatedUser
+    ) {
+        UserEntity user = findUserByLogin(updatedUser.login());
+
+        boolean isNotSame = !BCrypt.checkpw(updatedUser.oldPassword(), user.passwordHash());
+        if (isNotSame)
+            throw new BusinessLogicException("invalid old password provided");
+
+        UserLogin userLogin = updatedUser.login();
+        Optional<UserEntity> userOptional = userRepository.changeUserPassword(
+                userLogin,
+                updatedUser.newPasswordHash()
+        );
+
+        return userOptional.orElseThrow(
+                () -> new BusinessLogicException("password not changed")
+        );
     }
 
     @Transactional
