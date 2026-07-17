@@ -227,27 +227,6 @@ object MrBuild : BuildType({
             }
         }
 
-        script {
-            id = "SONARQUBE_TRAFFIC"
-            name = "SonarQube Analysis Traffic Generator"
-            workingDir = "traffic-generator"
-            scriptContent = """
-                #!/bin/sh
-                set -e
-                ./gradlew sonarqube --no-daemon \
-                  -Dsonar.host.url=%sonar.host.url% \
-                  -Dsonar.token=%env.SONAR_TOKEN% \
-                  -Dsonar.projectKey=polybank-traffic \
-                  -Dsonar.projectName=Polybank-Traffic-Generator \
-                  -Dsonar.projectVersion=%teamcity.build.branch%-%build.number% \
-                  -Dsonar.qualitygate.wait=true
-            """.trimIndent()
-
-            conditions {
-                equals(buildTra, "true")
-            }
-        }
-
         cleanupDatabaseStep()
     }
 
