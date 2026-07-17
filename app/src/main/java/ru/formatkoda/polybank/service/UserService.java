@@ -21,6 +21,8 @@ import ru.formatkoda.polybank.util.pagination.PageResult;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -65,7 +67,7 @@ public class UserService {
         userEventPublisher.publishUserRegistered(registered, CLIENT_ROLE);
         notificationEventPublisher.publishUserNotificationEvent(
                 userMapper.toNotificationDto(registered),
-                List.of("EMAIL"),
+                List.of(EMAIL.name()),
                 "USER_REGISTERED");
 
         return user.login();

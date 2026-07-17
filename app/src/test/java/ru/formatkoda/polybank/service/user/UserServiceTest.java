@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -182,7 +183,7 @@ class UserServiceTest {
         verify(userNotificationEventPublisher)
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
-                        List.of("EMAIL"),
+                        List.of(EMAIL.name()),
                         "USER_REGISTERED"
                 );
     }
@@ -199,7 +200,7 @@ class UserServiceTest {
         verify(userNotificationEventPublisher)
                 .publishUserNotificationEvent(
                         userMapper.toNotificationDto(user()),
-                        List.of("EMAIL"),
+                        List.of(EMAIL.name()),
                         "USER_REGISTERED"
                 );
         verify(userRepository).createUserAndReturnId(user());

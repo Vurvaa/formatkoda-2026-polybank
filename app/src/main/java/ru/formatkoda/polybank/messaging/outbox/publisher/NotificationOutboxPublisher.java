@@ -33,6 +33,10 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
             "TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS", "TransactionWithdrawBetweenAccounts"
     );
 
+    public enum AvailableNotificationMethods {
+        EMAIL
+    }
+
     private static String getUserNotificationEventType(String key) {
         return notificationEventTypeRegistry.get(key);
     }

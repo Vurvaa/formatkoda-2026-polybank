@@ -11,11 +11,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
@@ -29,17 +28,11 @@ public class DeliveryDispatchService {
     private final DeliveryPlanningService deliveryPlanningService;
 
     private static final int NUMBER_DELIVERIES_TO_DISPATCH = 20;
-    private static final int KEEP_ALIVE_TIME = 1000;
+    private static final int MAXIMUM_PARALLEL_TASKS = 40;
 
     private final ReentrantLock deliveryMarkLock = new ReentrantLock();
-    private final BlockingDeque<Runnable> deque = new LinkedBlockingDeque<>(NUMBER_DELIVERIES_TO_DISPATCH);
-    private final ThreadPoolExecutor deliveryDispatchExecutor = new ThreadPoolExecutor(
-            NUMBER_DELIVERIES_TO_DISPATCH,
-            2*NUMBER_DELIVERIES_TO_DISPATCH,
-            KEEP_ALIVE_TIME,
-            TimeUnit.MILLISECONDS,
-            deque
-    );
+    private final Semaphore virtualThreadsSemaphore = new Semaphore(MAXIMUM_PARALLEL_TASKS);
+    private final ExecutorService deliveryDispatchExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     @Scheduled(
             initialDelayString = "${notification.delivery.initial-delay-ms:10000}",
@@ -75,6 +68,8 @@ public class DeliveryDispatchService {
                                         deliveryDispatchWorker.dispatch(delivery);
                                     } catch (Exception _) {
                                         deliveryPlanningService.recoverDelivery(delivery);
+                                    } finally {
+                                        virtualThreadsSemaphore.release();
                                     }
                                 }
                         );

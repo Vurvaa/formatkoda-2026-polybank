@@ -15,6 +15,8 @@ import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 
+import static ru.formatkoda.polybank.messaging.outbox.publisher.NotificationOutboxPublisher.AvailableNotificationMethods.EMAIL;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class AccountService {
 						user.name(),
 						user.email().value()
 				),
-				List.of("EMAIL"),
+				List.of(EMAIL.name()),
 				"ACCOUNT_CREATED"
 		);
 
