@@ -12,6 +12,7 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
@@ -33,6 +34,7 @@ public class TransactionService {
 	private final AccountService accountService;
 	private final UserService userService;
 	private final TransactionEventPublisher transactionEventPublisher;
+	private final NotificationEventPublisher notificationEventPublisher;
 
 	public PageResult<TransactionWithAccountNumbersView> findByAccountNumber(
 			@NonNull AccountNumber accountNumber,
@@ -63,6 +65,8 @@ public class TransactionService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
 		AccountEntity account = accountService.topUpOwnedAccount(accountNumber, amount, userLogin);
 
 		TransactionEntity transaction = saveCompletedTransaction(
@@ -79,6 +83,18 @@ public class TransactionService {
 		);
 
 		transactionEventPublisher.publishTransactionCreated(transactionView);
+		notificationEventPublisher.publishTransactionNotificationEvent(
+				TransactionMapper.toNotificationDto(
+						transactionView,
+						null,
+						user.id(),
+						user.name(),
+						user.email().value()
+				),
+				List.of("EMAIL"),
+				"TRANSACTION_TOP_UP"
+		);
+
 
 		return transactionView;
 	}
@@ -89,6 +105,8 @@ public class TransactionService {
 			@NonNull BigDecimal amount,
 			@NonNull UserLogin userLogin
 	) {
+		UserEntity user = userService.findUserByLogin(userLogin);
+
 		AccountEntity account = accountService.withdrawFromOwnedAccount(accountNumber, amount, userLogin);
 
 		TransactionEntity transaction = saveCompletedTransaction(
@@ -105,6 +123,17 @@ public class TransactionService {
 		);
 
 		transactionEventPublisher.publishTransactionCreated(transactionView);
+		notificationEventPublisher.publishTransactionNotificationEvent(
+				TransactionMapper.toNotificationDto(
+						transactionView,
+						user.id(),
+						null,
+						user.name(),
+						user.email().value()
+				),
+				List.of("EMAIL"),
+				"TRANSACTION_WITHDRAW"
+		);
 
 		return transactionView;
 	}
@@ -122,6 +151,9 @@ public class TransactionService {
 		AccountEntity fromAccount = accountService.withdrawFromOwnedAccount(fromAccountNumber, amount, userLogin);
 		AccountEntity toAccount = accountService.topUpAccount(toAccountNumber, amount);
 
+		UserEntity userFrom = userService.findUserById(fromAccount.userId());
+		UserEntity userTo = userService.findUserById(toAccount.userId());
+
 		TransactionEntity transaction = saveCompletedTransaction(
 				fromAccount.id(),
 				toAccount.id(),
@@ -136,7 +168,45 @@ public class TransactionService {
 		);
 
 		transactionEventPublisher.publishTransactionCreated(transactionView);
+		if (userFrom.id().equals(userTo.id())) {
+			String personName = userFrom.name();
 
+			notificationEventPublisher.publishTransactionNotificationEvent(
+					TransactionMapper.toNotificationDto(
+							transactionView,
+							userFrom.id(),
+							userTo.id(),
+							personName,
+							userFrom.email().value()
+					),
+					List.of("EMAIL"),
+					"TRANSACTION_BETWEEN_PERSON_ACCOUNTS"
+			);
+		} else {
+			notificationEventPublisher.publishTransactionNotificationEvent(
+					TransactionMapper.toNotificationDto(
+							transactionView,
+							userFrom.id(),
+							userTo.id(),
+							userFrom.name(),
+							userFrom.email().value()
+					),
+					List.of("EMAIL"),
+					"TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS"
+			);
+
+			notificationEventPublisher.publishTransactionNotificationEvent(
+					TransactionMapper.toNotificationDto(
+							transactionView,
+							userFrom.id(),
+							userTo.id(),
+							userTo.name(),
+							userTo.email().value()
+					),
+					List.of("EMAIL"),
+					"TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS"
+			);
+		}
 		return transactionView;
 	}
 

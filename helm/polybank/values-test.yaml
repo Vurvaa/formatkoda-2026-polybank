@@ -9,16 +9,29 @@ service:
   nodePort: 30190
 resources:
   requests:
-    memory: "192Mi"
-    cpu: "75m"
+    memory: "384Mi"
+    cpu: "200m"
   limits:
     memory: "768Mi"
-    cpu: "250m"
+    cpu: "750m"
 
 startupProbe:
+  initialDelaySeconds: 20
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 40
+
+readinessProbe:
+  initialDelaySeconds: 20
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 5
+
+livenessProbe:
   initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 6
 
 webapp:
   appName: polybank-webapp
@@ -38,29 +51,36 @@ webapp:
       cpu: "50m"
 
 appVars:
-  APP_CORS_ALLOWED_ORIGIN:
-    secret: false
-    value: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
+  appCorsAllowedOrigin: "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191"
+
+postgresql:
+  host: polybank-pg-rw
+  port: 5432
 
 cnpg:
-  enabled: true
   instances: 1
   storageSize: 2Gi
   storageClass: "local-path"
   resources:
     requests:
-      cpu: "25m"
-      memory: "128Mi"
+      cpu: "50m"
+      memory: "512Mi"
     limits:
-      cpu: "100m"
-      memory: "256Mi"
+      cpu: "200m"
+      memory: "1Gi"
+
+resourceQuota:
+  maxPods: "25"
+  requestsCpu: "2"
+  requestsMemory: "4Gi"
+  limitsCpu: "5"
+  limitsMemory: "8Gi"
 
 postgresAuth:
   username: polybank_test_user
   database: polybank_test_db
 
 trafficGenerator:
-  enabled: true
   appName: polybank-traffic-generator
   image:
     repository: 192.168.130.81:5000/polybank-traffic-generator
@@ -77,3 +97,40 @@ trafficGenerator:
     limits:
       memory: "256Mi"
       cpu: "200m"
+
+notification:
+  appName: polybank-notification
+  replicas: 1
+  image:
+    repository: 192.168.130.81:5000/polybank-notification-test
+    tag: latest
+  service:
+    type: NodePort
+    nodePort: 30192
+  resources:
+    requests:
+      memory: "192Mi"
+      cpu: "75m"
+    limits:
+      memory: "384Mi"
+      cpu: "200m"
+  startupProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 40
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 5
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
+  kafka:
+    bootstrapServers: "192.168.130.82:9092"
+  mail:
+    host: "192.168.130.81"
+    port: 1025

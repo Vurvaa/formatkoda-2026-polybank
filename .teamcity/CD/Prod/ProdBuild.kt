@@ -38,6 +38,18 @@ object ProdBuild : BuildType({
         }
 
         dockerCommand {
+            id = "DOCKER_BUILD"
+            name = "Docker Build"
+            commandType = build {
+                source = file {
+                    path = "app/Dockerfile"
+                }
+                contextDir = "app"
+                namesAndTags = "%docker.registry%/polybank:%env.RELEASE_VERSION%"
+            }
+        }
+
+        dockerCommand {
             id = "DOCKER_BUILD_WEBAPP"
             name = "Docker Build Webapp"
             commandType = build {
@@ -49,15 +61,28 @@ object ProdBuild : BuildType({
             }
         }
 
+        script {
+            id = "BUILD_NOTIFICATION"
+            name = "Build notification application"
+            workingDir = "notification"
+
+            scriptContent = """
+                #!/bin/sh
+                set -e
+
+                ./mvnw clean package -DskipTests -B -Pdb-codegen
+            """.trimIndent()
+        }
+
         dockerCommand {
-            id = "DOCKER_BUILD"
-            name = "Docker Build"
+            id = "DOCKER_BUILD_NOTIFICATION"
+            name = "Docker Build Notification"
             commandType = build {
                 source = file {
-                    path = "app/Dockerfile"
+                    path = "notification/Dockerfile"
                 }
-                contextDir = "app"
-                namesAndTags = "%docker.registry%/polybank:%env.RELEASE_VERSION%"
+                contextDir = "notification"
+                namesAndTags = "%docker.registry%/polybank-notification:%env.RELEASE_VERSION%"
             }
         }
 
@@ -86,6 +111,14 @@ object ProdBuild : BuildType({
             name = "Docker Push Webapp"
             commandType = push {
                 namesAndTags = "%docker.registry%/polybank-webapp:%env.RELEASE_VERSION%"
+            }
+        }
+
+        dockerCommand {
+            id = "DOCKER_PUSH_NOTIFICATION"
+            name = "Docker Push Notification"
+            commandType = push {
+                namesAndTags = "%docker.registry%/polybank-notification:%env.RELEASE_VERSION%"
             }
         }
 

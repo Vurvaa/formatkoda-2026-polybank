@@ -11,7 +11,9 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.messaging.publisher.AccountEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.repository.AccountRepository;
+import ru.formatkoda.polybank.util.mapper.AccountMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,6 +25,7 @@ public class AccountService {
 	private final AccountRepository accountRepository;
 	private final UserService userService;
 	private final AccountEventPublisher accountEventPublisher;
+	private final NotificationEventPublisher notificationEventPublisher;
 
 	@Transactional
 	public AccountEntity createAccountForUser(@NonNull AccountEntity.Type accountType, @NonNull UserLogin userLogin) {
@@ -33,6 +36,15 @@ public class AccountService {
 				.orElseThrow(() -> new BusinessLogicException("account not created"));
 
 		accountEventPublisher.publishAccountCreated(account);
+		notificationEventPublisher.publishAccountNotificationEvent(
+				AccountMapper.toNotificationDto(
+						account,
+						user.name(),
+						user.email().value()
+				),
+				List.of("EMAIL"),
+				"ACCOUNT_CREATED"
+		);
 
 		return account;
 	}
