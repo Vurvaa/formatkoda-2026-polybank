@@ -9,6 +9,8 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +80,16 @@ public class DeliveryPlanningService {
                 deliveryEntity.id(),
                 DeliveryEntity.Status.SENT,
                 (short) (deliveryEntity.remainingAttempts() - 1)
+        );
+    }
+
+    @Transactional
+    public void recoverDelivery(DeliveryEntity deliveryEntity) {
+        eventDeliveryService.updateStatusRetryAtAndRemainingAttempts(
+                deliveryEntity.id(),
+                DeliveryEntity.Status.PENDING,
+                OffsetDateTime.now(ZoneOffset.UTC).plus(RETRY_TIME_DELTA),
+                deliveryEntity.remainingAttempts()
         );
     }
 }
