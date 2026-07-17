@@ -78,7 +78,6 @@ class AccountServiceStatusTest {
     @Test
     void shouldNotReturnSomeoneElseAccountDetails() {
         String testLogin = "TestLogin";
-        String expectedRole = "SENIOR_MANAGER";
 
         UserLogin userLogin = new UserLogin(
                 testLogin

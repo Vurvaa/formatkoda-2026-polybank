@@ -18,6 +18,8 @@ import ru.formatkoda.polybank.repository.TransactionRepository;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.AvailableNotificationMethods;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -91,8 +93,8 @@ public class TransactionService {
 						user.name(),
 						user.email().value()
 				),
-				List.of("EMAIL"),
-				"TRANSACTION_TOP_UP"
+				List.of(AvailableNotificationMethods.EMAIL.name()),
+				NotificationTemplate.TRANSACTION_TOP_UP
 		);
 
 
@@ -131,8 +133,8 @@ public class TransactionService {
 						user.name(),
 						user.email().value()
 				),
-				List.of("EMAIL"),
-				"TRANSACTION_WITHDRAW"
+				List.of(AvailableNotificationMethods.EMAIL.name()),
+				NotificationTemplate.TRANSACTION_WITHDRAW
 		);
 
 		return transactionView;
@@ -179,8 +181,8 @@ public class TransactionService {
 							personName,
 							userFrom.email().value()
 					),
-					List.of("EMAIL"),
-					"TRANSACTION_BETWEEN_PERSON_ACCOUNTS"
+					List.of(AvailableNotificationMethods.EMAIL.name()),
+					NotificationTemplate.TRANSACTION_BETWEEN_PERSON_ACCOUNTS
 			);
 		} else {
 			notificationEventPublisher.publishTransactionNotificationEvent(
@@ -191,8 +193,8 @@ public class TransactionService {
 							userFrom.name(),
 							userFrom.email().value()
 					),
-					List.of("EMAIL"),
-					"TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS"
+					List.of(AvailableNotificationMethods.EMAIL.name()),
+					NotificationTemplate.TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS
 			);
 
 			notificationEventPublisher.publishTransactionNotificationEvent(
@@ -203,8 +205,8 @@ public class TransactionService {
 							userTo.name(),
 							userTo.email().value()
 					),
-					List.of("EMAIL"),
-					"TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS"
+					List.of(AvailableNotificationMethods.EMAIL.name()),
+					NotificationTemplate.TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS
 			);
 		}
 		return transactionView;
