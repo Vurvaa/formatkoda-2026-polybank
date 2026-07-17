@@ -298,7 +298,7 @@ export function UserDetailsPage() {
           <>
             <Descriptions column={1} bordered>
               <Descriptions.Item label="Логин">{user.login.value}</Descriptions.Item>
-              <Descriptions.Item label="Email">{user.email.value}</Descriptions.Item>
+              <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
               <Descriptions.Item label="Имя">{user.name}</Descriptions.Item>
               <Descriptions.Item label="Фамилия">{user.lastName}</Descriptions.Item>
               <Descriptions.Item label="Роли">
