@@ -1,5 +1,6 @@
 import type { PageResponse } from '../models/page.ts';
 import type {
+  ChangedUserPasswordDto,
   StaffUserRegistrationDto,
   UserDetailsResponseDto,
   UserInfoResponseDto
@@ -42,5 +43,9 @@ export const userService = {
   async createStaffUser(payload: StaffUserRegistrationDto): Promise<UserDetailsResponseDto> {
     const response = await api.post<UserDetailsResponseDto>('/user', payload);
     return response.data;
+  },
+
+  async changePassword(payload: ChangedUserPasswordDto): Promise<void> {
+    await api.put<void>('/user/password', payload);
   }
 };
