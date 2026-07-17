@@ -6,17 +6,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.formatkoda.notification.domain.DeliveryEntity;
-import ru.formatkoda.notification.domain.EventEntity;
-import ru.formatkoda.notification.sender.NotificationSender;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,14 +23,10 @@ import java.util.concurrent.locks.ReentrantLock;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DeliveryDispatchService {
-    private final ObjectMapper objectMapper;
 
     private final EventDeliveryService eventDeliveryService;
-    private final EventService eventService;
-    private final DeliveryPlanningService deliveryPlanningService;
     private final DeliveryDispatchWorker deliveryDispatchWorker;
-
-    private final NotificationSenderRegistry notificationSenderRegistry;
+    private final DeliveryPlanningService deliveryPlanningService;
 
     private static final int NUMBER_DELIVERIES_TO_DISPATCH = 20;
     private static final int KEEP_ALIVE_TIME = 1000;
@@ -56,62 +49,39 @@ public class DeliveryDispatchService {
     public void dispatchPendingDeliveries() {
         deliveryMarkLock.lock();
 
-        List<DeliveryEntity> deliveriesToDispatch = eventDeliveryService
-                .findDeliveriesWithStatusRetryAtAndLimit(
-                        DeliveryEntity.Status.PENDING,
-                        OffsetDateTime.now(ZoneOffset.UTC),
-                        NUMBER_DELIVERIES_TO_DISPATCH
-        );
-        deliveriesToDispatch.forEach(delivery ->
-                eventDeliveryService.updateStatusOrThrow(
-                        delivery.id(),
-                        DeliveryEntity.Status.PROCESSING
-                )
-        );
-
-        deliveryMarkLock.unlock();
-
-        deliveriesToDispatch.forEach(delivery ->
-                deliveryDispatchExecutor.execute(
-                        () -> deliveryDispatchWorker.dispatch(delivery)
-                )
-        );
-    }
-
-    /*
-    private void dispatchDelivery(DeliveryEntity delivery) {
-        eventDeliveryService.updateStatusOrThrow(
-                delivery.id(),
-                DeliveryEntity.Status.PROCESSING
-        );
-
-        EventEntity event = eventService.findEventByIdOrThrow(delivery.eventId());
-        JsonNode payload = objectMapper.readTree(
-                event.payload().data()
-        );
-        JsonNode payloadEntity = payload.get("entity");
-
-        NotificationSender sender = notificationSenderRegistry.getNotificationSender(delivery.notificationType());
-        boolean result = sender.sendNotification(
-                NotificationTemplate.renderTemplate(
-                        payload.get("notificationTemplateName").asString(),
-                        payloadEntity
-                ),
-                payloadEntity.get(
-                        delivery
-                                .notificationType()
-                                .name()
-                                .toLowerCase()
-                ).asString()
-        );
-
-        if (!result) {
-            deliveryPlanningService.rescheduleDeliveryOrMarkFailed(delivery);
-            return;
+        List<DeliveryEntity> deliveriesToDispatch;
+        try {
+            deliveriesToDispatch = eventDeliveryService
+                    .findDeliveriesWithStatusRetryAtAndLimit(
+                            DeliveryEntity.Status.PENDING,
+                            OffsetDateTime.now(ZoneOffset.UTC),
+                            NUMBER_DELIVERIES_TO_DISPATCH
+                    );
+            deliveriesToDispatch.forEach(delivery ->
+                    eventDeliveryService.updateStatusOrThrow(
+                            delivery.id(),
+                            DeliveryEntity.Status.PROCESSING
+                    )
+            );
+        } finally {
+            deliveryMarkLock.unlock();
         }
 
-        deliveryPlanningService.completeDelivery(delivery);
+        deliveriesToDispatch.forEach(delivery -> {
+                    try {
+                        deliveryDispatchExecutor.execute(
+                                () -> {
+                                    try {
+                                        deliveryDispatchWorker.dispatch(delivery);
+                                    } catch (Exception _) {
+                                        deliveryPlanningService.recoverDelivery(delivery);
+                                    }
+                                }
+                        );
+                    } catch (RejectedExecutionException _) {
+                        deliveryPlanningService.recoverDelivery(delivery);
+                    }
+                }
+        );
     }
-
-     */
 }
