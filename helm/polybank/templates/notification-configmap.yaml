@@ -6,7 +6,7 @@ metadata:
 data:
   SPRING_APPLICATION_NAME: notification
   SERVER_PORT: {{ .Values.notification.appServicePort | quote }}
-  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
   SPRING_KAFKA_BOOTSTRAP_SERVERS: {{ .Values.notification.kafka.bootstrapServers | quote }}
   SPRING_MAIL_HOST: {{ .Values.notification.mail.host | quote }}

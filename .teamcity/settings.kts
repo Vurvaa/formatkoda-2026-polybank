@@ -41,7 +41,7 @@ project {
 
         param("env.APP_JWT_EXPIRATION_MINUTES", "60")
         password("env.APP_JWT_SECRET", "credentialsJSON:12db1afd-9baf-4d3e-873b-07ae63f3bd22")
-        param("env.APP_CORS_ALLOWED_ORIGIN", "http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091")
+        param("env.APP_CORS_ALLOWED_ORIGIN", "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191,http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091")
     }
 
     buildType(MrBuild)
