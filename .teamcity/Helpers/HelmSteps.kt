@@ -4,18 +4,13 @@ import jetbrains.buildServer.configs.kotlin.BuildSteps
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
 data class HelmDeployParams(
-    val namespaceParam: String,
+    val namespace: String,
     val valuesFiles: List<String>,
-    val imageRepoParam: String,
-    val imageTagParam: String,
-    val webappImageRepoParam: String,
-    val webappImageTagParam: String,
-    val trafficGenImageRepoParam: String,
-    val trafficGenImageTagParam: String,
-    val pgUserParam: String,
-    val pgPasswordParam: String,
-    val pgDatabaseParam: String,
-    val extraSetArgs: String = "",
+    val imageRegistry: String = "%docker.registry%",
+    val imageEnvSuffix: String = "",
+    val imageTag: String,
+    val envSuffix: String = "",
+    val postgresHost: String = "polybank-pg-rw",
 )
 
 fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
@@ -29,34 +24,8 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
             export KUBECONFIG=%k8s.kubeconfig%
             kubectl get nodes
 
-            NEEDS_RECREATE=0
-            if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
-                -o jsonpath='{.metadata.labels.app\.kubernetes\.io/managed-by}' 2>/dev/null \
-                | grep -q "Helm"; then
-                NEEDS_RECREATE=1
-            fi
-
-            if kubectl get secret polybank-backend-secret -n ${p.namespaceParam} >/dev/null 2>&1; then
-                if ! kubectl get secret polybank-backend-secret -n ${p.namespaceParam} \
-                    -o jsonpath='{.data.replication-password}' 2>/dev/null | grep -q .; then
-                    NEEDS_RECREATE=1
-                fi
-            fi
-
-            if [ "${'$'}NEEDS_RECREATE" = "1" ]; then
-                kubectl delete secret polybank-backend-secret -n ${p.namespaceParam} --ignore-not-found=true
-            fi
-
-            helm dependency build %helm.chart.path%/polybank/
-
-            HELM_APP_VAR_ARGS=""
-            for name in ${'$'}(echo "%env.app.vars.names%" | tr ',' ' '); do
-                val="${'$'}(printenv "${'$'}name" || true)"
-                HELM_APP_VAR_ARGS="${'$'}HELM_APP_VAR_ARGS --set-string appVars.${'$'}{name}.value=${'$'}val"
-            done
-
             helm upgrade polybank \
-                -n ${p.namespaceParam} \
+                -n ${p.namespace} \
                 -i \
                 --create-namespace \
                 --kubeconfig %k8s.kubeconfig% \
@@ -65,27 +34,29 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --timeout 30m0s \
                 %helm.chart.path%/polybank/ \
                 ${p.valuesFiles.joinToString(" ") { "-f %helm.chart.path%/polybank/$it" }} \
-                --set-string image.repository=${p.imageRepoParam} \
-                --set-string image.tag=${p.imageTagParam} \
-                --set-string webapp.image.repository=${p.webappImageRepoParam} \
-                --set-string webapp.image.tag=${p.webappImageTagParam} \
-                --set-string trafficGenerator.image.repository=${p.trafficGenImageRepoParam} \
-                --set-string trafficGenerator.image.tag=${p.trafficGenImageTagParam} \
-                --set-string postgresAuth.username="${'$'}(printenv ${p.pgUserParam})" \
-                --set-string postgresAuth.password="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresAuth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.password="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.postgresPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string global.postgresql.auth.replicationPassword="${'$'}(printenv ${p.pgPasswordParam})" \
-                --set-string postgresAuth.database="${'$'}(printenv ${p.pgDatabaseParam})" \
-                ${'$'}HELM_APP_VAR_ARGS \
-                ${p.extraSetArgs} \
+                --set-string image.repository=${p.imageRegistry}/polybank${p.imageEnvSuffix} \
+                --set-string image.tag=${p.imageTag} \
+                --set-string webapp.image.repository=${p.imageRegistry}/polybank-webapp${p.imageEnvSuffix} \
+                --set-string webapp.image.tag=${p.imageTag} \
+                --set-string notification.image.repository=${p.imageRegistry}/polybank-notification${p.imageEnvSuffix} \
+                --set-string notification.image.tag=${p.imageTag} \
+                --set-string trafficGenerator.image.repository=${p.imageRegistry}/polybank-traffic-generator${p.imageEnvSuffix} \
+                --set-string trafficGenerator.image.tag=${p.imageTag} \
+                --set-string postgresAuth.username="${'$'}(printenv POSTGRES_USER${p.envSuffix})" \
+                --set-string postgresAuth.password="${'$'}(printenv POSTGRES_PASSWORD${p.envSuffix})" \
+                --set-string postgresAuth.postgresPassword="${'$'}(printenv POSTGRES_PASSWORD${p.envSuffix})" \
+                --set-string postgresAuth.database="${'$'}(printenv POSTGRES_DB${p.envSuffix})" \
+                --set-string notification.kafka.bootstrapServers="%kafka.bootstrap.servers%" \
+                --set-string notification.mail.host="%mail.host%" \
+                --set-string notification.mail.port="%mail.port%" \
+                --set-string postgresql.host="${p.postgresHost}" \
+                --set-string postgresql.port="5432" \
+                --set-string appVars.appJwtExpirationMinutes="${'$'}(printenv APP_JWT_EXPIRATION_MINUTES)" \
+                --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv APP_CORS_ALLOWED_ORIGIN | sed 's/,/\\,/g')" \
+                --set-string appVars.appJwtSecret="${'$'}(printenv APP_JWT_SECRET)" \
                 --debug
 
-            kubectl get pods -n ${p.namespaceParam}
+            kubectl get pods -n ${p.namespace}
         """.trimIndent()
     }
 }

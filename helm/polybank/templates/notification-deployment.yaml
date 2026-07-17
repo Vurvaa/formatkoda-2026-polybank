@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-{{ .Values.notification.appName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.notification.appName }}
+  replicas: {{ .Values.notification.replicas }}
+  progressDeadlineSeconds: {{ .Values.notification.progressDeadlineSeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.notification.appName }}
+      annotations:
+        reloader.stakater.com/auto: "true"
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >-
+              until pg_isready -h {{ .Values.postgresql.host }} -p {{ .Values.postgresql.port }} -U "$POSTGRES_USER" -d "$POSTGRES_DB";
+              do echo "waiting for postgres"; sleep 2; done
+          envFrom:
+            - secretRef:
+                name: polybank-backend-secret
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+              ephemeral-storage: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+              ephemeral-storage: "64Mi"
+      containers:
+        - name: {{ .Values.notification.appName }}
+          image: {{ .Values.notification.image.repository }}:{{ .Values.notification.image.tag }}
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: {{ .Values.notification.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.startupProbe.timeoutSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.notification.startupProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: {{ .Values.notification.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.readinessProbe.timeoutSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.notification.readinessProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: {{ .Values.notification.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notification.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.notification.livenessProbe.timeoutSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.notification.livenessProbe.failureThreshold }}
+          resources:
+            requests:
+              memory: "{{ .Values.notification.resources.requests.memory }}"
+              cpu: "{{ .Values.notification.resources.requests.cpu }}"
+              ephemeral-storage: "256Mi"
+            limits:
+              memory: "{{ .Values.notification.resources.limits.memory }}"
+              cpu: "{{ .Values.notification.resources.limits.cpu }}"
+              ephemeral-storage: "512Mi"
+          envFrom:
+            - secretRef:
+                name: polybank-backend-secret
+            - configMapRef:
+                name: polybank-notification-config
+          ports:
+            - name: http
+              containerPort: {{ .Values.notification.appServicePort }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ .Values.notification.appName }}
+                topologyKey: kubernetes.io/hostname

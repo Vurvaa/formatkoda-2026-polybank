@@ -1,11 +1,10 @@
-{{- if .Values.cnpg.enabled }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: {{ .Release.Name }}-pg
   namespace: {{ .Release.Namespace }}
 spec:
-  instances: {{ .Values.cnpg.instances | default 3 }}
+  instances: {{ .Values.cnpg.instances }}
 
   bootstrap:
     initdb:
@@ -15,8 +14,8 @@ spec:
         name: {{ .Release.Name }}-pg-app-secret
 
   storage:
-    size: {{ .Values.cnpg.storageSize | default "10Gi" }}
-    storageClass: {{ .Values.cnpg.storageClass | default "local-path" }}
+    size: {{ .Values.cnpg.storageSize }}
+    storageClass: {{ .Values.cnpg.storageClass }}
 
   affinity:
     podAntiAffinityType: required
@@ -24,11 +23,11 @@ spec:
 
   resources:
     requests:
-      cpu: {{ .Values.cnpg.resources.requests.cpu | default "100m" }}
-      memory: {{ .Values.cnpg.resources.requests.memory | default "256Mi" }}
+      cpu: {{ .Values.cnpg.resources.requests.cpu }}
+      memory: {{ .Values.cnpg.resources.requests.memory }}
     limits:
-      cpu: {{ .Values.cnpg.resources.limits.cpu | default "1000m" }}
-      memory: {{ .Values.cnpg.resources.limits.memory | default "1Gi" }}
+      cpu: {{ .Values.cnpg.resources.limits.cpu }}
+      memory: {{ .Values.cnpg.resources.limits.memory }}
 
   postgresql:
     parameters:
@@ -36,4 +35,3 @@ spec:
 
   monitoring:
     enablePodMonitor: false
-{{- end }}

@@ -1,0 +1,15 @@
+FROM eclipse-temurin:25-jre-alpine
+WORKDIR /app
+
+RUN apk add --no-cache curl \
+    && addgroup -S spring \
+    && adduser -S spring -G spring
+
+COPY target/notification.jar notification.jar
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+
+EXPOSE 8080
+USER spring
+
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar notification.jar"]

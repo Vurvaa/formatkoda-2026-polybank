@@ -13,6 +13,7 @@ import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
 import ru.formatkoda.polybank.messaging.publisher.AccountEventPublisher;
+import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.repository.AccountRepository;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.UserService;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.formatkoda.polybank.testutil.TestData.USER_EMAIL;
 import static ru.formatkoda.polybank.testutil.TestData.USER_LOGIN;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +42,9 @@ class AccountServiceCreateTest {
 	@Mock
 	private AccountEventPublisher accountEventPublisher;
 
+	@Mock
+	private NotificationEventPublisher notificationEventPublisher;
+
 	@InjectMocks
 	private AccountService accountService;
 
@@ -48,6 +53,8 @@ class AccountServiceCreateTest {
 	void shouldCreateAccount(Type accountType) {
 		UserEntity userEntity = mock(UserEntity.class);
 		when(userEntity.id()).thenReturn(1L);
+		when(userEntity.name()).thenReturn("User");
+		when(userEntity.email()).thenReturn(USER_EMAIL);
 
 		when(userService.findNotBlockedUserByLogin(USER_LOGIN)).thenReturn(userEntity);
 
