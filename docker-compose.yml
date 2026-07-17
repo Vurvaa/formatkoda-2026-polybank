@@ -60,8 +60,8 @@ services:
 
   notifications:
     build:
-      context: ./notification
-      dockerfile: Dockerfile.local
+      context: .
+      dockerfile: notification/Dockerfile.local
       args:
         POSTGRES_DB: ${POSTGRES_DB}_codegen
         POSTGRES_USER: ${POSTGRES_USER}

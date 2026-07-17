@@ -30,6 +30,7 @@
 		<java.version>25</java.version>
 		<postgresql.version>42.7.4</postgresql.version>
 		<liquibase.version>5.0.0</liquibase.version>
+		<liquibase.searchPath>${project.basedir}../app/src/main/resources</liquibase.searchPath>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -183,7 +184,7 @@
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<version>${liquibase.version}</version>
 				<configuration>
-					<searchPath>${project.basedir}/src/main/resources</searchPath>
+					<searchPath>${liquibase.searchPath}</searchPath>
 				</configuration>
 				<dependencies>
 					<dependency>
