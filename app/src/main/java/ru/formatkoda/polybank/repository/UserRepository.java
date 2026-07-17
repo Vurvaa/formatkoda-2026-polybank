@@ -103,7 +103,7 @@ public class UserRepository {
                 .set(USERS.BLOCKED_AT, OffsetDateTime.now(ZoneOffset.UTC))
                 .where(USERS.ID.eq(userId))
                 .returning()
-                .fetchOptionalInto(UserEntity.class);
+                .fetchOptional(this::toEntity);
     }
 
     public Optional<UserEntity> unBlockUserById(Long userId) {
@@ -111,7 +111,7 @@ public class UserRepository {
                 .setNull(USERS.BLOCKED_AT)
                 .where(USERS.ID.eq(userId))
                 .returning()
-                .fetchOptionalInto(UserEntity.class);
+                .fetchOptional(this::toEntity);
     }
 
     public boolean removeUserRole(Long userId, Long roleId) {
