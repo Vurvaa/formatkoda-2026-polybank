@@ -57,6 +57,19 @@ postgresql:
   host: polybank-pg-rw
   port: 5432
 
+redis:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "150m"
+
+ingress:
+  pathPrefix: "/test"
+  webappEnabled: true
+
 cnpg:
   instances: 1
   storageSize: 2Gi

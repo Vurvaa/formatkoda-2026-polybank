@@ -51,6 +51,28 @@ postgresql:
   host: polybank-pg-rw
   port: 5432
 
+redis:
+  appName: polybank-redis
+  image:
+    repository: redis
+    tag: "7.4-alpine"
+  containerPort: 6379
+  maxMemory: "512mb"
+  maxMemoryPolicy: "allkeys-lru"
+  auth:
+    password: ""
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+
+ingress:
+  pathPrefix: ""
+  webappEnabled: false
+
 webapp:
   appName: polybank-webapp
   image:
