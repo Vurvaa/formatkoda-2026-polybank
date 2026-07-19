@@ -54,6 +54,7 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string appVars.appJwtExpirationMinutes="${'$'}(printenv APP_JWT_EXPIRATION_MINUTES)" \
                 --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv APP_CORS_ALLOWED_ORIGIN | sed 's/,/\\,/g')" \
                 --set-string appVars.appJwtSecret="${'$'}(printenv APP_JWT_SECRET)" \
+                --set-string redis.auth.password="${'$'}(printenv REDIS_PASSWORD)" \
                 --debug
 
             kubectl get pods -n ${p.namespace}
