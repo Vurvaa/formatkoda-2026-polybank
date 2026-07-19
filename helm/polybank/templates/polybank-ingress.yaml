@@ -1,0 +1,99 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polybank-ingress-api
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ .Values.ingress.pathPrefix }}/api"
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.pathPrefix }}/api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: polybank-app
+                port:
+                  number: {{ .Values.appServicePort }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polybank-ingress-notification
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ .Values.ingress.pathPrefix }}/notification"
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.pathPrefix }}/notification(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: polybank-notification
+                port:
+                  number: {{ .Values.notification.appServicePort }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polybank-ingress-traffic-generator
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: "{{ .Values.ingress.pathPrefix }}/traffic-generator"
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.pathPrefix }}/traffic-generator(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: polybank-traffic-generator
+                port:
+                  number: {{ .Values.trafficGenerator.containerPort }}
+  {{- if .Values.ingress.webappEnabled }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polybank-ingress-webapp
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingress.pathPrefix }}(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: polybank-webapp
+                port:
+                  number: 80
+  {{- end }}

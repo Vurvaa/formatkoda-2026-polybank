@@ -1,4 +1,4 @@
-import { Alert, Space, Typography } from 'antd';
+import { Space, Typography } from 'antd';
 
 const GRAFANA_BASE_URL = 'http://192.168.130.81:3000';
 const PUBLIC_DASHBOARD_UID = 'ffcbe9435344404c9f4f846c5d6bcd56';

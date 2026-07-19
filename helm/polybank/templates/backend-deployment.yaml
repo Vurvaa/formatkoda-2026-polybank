@@ -47,6 +47,27 @@ spec:
               cpu: "50m"
               memory: "32Mi"
               ephemeral-storage: "64Mi"
+        - name: wait-for-redis
+          image: {{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >-
+              until redis-cli -h polybank-redis -p {{ .Values.redis.containerPort }} -a "$REDIS_PASSWORD" ping;
+              do echo "waiting for redis"; sleep 2; done
+          envFrom:
+            - secretRef:
+                name: polybank-redis-secret
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+              ephemeral-storage: "32Mi"
+            limits:
+              cpu: "50m"
+              memory: "32Mi"
+              ephemeral-storage: "64Mi"
       containers:
         - name: {{ .Values.appName }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -89,6 +110,8 @@ spec:
           envFrom:
             - secretRef:
                 name: polybank-backend-secret
+            - secretRef:
+                name: polybank-redis-secret
             - configMapRef:
                 name: polybank-config
           ports:

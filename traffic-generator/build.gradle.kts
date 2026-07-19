@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
+
+    id("jacoco")
+    id("checkstyle")
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 group = "ru.formatkoda"

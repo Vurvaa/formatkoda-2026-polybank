@@ -13,10 +13,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ConfigProvider locale={ruRU}>
       <AntdApp>
         <BrowserRouter
-            future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-            }}
+          basename={import.meta.env.VITE_BASE_PATH || '/'}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
         >
           <AuthProvider>
             <App />
