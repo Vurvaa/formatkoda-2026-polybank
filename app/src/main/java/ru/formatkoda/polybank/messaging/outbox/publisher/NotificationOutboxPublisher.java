@@ -10,7 +10,6 @@ import ru.formatkoda.polybank.messaging.outbox.infrastructure.OutboxWriter;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -23,29 +22,15 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
 
     private final OutboxWriter outboxWriter;
 
-    private static final Map<String, String> notificationEventTypeRegistry = Map.of(
-            "USER_REGISTERED", "UserRegistered",
-            "ACCOUNT_CREATED", "AccountCreated",
-            "TRANSACTION_WITHDRAW", "TransactionWithdraw",
-            "TRANSACTION_TOP_UP", "TransactionTopUp",
-            "TRANSACTION_BETWEEN_PERSON_ACCOUNTS", "TransactionBetweenPersonAccounts",
-            "TRANSACTION_TOP_UP_BETWEEN_ACCOUNTS", "TransactionTopUpBetweenAccounts",
-            "TRANSACTION_WITHDRAW_BETWEEN_ACCOUNTS", "TransactionWithdrawBetweenAccounts"
-    );
-
-    private static String getUserNotificationEventType(String key) {
-        return notificationEventTypeRegistry.get(key);
-    }
-
     @Override
     public void publishUserNotificationEvent(
             UserNotificationEventDto user,
             List<String> notificationTypeNames,
-            String notificationTemplateName
+            NotificationTemplate notificationTemplate
     ) {
         NotificationEvent payload = new NotificationEvent(
                 notificationTypeNames,
-                notificationTemplateName,
+                notificationTemplate.name(),
                 user
         );
 
@@ -53,7 +38,7 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
                 TOPIC,
                 AGGREGATE_TYPE_USER,
                 user.id().toString(),
-                getUserNotificationEventType(notificationTemplateName),
+                notificationTemplate.getEventType(),
                 payload
         );
     }
@@ -62,11 +47,11 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
     public void publishAccountNotificationEvent(
             AccountNotificationEventDto account,
             List<String> notificationTypeNames,
-            String notificationTemplateName
+            NotificationTemplate notificationTemplate
     ) {
         NotificationEvent payload = new NotificationEvent(
                 notificationTypeNames,
-                notificationTemplateName,
+                notificationTemplate.name(),
                 account
         );
 
@@ -74,19 +59,20 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
                 TOPIC,
                 AGGREGATE_TYPE_ACCOUNT,
                 account.userId().toString(),
-                getUserNotificationEventType(notificationTemplateName),
+                notificationTemplate.getEventType(),
                 payload
         );
     }
 
+    @Override
     public void publishTransactionNotificationEvent(
             TransactionNotificationEventDto transaction,
             List<String> notificationTypeNames,
-            String notificationTemplateName
+            NotificationTemplate notificationTemplate
     ) {
         NotificationEvent payload = new NotificationEvent(
                 notificationTypeNames,
-                notificationTemplateName,
+                notificationTemplate.name(),
                 transaction
         );
 
@@ -94,7 +80,7 @@ public class NotificationOutboxPublisher implements NotificationEventPublisher {
                 TOPIC,
                 AGGREGATE_TYPE_TRANSACTION,
                 transaction.id().toString(),
-                getUserNotificationEventType(notificationTemplateName),
+                notificationTemplate.getEventType(),
                 payload
         );
     }
