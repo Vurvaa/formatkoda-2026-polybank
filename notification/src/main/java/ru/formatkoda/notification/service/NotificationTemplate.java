@@ -5,6 +5,7 @@ import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 
+@SuppressWarnings("java:S1192")
 public enum NotificationTemplate {
     USER_REGISTERED(List.of("name", "createdAt"), "Поздравляем, %s! Вы успешно зарегистрировались! Дата регистрации: %s"),
     ACCOUNT_CREATED(List.of("name", "number"), "%s, счет создан успешно! Номер счета: %s"),
