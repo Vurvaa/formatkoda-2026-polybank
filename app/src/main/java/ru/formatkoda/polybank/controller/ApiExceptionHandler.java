@@ -1,8 +1,10 @@
 package ru.formatkoda.polybank.controller;
 
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.exception.BusinessLogicException;
+import ru.formatkoda.polybank.exception.RateLimitExceededException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -109,6 +112,23 @@ class ApiExceptionHandler {
 						"code", "BUSINESS_RULE_VIOLATION"
 				)
 		);
+	}
+
+	@ExceptionHandler(RateLimitExceededException.class)
+	ResponseEntity<ProblemDetail> handleRateLimitExceededException(RateLimitExceededException ex) {
+		ProblemDetail problemDetail = buildProblem(
+				ex,
+				HttpStatus.TOO_MANY_REQUESTS,
+				"Too many requests",
+				Map.of(
+						"code", "TOO_MANY_REQUESTS"
+				)
+		);
+
+		return ResponseEntity
+				.status(HttpStatus.TOO_MANY_REQUESTS)
+				.header(HttpHeaders.RETRY_AFTER, ex.retryAfterSeconds())
+				.body(problemDetail);
 	}
 
 	@ExceptionHandler(Exception.class)
