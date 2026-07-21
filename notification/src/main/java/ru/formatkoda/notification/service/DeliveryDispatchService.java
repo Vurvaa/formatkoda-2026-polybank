@@ -60,7 +60,16 @@ public class DeliveryDispatchService {
             deliveryMarkLock.unlock();
         }
 
-        deliveriesToDispatch.forEach(delivery -> {
+        deliveriesToDispatch.forEach(
+                delivery -> {
+                    try {
+                        virtualThreadsSemaphore.acquire();
+                    } catch (InterruptedException _) {
+                        Thread.currentThread().interrupt();
+                        deliveryPlanningService.recoverDelivery(delivery);
+                        return;
+                    }
+
                     try {
                         deliveryDispatchExecutor.execute(
                                 () -> {
@@ -74,7 +83,11 @@ public class DeliveryDispatchService {
                                 }
                         );
                     } catch (RejectedExecutionException _) {
-                        deliveryPlanningService.recoverDelivery(delivery);
+                        try {
+                            deliveryPlanningService.recoverDelivery(delivery);
+                        } finally {
+                            virtualThreadsSemaphore.release();
+                        }
                     }
                 }
         );
