@@ -12,4 +12,5 @@ public record UserNotificationEventDto(
         String email,
         @NonNull OffsetDateTime createdAt,
         OffsetDateTime blockedAt
-) {}
+) {
+}
