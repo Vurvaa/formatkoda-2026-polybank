@@ -44,6 +44,8 @@ project {
         param("env.APP_CORS_ALLOWED_ORIGIN", "http://192.168.130.82:30191,http://192.168.130.83:30191,http://192.168.130.84:30191,http://192.168.130.82:30091,http://192.168.130.83:30091,http://192.168.130.84:30091")
 
         password("env.REDIS_PASSWORD", "credentialsJSON:d6c84f18-2ec6-4bf6-8ecb-e6c3df0ffb69")
+        param("env.REDIS_USER", "default")
+        param("env.REDIS_DATABASE", "0")
     }
 
     buildType(MrBuild)
