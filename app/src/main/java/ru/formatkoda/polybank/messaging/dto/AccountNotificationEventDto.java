@@ -15,4 +15,5 @@ public record AccountNotificationEventDto(
         @NonNull String type,
         @NonNull String status,
         @NonNull OffsetDateTime createdAt
-) {}
+) {
+}

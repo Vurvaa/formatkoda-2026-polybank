@@ -1,6 +1,7 @@
 Откат миграции (делать только локально, чтобы не было конфликтов)
 
-```export POSTGRES_URL='jdbc:postgresql://localhost:5432/polybank_db'
+```bash
+export POSTGRES_URL='jdbc:postgresql://localhost:5432/polybank_db'
 export POSTGRES_USER='polybank_user'
 export POSTGRES_PASSWORD='polybank_password'
 

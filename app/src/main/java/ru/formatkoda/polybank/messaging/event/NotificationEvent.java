@@ -6,4 +6,5 @@ public record NotificationEvent(
         List<String> notificationTypeNames,
         String notificationTemplateName,
         Object entity
-) {}
+) {
+}

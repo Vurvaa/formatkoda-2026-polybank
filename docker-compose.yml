@@ -226,9 +226,28 @@ services:
     networks:
       - polybank-net
 
+  redis:
+    image: redis:8.8.0
+    container_name: polybank-redis
+    env_file:
+      - .env
+    command:
+      - /bin/sh
+      - -c
+      - |
+        exec redis-server --appendonly yes --user default off \
+          --user "$${REDIS_USER}" on ">$${REDIS_PASSWORD}" "~*" "&*" "+@all"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   kafka_data:
+  redis_data:
+    driver: local
 
 networks:
   polybank-net:
