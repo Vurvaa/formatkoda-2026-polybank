@@ -55,6 +55,8 @@ fun BuildSteps.helmDeployStep(p: HelmDeployParams) {
                 --set-string appVars.appCorsAllowedOrigin="${'$'}(printenv APP_CORS_ALLOWED_ORIGIN | sed 's/,/\\,/g')" \
                 --set-string appVars.appJwtSecret="${'$'}(printenv APP_JWT_SECRET)" \
                 --set-string redis.auth.password="${'$'}(printenv REDIS_PASSWORD)" \
+                --set-string redis.auth.user="${'$'}(printenv REDIS_USER)" \
+                --set-string redis.auth.database="${'$'}(printenv REDIS_DATABASE)" \
                 --debug
 
             kubectl get pods -n ${p.namespace}

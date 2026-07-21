@@ -60,7 +60,9 @@ redis:
   maxMemory: "512mb"
   maxMemoryPolicy: "allkeys-lru"
   auth:
+    user: "default"
     password: ""
+    database: "0"
   resources:
     requests:
       memory: "128Mi"
