@@ -13,6 +13,8 @@ export type TransactionType =
   | 'REFUND'
   | 'INTEREST';
 
+export type ReportFormat = 'CSV' | 'PDF'
+
 export interface TransactionResponseDto {
   id: number;
   fromAccountNumber: string | null;

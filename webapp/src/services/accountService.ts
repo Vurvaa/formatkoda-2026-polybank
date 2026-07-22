@@ -5,7 +5,7 @@ import type {
   TransferRequestDto
 } from '../models/account.ts';
 import type { PageResponse } from '../models/page.ts';
-import type { TransactionResponseDto } from '../models/transaction.ts';
+import type {ReportFormat, TransactionResponseDto} from '../models/transaction.ts';
 import { api } from './api.ts';
 
 export const accountService = {
@@ -72,6 +72,12 @@ export const accountService = {
   async getTransactions(accountNumber: string, page: number, size: number): Promise<PageResponse<TransactionResponseDto>> {
     const response = await api.get<PageResponse<TransactionResponseDto>>(
       `/transaction/${accountNumber}`, { params: { page, size } });
+    return response.data;
+  },
+
+  async getReport(accountNumber: string, transactionsCount: number, reportFormat: ReportFormat): Promise<Blob> {
+    const response = await api.get<Blob>(`/transaction/${accountNumber}/export`,
+        { params: { transactionsCount, reportFormat }, responseType: 'blob' });
     return response.data;
   }
 };

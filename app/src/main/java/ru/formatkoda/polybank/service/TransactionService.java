@@ -15,12 +15,16 @@ import ru.formatkoda.polybank.exception.ResourceNotFoundException;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher;
 import ru.formatkoda.polybank.messaging.publisher.TransactionEventPublisher;
 import ru.formatkoda.polybank.repository.TransactionRepository;
+import ru.formatkoda.polybank.util.export.CsvGenerator;
+import ru.formatkoda.polybank.util.export.PdfGenerator;
+import ru.formatkoda.polybank.util.export.ReportFormat;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.NotificationTemplate;
 import ru.formatkoda.polybank.messaging.publisher.NotificationEventPublisher.AvailableNotificationMethods;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -47,7 +51,7 @@ public class TransactionService {
 		if (!userService.hasRole(userLogin, SENIOR_MANAGER))
 			account = accountService.findOwnedAccount(accountNumber, userLogin);
 		else
-			 account = accountService.findAccountByAccountNumber(accountNumber);
+			account = accountService.findAccountByAccountNumber(accountNumber);
 
 		List<TransactionWithAccountNumbersView> transactions = transactionRepository
 				.findViewsByAccountId(account.id(), pageRequest);
@@ -283,6 +287,30 @@ public class TransactionService {
 
 		return transactionView;
 
+	}
+
+	public ByteArrayInputStream exportReport(
+			@NonNull AccountNumber number,
+			@NonNull UserLogin userLogin,
+			int transactionsCount,
+			@NonNull ReportFormat reportFormat
+	) {
+		PageRequest request = new PageRequest(0, transactionsCount);
+		List<TransactionWithAccountNumbersView> transactions = findByAccountNumber(
+				number,
+				userLogin,
+				request
+		).items();
+
+		return switch (reportFormat) {
+			case CSV -> CsvGenerator.toCsv(transactions);
+			case PDF -> PdfGenerator.toPdf(transactions);
+			case null -> throw new IllegalArgumentException("unknown type");
+		};
+	}
+
+	public String generateReportFilename(@NonNull String accountNumber, @NonNull ReportFormat type) {
+		return "report_" + accountNumber + "." + type.getFormat();
 	}
 
 	private TransactionEntity saveCompletedTransaction(

@@ -1,6 +1,7 @@
 import {
   ArrowLeftOutlined,
   DownloadOutlined,
+  ExportOutlined,
   LockOutlined,
   SendOutlined,
   StopOutlined,
@@ -18,6 +19,7 @@ import type { TransactionResponseDto } from '../models/transaction.ts';
 import { accountService } from '../services/accountService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
 import { formatDateTime, formatMoney } from '../utils/format.ts';
+import {ReportModal} from "../components/ReportModal.tsx";
 
 export function AccountDetailsPage() {
   const { accountNumber } = useParams<{ accountNumber: string }>();
@@ -29,6 +31,7 @@ export function AccountDetailsPage() {
   const [accountLoading, setAccountLoading] = useState(true);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [operation, setOperation] = useState<AccountOperation | null>(null);
+  const [report, setReport] = useState<boolean>(false);
   const [actionLoading, setActionLoading] = useState(false);
   const { message } = AntdApp.useApp();
   const { isManager } = useAuth();
@@ -186,8 +189,17 @@ export function AccountDetailsPage() {
               <Button danger icon={<StopOutlined />} loading={actionLoading}>
                 Закрыть счет
               </Button>
+
             </Popconfirm>
           )}
+
+          <Button
+              icon={<ExportOutlined />}
+              loading={actionLoading}
+              onClick={() => setReport(true)}
+          >
+            Выписка по счету
+          </Button>
 
           {isManager && account?.status !== 'BLOCKED' && (
             <Button
@@ -229,6 +241,12 @@ export function AccountDetailsPage() {
         open={Boolean(operation)}
         onCancel={() => setOperation(null)}
         onSuccess={handleOperationSuccess}
+      />
+
+      <ReportModal
+        accountNumber={accountNumber}
+        open={report}
+        onCancel={() => setReport(false)}
       />
     </Space>
   );
