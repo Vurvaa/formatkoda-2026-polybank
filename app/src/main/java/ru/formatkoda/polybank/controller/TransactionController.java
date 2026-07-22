@@ -3,6 +3,10 @@ package ru.formatkoda.polybank.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,11 +25,13 @@ import ru.formatkoda.polybank.dto.transaction.AccountOperationRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.dto.transaction.TransferRequestDto;
 import ru.formatkoda.polybank.service.TransactionService;
+import ru.formatkoda.polybank.util.export.ReportFormat;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
 import ru.formatkoda.polybank.util.pagination.PageResponse;
 import ru.formatkoda.polybank.util.pagination.PageResult;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 
 @RestController
@@ -133,4 +139,30 @@ public class TransactionController {
 
         return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
     }
+
+	@SecurityRequirement(name = "bearerAuth")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{accountNumber}/export")
+	public ResponseEntity<Resource> exportReport(
+			@AuthenticationPrincipal UserLogin userLogin,
+			@PathVariable String accountNumber,
+			@RequestParam(defaultValue = "20") int transactionsCount,
+			@RequestParam ReportFormat reportFormat
+	) {
+		AccountNumber number = new AccountNumber(accountNumber);
+		ByteArrayInputStream csvStream = transactionService.exportReport(number, userLogin, transactionsCount, reportFormat);
+		InputStreamResource file = new InputStreamResource(csvStream);
+
+		String filename = transactionService.generateReportFilename(accountNumber, reportFormat);
+
+		MediaType mediaType = switch (reportFormat) {
+			case CSV -> MediaType.parseMediaType("text/csv;charset=UTF-8");
+			case PDF -> MediaType.APPLICATION_PDF;
+		};
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(mediaType)
+				.body(file);
+	}
 }
