@@ -38,6 +38,7 @@ import java.util.List;
 @Configuration()
 public class AuthorizationServerConfig {
 	private static final String LOGIN_ENDPOINT = "/login";
+
 	private final AuthorizationServerProperties authorizationProperties;
 	private final PasswordEncoder passwordEncoder;
 
@@ -103,7 +104,8 @@ public class AuthorizationServerConfig {
 						.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 						.scope(OidcScopes.OPENID)
 						.tokenSettings(TokenSettings.builder()
-								.accessTokenTimeToLive(Duration.ofHours(2))
+								.accessTokenTimeToLive(Duration.ofMinutes(
+										authorizationProperties.getExpirationMinutes()))
 								.build())
 						.build()
 		);

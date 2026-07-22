@@ -17,4 +17,5 @@ import java.util.List;
 public class AuthorizationServerProperties {
 	private String issuerUrl;
 	private List<String> allowedOrigins = new ArrayList<>();
+	private long expirationMinutes;
 }
