@@ -9,7 +9,7 @@ import java.util.Collection;
 
 
 @RequiredArgsConstructor
-public class AuthUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails {
     private final String login;
     private final String password;
     private final boolean isBlocked;

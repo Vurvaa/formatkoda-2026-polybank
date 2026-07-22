@@ -5,47 +5,53 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.formatkoda.authorization.auth.properties.AuthorizationServerProperties;
 import ru.formatkoda.authorization.auth.util.JwkUtils;
 
+import java.time.Duration;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Configuration
+@Configuration()
 public class AuthorizationServerConfig {
-	private static final String LOGIN_ENDPOINT = "/user/login";
+	private static final String LOGIN_ENDPOINT = "/auth/sign-in";
 	private final AuthorizationServerProperties authorizationProperties;
 
 	@Bean
 	@Order(Ordered.HIGHEST_PRECEDENCE)
-	public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) {
 
 		http.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().authenticated()
-				)
+						.anyRequest().authenticated())
 				.formLogin(Customizer.withDefaults())
 				.cors(Customizer.withDefaults())
 				.exceptionHandling(exceptions -> exceptions
-								.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(LOGIN_ENDPOINT)))
-				.oauth2AuthorizationServer((authorizationServer) -> authorizationServer
+								.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+				.oauth2AuthorizationServer(authorizationServer -> authorizationServer
 						.oidc(Customizer.withDefaults())
 				);
 
@@ -58,7 +64,6 @@ public class AuthorizationServerConfig {
 				.issuer(authorizationProperties.getIssuerUrl())
 				.build();
 	}
-
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
@@ -81,22 +86,25 @@ public class AuthorizationServerConfig {
 	}
 
 	@Bean
-	public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-		return new JdbcRegisteredClientRepository(jdbcTemplate);
+	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
 	}
 
-/*
-	This Bean will implement with Redis
-
 	@Bean
-	OAuth2AuthorizationService jdbcOAuth2AuthorizationService(
-			JdbcOperations jdbcOperations, RegisteredClientRepository registeredClientRepository) {
-		return new CustomJdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
-	}
-*/
-
-	@Bean
-	public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
-		return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
+	public RegisteredClientRepository registeredClientRepository() {
+		return new InMemoryRegisteredClientRepository(
+				RegisteredClient.withId("random-id-for-system-cases")
+						.clientName("client")
+						.clientId("client")
+						.clientSecret("{noop}secret")
+						.redirectUri("https://www.manning.com/authorized")
+						.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+						.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+						.scope(OidcScopes.OPENID)
+						.tokenSettings(TokenSettings.builder()
+								.accessTokenTimeToLive(Duration.ofHours(2))
+								.build())
+						.build()
+		);
 	}
 }
