@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AuthUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
@@ -25,7 +25,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 
         List<String> userRoles = userRepository.findAllUserRoles(userEntity);
 
-        return new AuthUserDetails(
+        return new CustomUserDetails(
                 userEntity.login().value(),
                 userEntity.passwordHash(),
                 userEntity.isBlocked(),
