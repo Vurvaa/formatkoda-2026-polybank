@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
+import ru.formatkoda.polybank.ratelimiting.RateLimit;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/account")
+@RateLimit(requests = 100)
 @RequiredArgsConstructor
 public class AccountController {
 	private final AccountService accountService;

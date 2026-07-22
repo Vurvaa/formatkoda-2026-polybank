@@ -30,6 +30,7 @@ import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
+import ru.formatkoda.polybank.ratelimiting.RateLimit;
 import ru.formatkoda.polybank.service.AccountService;
 import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.UserService;
@@ -43,6 +44,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/user")
+@RateLimit(requests = 100)
 @RequiredArgsConstructor
 public class UserController {
     private final AuthService authService;

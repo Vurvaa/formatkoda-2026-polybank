@@ -6,10 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;
 import ru.formatkoda.polybank.exception.RateLimitExceededException;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 
 @Slf4j
@@ -28,11 +32,13 @@ class RateLimitAspect {
 	private final RateLimitKeyResolver keyResolver;
 	private final HttpServletResponse httpResponse;
 
-	@Around("@annotation(rateLimit)")
-	Object limit(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
+	@Around("@within(RateLimit) || @annotation(RateLimit)")
+	Object limit(ProceedingJoinPoint joinPoint) throws Throwable {
 		if (!enabled)
 			return joinPoint.proceed();
 
+		RateLimit rateLimit = resolveRateLimit(joinPoint);
+		log.debug("got annotation: {} {}", rateLimit.requests(), rateLimit.perUser());
 		Duration period = Duration.ofMillis(rateLimit.periodMillis());
 		RateLimitKey key = keyResolver.resolve(joinPoint, rateLimit);
 
@@ -45,5 +51,21 @@ class RateLimitAspect {
 			throw new RateLimitExceededException(result.retryAfter());
 
 		return joinPoint.proceed();
+	}
+
+	private RateLimit resolveRateLimit(ProceedingJoinPoint joinPoint) {
+		Class<?> targetClass = AopUtils.getTargetClass(joinPoint.getTarget());
+		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		Method method = AopUtils.getMostSpecificMethod(signature.getMethod(), targetClass);
+
+		RateLimit methodRateLimit = AnnotatedElementUtils.findMergedAnnotation(method, RateLimit.class);
+		if (methodRateLimit != null)
+			return methodRateLimit;
+
+		RateLimit classRateLimit = AnnotatedElementUtils.findMergedAnnotation(targetClass, RateLimit.class);
+		if (classRateLimit != null)
+			return classRateLimit;
+
+		throw new IllegalStateException("RateLimit annotation was not found");
 	}
 }
