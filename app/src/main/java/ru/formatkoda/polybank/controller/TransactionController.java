@@ -20,6 +20,7 @@ import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.transaction.AccountOperationRequestDto;
 import ru.formatkoda.polybank.dto.transaction.TransactionResponseDto;
 import ru.formatkoda.polybank.dto.transaction.TransferRequestDto;
+import ru.formatkoda.polybank.ratelimiting.RateLimit;
 import ru.formatkoda.polybank.service.TransactionService;
 import ru.formatkoda.polybank.util.mapper.TransactionMapper;
 import ru.formatkoda.polybank.util.pagination.PageRequest;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/transaction")
+@RateLimit(requests = 100)
 @RequiredArgsConstructor
 public class TransactionController {
 	private final TransactionService transactionService;
