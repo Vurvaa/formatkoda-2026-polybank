@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
-import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
 import ru.formatkoda.polybank.dto.user.ChangedUserPasswordDto;
@@ -26,13 +25,10 @@ import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.dto.user.UserEmailDto;
-import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
-import ru.formatkoda.polybank.dto.user.AuthUserDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
 import ru.formatkoda.polybank.ratelimiting.RateLimit;
 import ru.formatkoda.polybank.service.AccountService;
-import ru.formatkoda.polybank.service.AuthService;
 import ru.formatkoda.polybank.service.UserService;
 import ru.formatkoda.polybank.util.mapper.AccountMapper;
 import ru.formatkoda.polybank.util.mapper.UserMapper;
@@ -47,24 +43,19 @@ import java.util.List;
 @RateLimit(requests = 100)
 @RequiredArgsConstructor
 public class UserController {
-    private final AuthService authService;
     private final UserService userService;
     private final AccountService accountService;
     private final UserMapper userMapper;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<AuthUserDto> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
-        JwtToken token = authService.registerUser(userMapper.toEntity(user));
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new AuthUserDto(token.token()));
+    @GetMapping("/demo")
+    public String demo() {
+        return "DEMO_ENDPOINT";
     }
 
-    @PostMapping("/sign-in")
-    public ResponseEntity<AuthUserDto> loginUser(@RequestBody @Valid UserLoginDto user) {
-        JwtToken token = authService.loginUser(userMapper.toEntity(user));
-
-        return ResponseEntity.ok(new AuthUserDto(token.token()));
+    @PostMapping("/sign-up")
+    public ResponseEntity<Void> registrationUser(@RequestBody @Valid UserRegistrationDto user) {
+        userService.createUser(userMapper.toEntity(user));
+        return ResponseEntity.ok().build();
     }
 
     @SecurityRequirement(name = "bearerAuth")

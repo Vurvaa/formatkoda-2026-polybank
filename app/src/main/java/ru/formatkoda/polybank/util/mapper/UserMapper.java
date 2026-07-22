@@ -13,7 +13,6 @@ import ru.formatkoda.polybank.dto.user.ChangedUserPasswordDto;
 import ru.formatkoda.polybank.dto.user.StaffUserRegistrationDto;
 import ru.formatkoda.polybank.dto.user.UserDetailsResponseDto;
 import ru.formatkoda.polybank.dto.user.UserInfoResponseDto;
-import ru.formatkoda.polybank.dto.user.UserLoginDto;
 import ru.formatkoda.polybank.dto.user.UserRegistrationDto;
 import ru.formatkoda.polybank.messaging.dto.UserNotificationEventDto;
 
@@ -35,19 +34,6 @@ public class UserMapper {
                 user.name(),
                 user.lastName(),
                 getPasswordHash(user.password()),
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null
-        );
-    }
-
-    public UserEntity toEntity(UserLoginDto user) {
-        return new UserEntity(
-                null,
-                new UserLogin(user.login()),
-                new UserEmail(null),
-                "",
-                "",
-                user.password(),
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );

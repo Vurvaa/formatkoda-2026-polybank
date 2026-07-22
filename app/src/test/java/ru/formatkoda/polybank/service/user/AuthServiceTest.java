@@ -9,7 +9,6 @@ import ru.formatkoda.polybank.domain.user.UserEntity;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.domain.auth.JwtToken;
 import ru.formatkoda.polybank.service.AuthService;
-import ru.formatkoda.polybank.service.JwtService;
 import ru.formatkoda.polybank.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
