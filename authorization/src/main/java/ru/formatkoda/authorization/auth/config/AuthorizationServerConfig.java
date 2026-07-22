@@ -13,7 +13,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -38,8 +37,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration()
 public class AuthorizationServerConfig {
-	private static final String LOGIN_ENDPOINT = "/auth/sign-in";
+	private static final String LOGIN_ENDPOINT = "/login";
 	private final AuthorizationServerProperties authorizationProperties;
+	private final PasswordEncoder passwordEncoder;
 
 	@Bean
 	@Order(Ordered.HIGHEST_PRECEDENCE)
@@ -50,7 +50,7 @@ public class AuthorizationServerConfig {
 				.formLogin(Customizer.withDefaults())
 				.cors(Customizer.withDefaults())
 				.exceptionHandling(exceptions -> exceptions
-								.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
+								.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(LOGIN_ENDPOINT)))
 				.oauth2AuthorizationServer(authorizationServer -> authorizationServer
 						.oidc(Customizer.withDefaults())
 				);
@@ -92,11 +92,12 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
+
 		return new InMemoryRegisteredClientRepository(
 				RegisteredClient.withId("random-id-for-system-cases")
 						.clientName("client")
 						.clientId("client")
-						.clientSecret("{noop}secret")
+						.clientSecret(passwordEncoder.encode("secret"))
 						.redirectUri("https://www.manning.com/authorized")
 						.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 						.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
