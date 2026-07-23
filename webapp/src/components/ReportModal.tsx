@@ -1,5 +1,5 @@
 import {App as AntdApp, Form, InputNumber, Modal, Select} from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { accountService } from '../services/accountService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
 import type {ReportFormat} from "../models/transaction.ts";
@@ -32,12 +32,6 @@ export function ReportModal({accountNumber, open, onCancel}: Readonly<ReportModa
     const [form] = Form.useForm<ReportFormValues>();
     const [submitting, setSubmitting] = useState(false);
     const { message } = AntdApp.useApp();
-
-    useEffect(() => {
-        if (!open) {
-            form.resetFields();
-        }
-    }, [form, open]);
 
     async function handleSubmit(values: ReportFormValues) {
         setSubmitting(true);

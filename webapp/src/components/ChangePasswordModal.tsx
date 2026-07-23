@@ -1,5 +1,5 @@
 import { App as AntdApp, Form, Input, Modal } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { userService } from '../services/userService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
 
@@ -20,12 +20,6 @@ export function ChangePasswordModal({ open, login, onCancel, onSuccess }: Readon
   const [form] = Form.useForm<ChangePasswordFormValues>();
   const [submitting, setSubmitting] = useState(false);
   const { message } = AntdApp.useApp();
-
-  useEffect(() => {
-    if (!open) {
-      form.resetFields();
-    }
-  }, [form, open]);
 
   async function handleSubmit(values: ChangePasswordFormValues) {
     setSubmitting(true);

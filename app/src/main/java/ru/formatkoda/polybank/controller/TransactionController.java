@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.formatkoda.polybank.config.CurrentUserLogin;
 import ru.formatkoda.polybank.domain.account.AccountNumber;
 import ru.formatkoda.polybank.domain.transaction.TransactionWithAccountNumbersView;
 import ru.formatkoda.polybank.domain.user.UserLogin;
@@ -42,11 +42,11 @@ import java.math.BigDecimal;
 public class TransactionController {
 	private final TransactionService transactionService;
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}")
 	public ResponseEntity<PageResponse<TransactionResponseDto>> getAllTransactionsByAccountNumber(
-			@AuthenticationPrincipal UserLogin userLogin,
+			@CurrentUserLogin UserLogin userLogin,
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size
@@ -70,11 +70,11 @@ public class TransactionController {
 		);
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/top-up")
 	public ResponseEntity<TransactionResponseDto> topUpAccount(
-			@AuthenticationPrincipal UserLogin login,
+			@CurrentUserLogin UserLogin login,
 			@Valid @RequestBody AccountOperationRequestDto request
 	) {
 		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
@@ -88,11 +88,11 @@ public class TransactionController {
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/withdraw")
 	public ResponseEntity<TransactionResponseDto> withdrawAccount(
-			@AuthenticationPrincipal UserLogin login,
+			@CurrentUserLogin UserLogin login,
 			@Valid @RequestBody AccountOperationRequestDto request
 	) {
 		AccountNumber accountNumber = new AccountNumber(request.accountNumber());
@@ -106,11 +106,11 @@ public class TransactionController {
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/transfer")
 	public ResponseEntity<TransactionResponseDto> transferBetweenAccounts(
-			@AuthenticationPrincipal UserLogin login,
+			@CurrentUserLogin UserLogin login,
 			@Valid @RequestBody TransferRequestDto request
 	) {
 		AccountNumber fromAccountNumber = new AccountNumber(request.fromAccountNumber());
@@ -126,11 +126,11 @@ public class TransactionController {
 		return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
 	}
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
     @PutMapping("/{transactionId}/cancel")
     public ResponseEntity<TransactionResponseDto> cancelTransaction(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @PathVariable Long transactionId
     ) {
         TransactionWithAccountNumbersView transaction =
@@ -142,11 +142,11 @@ public class TransactionController {
         return ResponseEntity.ok(TransactionMapper.toResponse(transaction));
     }
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}/export")
 	public ResponseEntity<Resource> exportReport(
-			@AuthenticationPrincipal UserLogin userLogin,
+			@CurrentUserLogin UserLogin userLogin,
 			@PathVariable String accountNumber,
 			@RequestParam(defaultValue = "20") int transactionsCount,
 			@RequestParam ReportFormat reportFormat

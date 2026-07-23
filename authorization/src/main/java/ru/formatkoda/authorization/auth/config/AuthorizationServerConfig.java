@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -46,7 +45,6 @@ public class AuthorizationServerConfig {
 	private static final String LOGIN_ENDPOINT = "/login";
 
 	private final AuthorizationServerProperties authorizationProperties;
-	private final PasswordEncoder passwordEncoder;
 
 	@Bean
 	@Order(1)
@@ -129,7 +127,7 @@ public class AuthorizationServerConfig {
 				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.redirectUri("http://localhost:5173/oauth/callback")
-				.postLogoutRedirectUri("http://localhost:5173")
+				.postLogoutRedirectUri("http://localhost:5173/login")
 				.scope(OidcScopes.OPENID)
 				.scope(OidcScopes.PROFILE)
 				.scope("api")
@@ -137,14 +135,38 @@ public class AuthorizationServerConfig {
 						.requireProofKey(true)
 						.requireAuthorizationConsent(false)
 						.build())
-				.tokenSettings(TokenSettings.builder()
-						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-						.accessTokenTimeToLive(Duration.ofMinutes(
-								authorizationProperties.getAccessExpirationMinutes()
-						))
-						.build())
+				.tokenSettings(tokenSettings())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(frontendClient);
+		RegisteredClient swaggerClient = RegisteredClient
+				.withId(UUID.randomUUID().toString())
+				.clientName("swagger-ui")
+				.clientId("swagger-ui")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("http://localhost:8080/swagger-ui/oauth2-redirect.html")
+				.scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.scope("api")
+				.clientSettings(ClientSettings.builder()
+						.requireProofKey(true)
+						.requireAuthorizationConsent(false)
+						.build())
+				.tokenSettings(tokenSettings())
+				.build();
+
+		return new InMemoryRegisteredClientRepository(
+				frontendClient,
+				swaggerClient
+		);
+	}
+
+	private TokenSettings tokenSettings() {
+		return TokenSettings.builder()
+				.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+				.accessTokenTimeToLive(Duration.ofMinutes(
+						authorizationProperties.getAccessExpirationMinutes()
+				))
+				.build();
 	}
 }
