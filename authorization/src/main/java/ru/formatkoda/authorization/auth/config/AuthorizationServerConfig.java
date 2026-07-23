@@ -14,9 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.FactorGrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -37,9 +34,7 @@ import ru.formatkoda.authorization.auth.properties.AuthorizationServerProperties
 import ru.formatkoda.authorization.auth.util.JwkUtils;
 
 import java.time.Duration;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Configuration()
@@ -63,22 +58,14 @@ public class AuthorizationServerConfig {
 								.anyRequest().authenticated()
 				)
 				.cors(Customizer.withDefaults())
-				.exceptionHandling((exceptions) -> exceptions
+				.exceptionHandling(exceptions -> exceptions
 						.defaultAuthenticationEntryPointFor(
-								new LoginUrlAuthenticationEntryPoint("/login"),
+								new LoginUrlAuthenticationEntryPoint(LOGIN_ENDPOINT),
 								new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 						)
 				);
 
 		return http.build();
-	}
-
-	private GrantedAuthoritiesMapper bugFixOidcUserAuthoritiesMapper() {
-		return authorities -> {
-			Set<GrantedAuthority> mapped = new LinkedHashSet<>(authorities);
-			mapped.add(FactorGrantedAuthority.fromAuthority(FactorGrantedAuthority.AUTHORIZATION_CODE_AUTHORITY));
-			return mapped;
-		};
 	}
 
 	@Bean
