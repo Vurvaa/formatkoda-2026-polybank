@@ -7,12 +7,16 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -25,6 +29,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,10 +37,13 @@ import ru.formatkoda.authorization.auth.properties.AuthorizationServerProperties
 import ru.formatkoda.authorization.auth.util.JwkUtils;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Configuration()
+@EnableWebSecurity
 public class AuthorizationServerConfig {
 	private static final String LOGIN_ENDPOINT = "/login";
 
@@ -43,21 +51,49 @@ public class AuthorizationServerConfig {
 	private final PasswordEncoder passwordEncoder;
 
 	@Bean
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) {
-
-		http.authorizeHttpRequests(authorize -> authorize
-						.anyRequest().authenticated())
-				.formLogin(Customizer.withDefaults())
+	@Order(1)
+	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+		http.oauth2AuthorizationServer(authorizationServer -> {
+					http.securityMatcher(authorizationServer.getEndpointsMatcher());
+					authorizationServer
+							.oidc(Customizer.withDefaults());
+				})
+				.authorizeHttpRequests(authorize ->
+						authorize
+								.anyRequest().authenticated()
+				)
 				.cors(Customizer.withDefaults())
-				.exceptionHandling(exceptions -> exceptions
-								.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(LOGIN_ENDPOINT)))
-				.oauth2AuthorizationServer(authorizationServer -> authorizationServer
-						.oidc(Customizer.withDefaults())
+				.exceptionHandling((exceptions) -> exceptions
+						.defaultAuthenticationEntryPointFor(
+								new LoginUrlAuthenticationEntryPoint("/login"),
+								new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+						)
 				);
 
 		return http.build();
 	}
+
+	private GrantedAuthoritiesMapper bugFixOidcUserAuthoritiesMapper() {
+		return authorities -> {
+			Set<GrantedAuthority> mapped = new LinkedHashSet<>(authorities);
+			mapped.add(FactorGrantedAuthority.fromAuthority(FactorGrantedAuthority.AUTHORIZATION_CODE_AUTHORITY));
+			return mapped;
+		};
+	}
+
+	@Bean
+	@Order(2)
+	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
+		http.authorizeHttpRequests(authorize ->
+						authorize
+								.requestMatchers("/error").permitAll()
+								.anyRequest().authenticated()
+				)
+				.formLogin(Customizer.withDefaults());
+
+		return http.build();
+	}
+
 
 	@Bean
 	public AuthorizationServerSettings authorizationServerSettings() {
@@ -101,11 +137,14 @@ public class AuthorizationServerConfig {
 						.clientSecret(passwordEncoder.encode("secret"))
 						.redirectUri("https://www.manning.com/authorized")
 						.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-						.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+						.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+						.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 						.scope(OidcScopes.OPENID)
 						.tokenSettings(TokenSettings.builder()
-								.accessTokenTimeToLive(Duration.ofMinutes(
-										authorizationProperties.getExpirationMinutes()))
+								.accessTokenTimeToLive(Duration.ofMinutes(authorizationProperties
+										.getAccessExpirationMinutes()))
+								.refreshTokenTimeToLive(Duration.ofMinutes(authorizationProperties
+										.getRefreshExpirationMinutes()))
 								.build())
 						.build()
 		);

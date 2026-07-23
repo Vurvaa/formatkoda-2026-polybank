@@ -6,10 +6,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
+import java.time.Instant;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
@@ -27,10 +30,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		}
 
 		UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
-		UserDetails user =  customUserDetailsService.loadUserByUsername(auth.getName());
+		customUserDetailsService.loadUserByUsername(auth.getName());
 
-		return new UsernamePasswordAuthenticationToken(
-				user, auth.getCredentials(), user.getAuthorities());
+		return new UsernamePasswordAuthenticationToken(auth.getName(), auth.getCredentials(), auth.getAuthorities());
 	}
 
 	@Override
