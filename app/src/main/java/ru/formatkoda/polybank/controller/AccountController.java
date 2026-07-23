@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PutMapping;
+import ru.formatkoda.polybank.config.CurrentUserLogin;
 import ru.formatkoda.polybank.domain.account.AccountEntity;
 import ru.formatkoda.polybank.dto.account.AccountResponseDto;
 import ru.formatkoda.polybank.dto.account.CreateAccountRequestDto;
@@ -32,11 +32,11 @@ import java.util.List;
 public class AccountController {
 	private final AccountService accountService;
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<AccountResponseDto> createAccount(
-			@AuthenticationPrincipal UserLogin login,
+			@CurrentUserLogin UserLogin login,
 			@Valid @RequestBody CreateAccountRequestDto createAccountDto
 	) {
 		AccountEntity accountEntity = accountService.createAccountForUser(createAccountDto.accountType(), login);
@@ -44,10 +44,10 @@ public class AccountController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(AccountMapper.toResponse(accountEntity));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
-	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@AuthenticationPrincipal UserLogin login) {
+	public ResponseEntity<List<AccountResponseDto>> getAllAccounts(@CurrentUserLogin UserLogin login) {
 		List<AccountResponseDto> accounts = accountService
 				.findAllForUser(login)
 				.stream()
@@ -57,11 +57,11 @@ public class AccountController {
 		return ResponseEntity.ok(accounts);
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{accountNumber}")
 	public ResponseEntity<AccountResponseDto> getAccount(
-			@AuthenticationPrincipal UserLogin login,
+			@CurrentUserLogin UserLogin login,
 			@PathVariable String accountNumber
 	) {
 		AccountEntity account = accountService.findOwnedAccount(new AccountNumber(accountNumber), login);
@@ -69,11 +69,11 @@ public class AccountController {
 		return ResponseEntity.ok(AccountMapper.toResponse(account));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/close")
 	public ResponseEntity<AccountResponseDto> closeAccount(
-			@AuthenticationPrincipal UserLogin userLogin,
+			@CurrentUserLogin UserLogin userLogin,
 			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
@@ -86,11 +86,11 @@ public class AccountController {
 		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/freeze")
 	public ResponseEntity<AccountResponseDto> freezeAccount(
-			@AuthenticationPrincipal UserLogin userLogin,
+			@CurrentUserLogin UserLogin userLogin,
 			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
@@ -103,11 +103,11 @@ public class AccountController {
 		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{number}/unfreeze")
 	public ResponseEntity<AccountResponseDto> unFreezeAccount(
-			@AuthenticationPrincipal UserLogin userLogin,
+			@CurrentUserLogin UserLogin userLogin,
 			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService
@@ -120,11 +120,11 @@ public class AccountController {
 		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
 	@PutMapping("/{number}/block")
 	public ResponseEntity<AccountResponseDto> blockAccount(
-			@Valid @AuthenticationPrincipal UserLogin managerLogin,
+			@Valid @CurrentUserLogin UserLogin managerLogin,
 			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService.blockAccountByNumber(
@@ -135,11 +135,11 @@ public class AccountController {
 		return ResponseEntity.ok(AccountMapper.toResponse(accountEntity));
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("hasAnyRole('MANAGER', 'SENIOR_MANAGER')")
 	@PutMapping("/{number}/unblock")
 	public ResponseEntity<AccountResponseDto> unBlockAccount(
-			@Valid @AuthenticationPrincipal UserLogin managerLogin,
+			@Valid @CurrentUserLogin UserLogin managerLogin,
 			@PathVariable(name = "number") String accountNumber
 	) {
 		AccountEntity accountEntity = accountService.unBlockAccountByNumber(

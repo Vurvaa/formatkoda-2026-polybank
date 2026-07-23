@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.formatkoda.polybank.config.CurrentUserLogin;
 import ru.formatkoda.polybank.domain.account.AccountInfo;
 import ru.formatkoda.polybank.domain.user.UserEmail;
 import ru.formatkoda.polybank.domain.user.UserWithRolesView;
@@ -58,11 +58,11 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @PutMapping("/{userLogin}/block")
     public ResponseEntity<UserDetailsResponseDto> blockUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @Valid @PathVariable String userLogin
     ) {
         UserWithRolesView user = userService.blockUserByLogin(
@@ -73,11 +73,11 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @PutMapping("/{userLogin}/unblock")
     public ResponseEntity<UserDetailsResponseDto> unBlockUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @Valid @PathVariable String userLogin
     ) {
         UserWithRolesView user = userService.unBlockUserByLogin(
@@ -88,7 +88,7 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasAnyRole('SENIOR_MANAGER', 'MANAGER')")
     @GetMapping
     public ResponseEntity<PageResponse<UserDetailsResponseDto>> getAllUsers(
@@ -112,11 +112,11 @@ public class UserController {
         );
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @DeleteMapping("/{userLogin}/roles/{roleName}")
     public ResponseEntity<UserDetailsResponseDto> removeUserRole(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @PathVariable String userLogin,
             @PathVariable String roleName
     ) {
@@ -129,11 +129,11 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @PutMapping("/{userLogin}/roles/{roleName}")
     public ResponseEntity<UserDetailsResponseDto> addUserRole(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @PathVariable String userLogin,
             @PathVariable String roleName
     ) {
@@ -146,11 +146,11 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/mail")
     public ResponseEntity<Void> changeUserEmail(
-            @AuthenticationPrincipal UserLogin userLogin,
+            @CurrentUserLogin UserLogin userLogin,
             @RequestBody @Valid UserEmailDto userEmail
     ) {
         UserEmail email = new UserEmail(userEmail.value());
@@ -159,7 +159,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/password")
     public ResponseEntity<Void> changeUserPassword(
@@ -174,11 +174,11 @@ public class UserController {
     }
 
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{userLogin}/info")
     public ResponseEntity<UserInfoResponseDto> getUserInfo(
-            @AuthenticationPrincipal UserLogin requesterLogin,
+            @CurrentUserLogin UserLogin requesterLogin,
             @PathVariable String userLogin
     ) {
         UserLogin login = new UserLogin(userLogin);
@@ -194,11 +194,11 @@ public class UserController {
         );
     }
 
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "oauth2")
     @PreAuthorize("hasRole('SENIOR_MANAGER')")
     @PostMapping
     public ResponseEntity<UserDetailsResponseDto> createStaffUser(
-            @AuthenticationPrincipal UserLogin managerLogin,
+            @CurrentUserLogin UserLogin managerLogin,
             @Valid @RequestBody StaffUserRegistrationDto staffUserRegistrationDto
     ) {
         UserWithRolesView staffUser = userService.createStaffUser(

@@ -12,7 +12,7 @@ import { authService } from '../services/authService.ts';
 import { userService } from '../services/userService.ts';
 import { authStorage } from '../utils/authStorage.ts';
 import { extractLoginFromToken } from '../utils/jwt.ts';
-import {exchangeCode, startLogin} from "../services/oauthService.ts";
+import {exchangeCode, saveIdToken, startLogin, startLogout} from "../services/oauthService.ts";
 
 interface AuthContextValue {
   token: string | null;
@@ -82,6 +82,7 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
     const response = await exchangeCode(search);
 
     authStorage.setToken(response.access_token);
+    saveIdToken(response.id_token);
     setToken(response.access_token);
   }, []);
 
@@ -97,6 +98,8 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
     setRoles([]);
     setName(null);
     setLastName(null);
+
+    startLogout();
   }, []);
 
   const value = useMemo<AuthContextValue>(

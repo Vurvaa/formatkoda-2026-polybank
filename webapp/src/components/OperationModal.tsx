@@ -1,5 +1,5 @@
 import { App as AntdApp, Form, Input, InputNumber, Modal } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { accountService } from '../services/accountService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
 
@@ -58,12 +58,6 @@ export function OperationModal({accountNumber, operation, open, onCancel, onSucc
     () => (operation ? operationSubmitText[operation] : 'Выполнить'),
     [operation]
   );
-
-  useEffect(() => {
-    if (!open) {
-      form.resetFields();
-    }
-  }, [form, open]);
 
   async function handleSubmit(values: OperationFormValues) {
     if (!operation) {

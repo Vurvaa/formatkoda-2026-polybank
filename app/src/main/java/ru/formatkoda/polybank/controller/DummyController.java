@@ -4,11 +4,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.formatkoda.polybank.config.CurrentUserLogin;
 import ru.formatkoda.polybank.domain.user.UserLogin;
 import ru.formatkoda.polybank.ratelimiting.RateLimit;
 
@@ -30,11 +30,11 @@ public class DummyController {
 		return ResponseEntity.ok("bar");
 	}
 
-	@SecurityRequirement(name = "bearerAuth")
+	@SecurityRequirement(name = "oauth2")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/rps-2-per-user-true")
 	@RateLimit(requests = 2, perUser = true)
-	public ResponseEntity<String> rps2perUserTrue(@AuthenticationPrincipal UserLogin login, String bar) {
+	public ResponseEntity<String> rps2perUserTrue(@CurrentUserLogin UserLogin login, String bar) {
 		return ResponseEntity.ok(login.value() + bar);
 	}
 }

@@ -1,8 +1,11 @@
 const AUTH_SERVER = 'http://localhost:9091';
 const CLIENT_ID = 'frontend';
 const REDIRECT_URI = 'http://localhost:5173/oauth/callback';
+const POST_LOGOUT_REDIRECT_URI = 'http://localhost:5173/login';
 const SCOPE = 'openid profile api';
 
+
+const ID_TOKEN_KEY = 'oauth.id_token';
 const VERIFIER_KEY = 'oauth.code_verifier';
 const STATE_KEY = 'oauth.state';
 const RETURN_TO_KEY = 'oauth.return_to';
@@ -121,4 +124,38 @@ export function getReturnTo(): string {
 
 export function clearReturnTo(): void {
     sessionStorage.removeItem(RETURN_TO_KEY);
+}
+
+export function saveIdToken(idToken?: string): void {
+    if (idToken) {
+        sessionStorage.setItem(ID_TOKEN_KEY, idToken);
+    }
+}
+
+export function clearOAuthSession(): void {
+    sessionStorage.removeItem(ID_TOKEN_KEY);
+    sessionStorage.removeItem(VERIFIER_KEY);
+    sessionStorage.removeItem(STATE_KEY);
+    sessionStorage.removeItem(RETURN_TO_KEY);
+}
+
+export function startLogout(): void {
+    const idToken = sessionStorage.getItem(ID_TOKEN_KEY);
+
+    if (!idToken) {
+        clearOAuthSession();
+        window.location.assign(`${AUTH_SERVER}/logout`);
+        return;
+    }
+
+    const params = new URLSearchParams({
+        id_token_hint: idToken,
+        post_logout_redirect_uri: POST_LOGOUT_REDIRECT_URI
+    });
+
+    clearOAuthSession();
+
+    window.location.assign(
+        `${AUTH_SERVER}/connect/logout?${params.toString()}`
+    );
 }

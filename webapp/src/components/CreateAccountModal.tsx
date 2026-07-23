@@ -1,5 +1,5 @@
 import { App as AntdApp, Form, Modal, Select } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { AccountType, CreateAccountRequestDto } from '../models/account.ts';
 import { accountService } from '../services/accountService.ts';
 import { getApiErrorMessage } from '../utils/errors.ts';
@@ -22,12 +22,6 @@ export function CreateAccountModal({ open, onCancel, onSuccess }: Readonly<Creat
   const [submitting, setSubmitting] = useState(false);
   const { message } = AntdApp.useApp();
 
-  useEffect(() => {
-    if (!open) {
-      form.resetFields();
-    }
-  }, [form, open]);
-
   async function handleSubmit(values: CreateAccountRequestDto) {
     setSubmitting(true);
 
@@ -44,25 +38,38 @@ export function CreateAccountModal({ open, onCancel, onSuccess }: Readonly<Creat
   }
 
   return (
-    <Modal
-      title="Открыть новый счет"
-      open={open}
-      okText="Открыть"
-      cancelText="Отмена"
-      confirmLoading={submitting}
-      onCancel={onCancel}
-      onOk={() => form.submit()}
-      destroyOnHidden
-    >
-      <Form form={form} layout="vertical" onFinish={handleSubmit} preserve={false}>
-        <Form.Item
-          name="accountType"
-          label="Тип счета"
-          rules={[{ required: true, message: 'Выберите тип счета' }]}
+      <Modal
+          title="Открыть новый счет"
+          open={open}
+          okText="Открыть"
+          cancelText="Отмена"
+          confirmLoading={submitting}
+          onCancel={onCancel}
+          onOk={() => form.submit()}
+          destroyOnHidden
+          afterOpenChange={(isOpen) => {
+            if (isOpen) {
+              form.resetFields();
+            }
+          }}
+      >
+        <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            preserve={false}
         >
-          <Select options={accountTypeOptions} placeholder="Выберите тип" />
-        </Form.Item>
-      </Form>
-    </Modal>
+          <Form.Item
+              name="accountType"
+              label="Тип счета"
+              rules={[{ required: true, message: 'Выберите тип счета' }]}
+          >
+            <Select
+                options={accountTypeOptions}
+                placeholder="Выберите тип"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
   );
 }
