@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -35,6 +37,7 @@ import ru.formatkoda.authorization.auth.util.JwkUtils;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Configuration()
@@ -73,7 +76,10 @@ public class AuthorizationServerConfig {
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
 		http.authorizeHttpRequests(authorize ->
 						authorize
-								.requestMatchers("/error").permitAll()
+								.requestMatchers(
+										"/error",
+										"/.well-known/appspecific/**"
+								).permitAll()
 								.anyRequest().authenticated()
 				)
 				.formLogin(Customizer.withDefaults());
@@ -116,24 +122,29 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
+		RegisteredClient frontendClient = RegisteredClient
+				.withId(UUID.randomUUID().toString())
+				.clientName("frontend")
+				.clientId("frontend")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("http://localhost:5173/oauth/callback")
+				.postLogoutRedirectUri("http://localhost:5173")
+				.scope(OidcScopes.OPENID)
+				.scope(OidcScopes.PROFILE)
+				.scope("api")
+				.clientSettings(ClientSettings.builder()
+						.requireProofKey(true)
+						.requireAuthorizationConsent(false)
+						.build())
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.accessTokenTimeToLive(Duration.ofMinutes(
+								authorizationProperties.getAccessExpirationMinutes()
+						))
+						.build())
+				.build();
 
-		return new InMemoryRegisteredClientRepository(
-				RegisteredClient.withId("random-id-for-system-cases")
-						.clientName("client")
-						.clientId("client")
-						.clientSecret(passwordEncoder.encode("secret"))
-						.redirectUri("https://www.manning.com/authorized")
-						.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-						.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-						.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-						.scope(OidcScopes.OPENID)
-						.tokenSettings(TokenSettings.builder()
-								.accessTokenTimeToLive(Duration.ofMinutes(authorizationProperties
-										.getAccessExpirationMinutes()))
-								.refreshTokenTimeToLive(Duration.ofMinutes(authorizationProperties
-										.getRefreshExpirationMinutes()))
-								.build())
-						.build()
-		);
+		return new InMemoryRegisteredClientRepository(frontendClient);
 	}
 }

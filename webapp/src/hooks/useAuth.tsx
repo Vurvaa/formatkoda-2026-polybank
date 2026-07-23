@@ -7,11 +7,12 @@ import {
   useState,
   type PropsWithChildren
 } from 'react';
-import type { LoginRequestDto, UserRegistrationDto } from '../models/auth.ts';
+import type { UserRegistrationDto } from '../models/auth.ts';
 import { authService } from '../services/authService.ts';
 import { userService } from '../services/userService.ts';
 import { authStorage } from '../utils/authStorage.ts';
 import { extractLoginFromToken } from '../utils/jwt.ts';
+import {exchangeCode, startLogin} from "../services/oauthService.ts";
 
 interface AuthContextValue {
   token: string | null;
@@ -23,7 +24,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isManager: boolean;
   isSeniorManager: boolean;
-  login: (payload: LoginRequestDto) => Promise<void>;
+  login: (returnTo?: string) => Promise<void>;
+  completeLogin: (search: string) => Promise<void>;
   register: (payload: UserRegistrationDto) => Promise<void>;
   logout: () => void;
 }
@@ -72,10 +74,15 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
     };
   }, [login_]);
 
-  const login = useCallback(async (payload: LoginRequestDto) => {
-    const response = await authService.login(payload);
-    authStorage.setToken(response.token);
-    setToken(response.token);
+  const login = useCallback(async (returnTo = '/accounts') => {
+    await startLogin(returnTo);
+  }, []);
+
+  const completeLogin = useCallback(async (search: string) => {
+    const response = await exchangeCode(search);
+
+    authStorage.setToken(response.access_token);
+    setToken(response.access_token);
   }, []);
 
   const register = useCallback(async (payload: UserRegistrationDto) => {
@@ -104,10 +111,11 @@ export function AuthProvider({ children }: Readonly<PropsWithChildren>) {
       isManager: roles.includes('MANAGER') || roles.includes('SENIOR_MANAGER'),
       isSeniorManager: roles.includes('SENIOR_MANAGER'),
       login,
+      completeLogin,
       register,
       logout
     }),
-    [login, login_, email, logout, register, roles, name, lastName, token]
+    [login, completeLogin, login_, email, logout, register, roles, name, lastName, token]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
