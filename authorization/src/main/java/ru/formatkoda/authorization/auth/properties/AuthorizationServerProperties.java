@@ -16,6 +16,9 @@ import java.util.List;
 @ConfigurationProperties(prefix = "spring.security.oauth2.authorizationserver")
 public class AuthorizationServerProperties {
 	private String issuerUrl;
+	private String frontendRedirectUri;
+	private String swaggerRedirectUri;
+	private String frontendRedirectLogout;
 	private List<String> allowedOrigins = new ArrayList<>();
 	private long accessExpirationMinutes;
 	private long refreshExpirationMinutes;
